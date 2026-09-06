@@ -22,7 +22,7 @@
     "handlebars": "^4.7.0",
     "helmet": "^8.3.0",
     "nodemailer": "^9.1.0",
-    "puppeteer": "^25.9.0"
+    "puppeteer": "^25.10.0"
   },
   "devDependencies": {
     "concurrently": "^10.0.3",
