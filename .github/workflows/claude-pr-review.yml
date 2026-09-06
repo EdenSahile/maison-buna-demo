@@ -1,0 +1,148 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      # Chrome pour Puppeteer : installé par le postinstall de la racine.
+      # Mis en cache pour ne payer le telechargement (~150 Mo) qu'une seule fois.
+      - name: Cache Puppeteer Chrome
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: puppeteer-${{ runner.os }}-
+
+      - name: Install (serveur)
+        run: npm ci
+
+      # Le code Node ESM n'a aucune etape de build : sans ce controle, une faute
+      # de syntaxe serveur ne casserait qu'au demarrage sur Render.
+      - name: Syntaxe serveur
+        run: |
+          node --check server.js
+          node --check routes/devis.js
+          node --check services/pdfService.js
+          node --check services/mailService.js
+          node --check data/storage.js
+
+      - name: Tests serveur (Vitest + Puppeteer reel)
+        run: npx vitest run
+
+      - name: Install (client)
+        run: npm ci
+        working-directory: client
+
+      - name: Tests client (Vitest)
+        run: npm test
+        working-directory: client
+
+      # `npm run build` a la racine telecharge Chrome a chaque run et ne valide
+      # rien du code : on ne lance que le build Vite, comme le skill open-pr.
+      - name: Build client (Vite)
+        run: npm run build
+        working-directory: client
+
+  claude-review:
+    name: Claude review
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true
+          claude_args: |
+            --allowedTools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*)"
+          prompt: |
+            You are reviewing PR #${{ github.event.pull_request.number }}
+            specifically. Use `gh pr view ${{ github.event.pull_request.number }}`
+            and `gh pr diff ${{ github.event.pull_request.number }}` directly —
+            do not run `gh pr list` to discover it.
+
+            This is Maison Buna Devis (DEMO repo): a Node.js ESM + Express app
+            that turns a quote request into a Puppeteer-generated PDF and two
+            emails, for a French specialty-coffee brand. This is the PUBLIC demo
+            repository — it uses fictitious business details (fake SIRET, fake
+            address, placeholder name) and displays a "DÉMO" banner. Review the
+            diff against CLAUDE.md, and in particular against these rules:
+
+            1. `.env` must never be committed — only `.env.example`.
+            2. `public/index.html` must not be modified without an explicit
+               stated reason in the PR description.
+            3. All incoming data must be validated server-side in
+               routes/devis.js (email, société, quantité are mandatory).
+            4. Every quote must send TWO emails — client and admin. A change
+               that can drop one of them is Critical.
+            5. Every quote must be persisted to data/devis.json with a
+               timestamp and a unique id.
+            6. The Maison Buna palette is fixed: #2e2010, #4F3422, #D3C2AC,
+               #AB9679, #FAF7F3. Any other hardcoded colour in templates/,
+               client/ or public/ is a finding. Fonts: Cormorant Garamond
+               (serif) and Jost (sans-serif).
+            7. Completed tasks must be ticked in CONTEXT.MD.
+            8. **DEMO-SPECIFIC — Critical**: this is a public demo repo. Real
+               Maison Buna details (real SIRET, real address, real owner name,
+               real domain maisonbuna.com) must NEVER appear in this repo.
+               Templates and emails use fictitious placeholders and a "DÉMO"
+               banner — any change that removes the demo banner or introduces
+               real business data is Critical.
+
+            Also check for correctness bugs, secrets leaking into the repo or
+            into logs, and consistency with existing patterns in the codebase.
+
+            The `test` job already ran `node --check` on the server files,
+            `npx vitest run` (server, real Puppeteer), the client Vitest suite
+            and the Vite build before this step — treat that as ground truth
+            for whether they pass. Don't re-run them yourself; run a single
+            focused check only if you need to verify a specific concern.
+
+            Do not run `gh pr checks`, `gh api`, `gh pr list`, or any other gh
+            command beyond `gh pr view`, `gh pr diff`, and `gh pr review` — you
+            do not have permission for anything else, and the `test` job's
+            status is already known to have passed by the time you run (this
+            job depends on it via `needs: [test]`). Go straight to the diff.
+
+            Note: `cd client && npm run lint` currently reports exactly 3
+            pre-existing ESLint errors, all of them
+            react-refresh/only-export-components in
+            client/src/components/Reusable-ui/Field.jsx. They are cosmetic and
+            deliberately left in place. Do not report those as findings unless
+            the PR adds new ones.
+
+            Categorize findings as Critical / Important / Minor.
+
+            When you're done:
+            - If there are no Critical or Important findings, submit an
+              approving review: `gh pr review --approve --body "<short summary>"`.
+            - If there are Critical or Important findings, request changes:
+              `gh pr review --request-changes --body "<findings with file:line>"`.
+
+            Do not merge the PR yourself and do not push commits — your only
+            job is to leave the review verdict.

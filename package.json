@@ -1,0 +1,43 @@
+{
+  "name": "maison-buna-devis",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "dev:client": "cd client && npm run dev",
+    "dev:all": "concurrently -n API,React -c cyan,magenta \"nodemon server.js\" \"cd client && npm run dev\"",
+    "start": "NODE_ENV=production node server.js",
+    "build": "npx puppeteer browsers install chrome && cd client && npm install && npm run build",
+    "pdf:test": "node scripts/test-pdf.js",
+    "mail:test": "node scripts/test-mail.js",
+    "docs:generate": "node scripts/generate-docs.js",
+    "test": "cd client && npm test",
+    "postinstall": "npx puppeteer browsers install chrome",
+    "test:server": "vitest run",
+    "test:all": "npm run test:server && npm test"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "handlebars": "^4.7.0",
+    "helmet": "^8.3.0",
+    "nodemailer": "^9.1.0",
+    "puppeteer": "^25.9.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "nodemon": "^3.0.0",
+    "vitest": "^4.1.11"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "data/*",
+      "scripts/test-output.pdf",
+      "handoffs/*"
+    ]
+  },
+  "engines": {
+    "node": ">=24.14.1",
+    "npm": ">=11"
+  }
+}

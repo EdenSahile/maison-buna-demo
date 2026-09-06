@@ -1,0 +1,14 @@
+.env
+node_modules/
+**/.DS_Store
+data/devis.json
+data/bg-errors.log
+scripts/test-output.pdf
+scripts/test-output-particulier.pdf
+data/counter.json
+handoffs/
+Claude outputs/
+.playwright-mcp/
+.superpowers/
+docs/
+.cache/
