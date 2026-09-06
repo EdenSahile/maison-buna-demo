@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Nouvelle demande de devis — Maison Buna</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #ECE7DE;
+      font-family: 'DM Sans', Verdana, system-ui, sans-serif;
+      color: #2E2016;
+      padding: 40px 16px 80px;
+      -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    a { color: #6B5040; text-decoration: none; }
+
+    .email-wrapper {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .email-header {
+      text-align: center;
+      margin-bottom: 36px;
+      padding: 0 4px;
+    }
+
+    .brand-title {
+      display: block;
+      font-family: 'DM Sans', Verdana, sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #2E2016;
+      margin-bottom: 8px;
+    }
+
+    .brand-name strong {
+      display: block;
+      font-family: 'DM Sans', Verdana, sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #2E2016;
+    }
+
+    .brand-name small {
+      display: block;
+      font-size: 11px;
+      color: #9C7E60;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
+    }
+
+    .header-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #9C7E60;
+      border: 1px solid #DDD5C8;
+      padding: 5px 10px;
+      border-radius: 3px;
+      background-color: #F5F1EB;
+    }
+
+    /* ── Card ── */
+    .email-card {
+      background-color: #F5F1EB;
+      border: 1px solid #DDD5C8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* ── Banner ── */
+    .notification-banner {
+      background-color: #EAE4DB;
+      border-bottom: 1px solid #DDD5C8;
+    }
+
+    .banner-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 20px;
+      color: #2E2016;
+      letter-spacing: 0.2px;
+    }
+
+    .banner-meta {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .banner-date {
+      font-size: 12px;
+      color: #4A3828;
+      display: block;
+    }
+
+    .banner-ref {
+      font-size: 10px;
+      color: #9C7E60;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* ── Body ── */
+    .email-body {
+      padding: 36px 48px 40px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #9C7E60;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      background-color: #EAE4DB;
+      border-radius: 3px;
+    }
+
+    .section-block {
+      margin-bottom: 32px;
+    }
+
+    /* ── Récapitulatif ── */
+    .recap-block {
+      border-top: none;
+    }
+
+    .recap-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid #E8E2D9;
+      align-items: baseline;
+    }
+
+    .recap-row:last-child {
+      border-bottom: none;
+    }
+
+    .recap-key {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #9C7E60;
+      padding-top: 2px;
+    }
+
+    .recap-value {
+      font-size: 15px;
+      font-weight: 400;
+      color: #2E2016;
+    }
+
+    .recap-value.large {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .recap-value.muted {
+      font-size: 13px;
+      color: #6B5040;
+    }
+
+    .recap-value.empty {
+      font-size: 13px;
+      color: #C2B5A5;
+      font-style: italic;
+    }
+
+    .recap-value a {
+      color: #4A3828;
+      text-decoration: underline;
+    }
+
+    .mouture-tag {
+      display: inline-block;
+      background-color: #E6DDD3;
+      color: #6B5040;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 3px;
+      letter-spacing: 0.3px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    /* ── Message libre ── */
+    .message-block {
+      padding: 18px 22px;
+      background-color: #EAE4DB;
+      border-left: 2px solid #3A2314;
+    }
+
+    .message-block p {
+      font-size: 14px;
+      color: #2E2016;
+      line-height: 1.75;
+      font-style: italic;
+    }
+
+    /* ── Statut PDF ── */
+    .pdf-status {
+      padding: 14px 20px;
+      background-color: #EAE4DB;
+      border: 1px solid #DDD5C8;
+      border-radius: 3px;
+    }
+
+    .pdf-status p {
+      font-size: 12px;
+      color: #4A3828;
+      line-height: 1.6;
+    }
+
+    /* ── Footer ── */
+    .email-footer {
+      padding: 22px 48px;
+      background-color: #EAE4DB;
+      border-top: 1px solid #DDD5C8;
+      text-align: center;
+    }
+
+    .footer-brand {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #2E2016;
+      margin-bottom: 4px;
+    }
+
+    .footer-sub {
+      font-size: 10px;
+      color: #9C7E60;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-sub a {
+      color: #9C7E60;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">{{devis_numero}} — {{date_emission}}</div>
+
+  <div class="email-wrapper">
+
+    <!-- Header -->
+    <div class="email-header">
+      <img src="cid:monogram-mb" alt="MB" width="80" height="80" style="display:block;border-radius:10px;margin:0 auto 16px;">
+      <strong class="brand-title">Maison Buna</strong>
+      <span class="header-badge">Notification interne</span>
+    </div>
+
+    <!-- Demo banner -->
+    <div style="background-color:#2e2010;color:#D3C2AC;text-align:center;padding:9px 16px;font-size:11px;letter-spacing:0.6px;border-radius:4px 4px 0 0;">
+      Démo — ce devis est fictif et n'a aucune valeur commerciale.
+    </div>
+
+    <!-- Card -->
+    <div class="email-card" style="border-top:none;border-radius:0 0 4px 4px;">
+
+      <!-- Banner -->
+      <div class="notification-banner">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="padding:20px 48px;">
+          <tr>
+            <td style="vertical-align:baseline;">
+              <p class="banner-title">{{#if sur_devis}}Demande sur mesure{{else}}Nouvelle demande de devis{{/if}}</p>
+            </td>
+            <td style="vertical-align:baseline;text-align:right;white-space:nowrap;" class="banner-meta">
+              <span class="banner-date" style="display:block;">{{date_emission}}</span>
+              <span class="banner-ref" style="display:block;margin-top:2px;">{{devis_numero}}</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="email-body">
+
+        <!-- SECTION : Coordonnées client -->
+        <div class="section-block">
+          <p class="section-label">Coordonnées client</p>
+          <div class="recap-block">
+
+            <div class="recap-row">
+              <span class="recap-key">{{#if is_particulier}}Type{{else}}Société{{/if}}</span>
+              <span class="recap-value large">{{societe}}</span>
+            </div>
+
+            <div class="recap-row">
+              <span class="recap-key">Contact</span>
+              <span class="recap-value large">{{prenom}} {{nom}}</span>
+            </div>
+
+            <div class="recap-row">
+              <span class="recap-key">Email</span>
+              <span class="recap-value muted"><a href="mailto:{{email}}">{{email}}</a></span>
+            </div>
+
+            <div class="recap-row">
+              <span class="recap-key">Téléphone</span>
+              <span class="recap-value muted">{{#if telephone}}{{telephone}}{{else}}<span class="empty">Non renseigné</span>{{/if}}</span>
+            </div>
+
+            {{#if is_particulier}}
+            <div class="recap-row" style="border-bottom:none;">
+              <span class="recap-key">Adresse</span>
+              <span class="recap-value">{{adresse}}<br>{{codepostal}} {{ville}}</span>
+            </div>
+            {{else}}
+            <div class="recap-row">
+              <span class="recap-key">Collaborateurs</span>
+              <span class="recap-value">{{#if collaborateurs}}{{collaborateurs}}{{else}}<span class="empty">Non renseigné</span>{{/if}}</span>
+            </div>
+
+            <div class="recap-row">
+              <span class="recap-key">Ville</span>
+              <span class="recap-value">{{#if ville}}{{ville}}{{else}}<span class="empty">Non renseignée</span>{{/if}}</span>
+            </div>
+
+            <div class="recap-row" style="border-bottom:none;">
+              <span class="recap-key">Secteur</span>
+              <span class="recap-value">{{#if secteur}}{{secteur}}{{else}}<span class="empty">Non renseigné</span>{{/if}}</span>
+            </div>
+            {{/if}}
+
+          </div>
+        </div>
+
+        <!-- SECTION : Détails commande -->
+        <div class="section-block">
+          <p class="section-label">Détails de la commande</p>
+          <div class="recap-block">
+
+            <div class="recap-row">
+              <span class="recap-key">Café(s)</span>
+              <span class="recap-value large">{{#each cafes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+            </div>
+
+            <div class="recap-row">
+              <span class="recap-key">Quantité</span>
+              <span class="recap-value">{{#if sur_devis}}Sur mesure{{else}}{{quantite_resume}}{{/if}}</span>
+            </div>
+
+            <div class="recap-row">
+              <span class="recap-key">Fréquence</span>
+              <span class="recap-value">{{#if frequence}}{{frequence}}{{else}}<span class="empty">Non renseignée</span>{{/if}}</span>
+            </div>
+
+            <div class="recap-row" style="border-bottom:none;">
+              <span class="recap-key">Moutures</span>
+              <span class="recap-value">
+                {{#if moutures}}
+                  {{#each moutures}}<span class="mouture-tag">{{this}}</span>{{/each}}
+                {{else}}
+                  <span class="empty">Non renseignées</span>
+                {{/if}}
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION : Message libre (conditionnel) -->
+        {{#if message}}
+        <div class="section-block">
+          <p class="section-label">Message du client</p>
+          <div class="message-block">
+            <p>{{message}}</p>
+          </div>
+        </div>
+        {{/if}}
+
+        <!-- SECTION : Statut PDF -->
+        <div class="pdf-status">
+          <p>
+            {{#if sur_devis}}
+              Demande sur mesure — aucun PDF joint. À traiter manuellement.
+            {{else}}
+              Le PDF du devis est joint à cet email.
+            {{/if}}
+          </p>
+        </div>
+
+      </div>
+
+  
+
+  </div>
+
+</body>
+</html>

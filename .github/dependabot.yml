@@ -1,0 +1,34 @@
+# Signale automatiquement les vulnerabilites et mises a jour des dependances.
+# Ce depot a deux packages distincts : le serveur Node ESM a la racine et
+# l'app React dans client/ — chacun a son propre package-lock.json, donc
+# chacun doit etre declare ici. Un seul repertoire "/" ne verrait jamais
+# les dependances du client.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+      - serveur
+
+  - package-ecosystem: npm
+    directory: "/client"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+      - client
