@@ -176,19 +176,25 @@ Quand on construit une feature, toujours respecter cet ordre :
 1. UX Designer    -> crée les templates (reports/dev-report.md : "UX Designer — DONE")
 2. Développeur    -> construit le serveur (reports/dev-report.md : "Développeur — DONE")
 3. Testeur        -> valide les fonctionnalités (reports/test-report.md : "DONE")
-4. Code Reviewer  -> audite la qualité (reports/review-report.md : "APPROUVÉ")
-5. Sécurité       -> audite les vulnérabilités (reports/security-report.md : "SÛR")
+4. Code Reviewer  -> audite la qualité (reports/local/review-report.md : "APPROUVÉ")
+5. Sécurité       -> audite les vulnérabilités (reports/local/security-report.md : "SÛR")
 
 En cas d'échec :
 - Testeur FAILED -> retour Développeur avec reports/test-report.md
-- Reviewer BLOQUANT -> retour Développeur avec reports/review-report.md
-- Sécurité BLOQUANT -> retour Développeur avec reports/security-report.md
+- Reviewer BLOQUANT -> retour Développeur avec reports/local/review-report.md
+- Sécurité BLOQUANT -> retour Développeur avec reports/local/security-report.md
 
 Fichiers de communication entre agents :
-- reports/dev-report.md      <- UX Designer + Développeur écrivent ici
-- reports/test-report.md     <- Testeur écrit ici
-- reports/review-report.md   <- Reviewer écrit ici
-- reports/security-report.md <- Sécurité écrit ici
+- reports/dev-report.md            <- UX Designer + Développeur écrivent ici
+- reports/test-report.md           <- Testeur écrit ici
+- reports/local/review-report.md   <- Reviewer écrit ici
+- reports/local/security-report.md <- Sécurité écrit ici
+
+Le dépôt est public. `reports/local/` est ignoré par git : c'est là que vont les
+rapports du reviewer et de la sécurité, qui citent des fichiers, des lignes et
+des vulnérabilités. Les fichiers `reports/review-report.md` et
+`reports/security-report.md` restent des stubs versionnés et ne doivent jamais
+contenir de findings.
 
 ---
 
