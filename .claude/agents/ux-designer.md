@@ -37,12 +37,18 @@ Ne jamais hardcoder d'autres couleurs.
 ### templates/devis-template.html
 PDF A4 Handlebars avec :
 - Header : monogramme MB (SVG) + "Maison Buna" + "Le berceau du café"
-- Numéro de devis : {{id}} (8 premiers caractères)
-- Date : {{timestamp}} formatée en français
+- Numéro de devis : {{devis_numero}}
+- Dates : {{date_emission}} et {{date_validite}}, déjà formatées en français
+  par le serveur
 - Bloc client : société, nom, email, téléphone, collaborateurs, ville
 - Bloc commande : quantité, fréquence, moutures, message
-- Footer : "Maison Buna, contact@example.com" (coordonnées fictives : dépôt
-  de démonstration public, jamais les vraies coordonnées du client)
+- Bandeau DÉMO obligatoire sous le header : "Démo : ce devis est fictif et
+  n'a aucune valeur commerciale." Un rappel dans le footer, qui est en
+  position: fixed et donc répété sur chaque page.
+- Footer : "Maison Buna", puis contact@fictif.com · www.demo-fictif.com, puis
+  "Devis N° {{devis_numero}} · {{date_emission}}". Coordonnées toujours
+  fictives : dépôt de démonstration public, jamais les vraies coordonnées du
+  client.
 - Design élégant, fond #FAF7F3, header #2e2010
 
 ### templates/email-client.html
