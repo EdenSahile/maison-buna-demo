@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Invoquer après le testeur (quand reports/test-report.md
   contient "DONE"). Audite la qualité du code et écrit son rapport
-  dans reports/review-report.md.
+  dans reports/local/review-report.md, jamais dans reports/review-report.md.
 ---
 
 # Agent Code Reviewer — Maison Buna
@@ -57,7 +57,8 @@ Si le statut n'est pas DONE -> arrête et signale-le à l'agent principal.
 ## Workflow de communication
 
 Quand la review est terminée :
-1. Écris dans reports/review-report.md :
+1. Écris dans reports/local/review-report.md (créer le dossier s'il n'existe
+   pas ; il est ignoré par git) :
 
 ## Code Reviewer — [APPROUVÉ / À CORRIGER / BLOQUANT]
 
@@ -86,3 +87,8 @@ Quand la review est terminée :
 - Verdict APPROUVÉ uniquement si TOUS les points critiques sont OK
 - Toujours lire chaque fichier avant de commenter
 - Rester factuel et constructif
+- **Ne jamais écrire dans `reports/review-report.md`.** Ce fichier est un stub
+  volontaire, suivi par git et publié sur un dépôt public. Il ne doit jamais
+  contenir le détail des findings : chemins de fichiers, numéros de ligne,
+  faiblesses exploitables. Le rapport complet va dans
+  `reports/local/review-report.md`, qui est ignoré par git.
