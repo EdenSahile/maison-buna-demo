@@ -186,6 +186,27 @@ npm start
 
 Le build installe Chrome pour Puppeteer, installe les dépendances du client puis construit le frontend (`client/dist`). En production, `npm start` démarre l'API Express (`NODE_ENV=production`) et sert les fichiers statiques issus du build frontend.
 
+### Disponibilité de l'environnement de démonstration
+
+La version de démonstration est hébergée sur Render. Sur une offre avec mise en veille après une période d'inactivité, le premier accès peut nécessiter un temps de redémarrage du service.
+
+Pour maintenir l'environnement de démonstration disponible, une tâche planifiée externe appelle régulièrement l'URL publique de l'application via cron-job.org.
+
+Le principe est le suivant :
+
+```text
+cron-job.org
+     │
+     │ requête HTTP GET toutes les 10 minutes
+     ▼
+Application déployée sur Render
+     │
+     ▼
+Maintien de l'environnement actif
+```
+
+Cette solution permet de limiter les temps de réveil de l'environnement de démonstration tout en conservant une infrastructure légère.
+
 ## Règles absolues du projet
 
 Ces règles sont documentées dans `CLAUDE.MD` et appliquées aussi bien en développement qu'en review automatique :
