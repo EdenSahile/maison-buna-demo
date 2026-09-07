@@ -4,7 +4,7 @@
       {
         "hooks": [{
           "type": "command",
-          "command": "node .claude/hooks/session-start.js"
+          "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/session-start.js\""
         }]
       }
     ],
@@ -13,7 +13,7 @@
         "matcher": "Write",
         "hooks": [{
           "type": "command",
-          "command": "node .claude/hooks/post-tool-use.js"
+          "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/post-tool-use.js\""
         }]
       }
     ],
@@ -21,7 +21,7 @@
       {
         "hooks": [{
           "type": "command",
-          "command": "node .claude/hooks/stop.js"
+          "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/stop.js\""
         }]
       }
     ]
