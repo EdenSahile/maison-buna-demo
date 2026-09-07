@@ -188,11 +188,9 @@ Le build installe Chrome pour Puppeteer, installe les dépendances du client pui
 
 ### Disponibilité de l'environnement de démonstration
 
-La version de démonstration est hébergée sur Render. Sur une offre avec mise en veille après une période d'inactivité, le premier accès peut nécessiter un temps de redémarrage du service.
+L'application est déployée sur Render. Sur l'offre gratuite utilisée pour cette démonstration, un service est mis en veille après 15 minutes d'inactivité, ce qui peut entraîner un temps de redémarrage lors du premier accès.
 
-Pour maintenir l'environnement de démonstration disponible, une tâche planifiée externe appelle régulièrement l'URL publique de l'application via cron-job.org.
-
-Le principe est le suivant :
+Pour limiter ce phénomène et maintenir l'environnement de démonstration disponible, une tâche planifiée externe (cron-job.org) appelle l'application toutes les 10 minutes, un intervalle volontairement inférieur au seuil de mise en veille de Render.
 
 ```text
 cron-job.org
@@ -205,7 +203,7 @@ Application déployée sur Render
 Maintien de l'environnement actif
 ```
 
-Cette solution permet de limiter les temps de réveil de l'environnement de démonstration tout en conservant une infrastructure légère.
+Cette solution permet de limiter les temps de réveil de l'environnement de démonstration tout en conservant une infrastructure légère et adaptée à un projet de démonstration.
 
 ## Règles absolues du projet
 
