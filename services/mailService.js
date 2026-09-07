@@ -7,6 +7,18 @@ import { dirname, join } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BREVO_API = 'https://api.brevo.com/v3/smtp/email';
 
+// Les templates d'email passent par Handlebars, qui échappe {{ }} tout seul.
+// L'alerte PDF, elle, est assemblée en template literal : sans échappement, un
+// prénom contenant du HTML arriverait intact dans la boîte de l'admin.
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function loadTemplate(name) {
   return readFileSync(join(__dirname, '../templates', name), 'utf8');
 }
@@ -78,10 +90,10 @@ export async function sendPdfFailureAlert(devis) {
   const html = `
     <p>La génération du PDF a échoué après 3 tentatives pour le devis suivant :</p>
     <ul>
-      <li><strong>Numéro :</strong> ${devis.devis_numero}</li>
-      <li><strong>Client :</strong> ${devis.prenom} ${devis.nom} (${devis.societe || 'Particulier'})</li>
-      <li><strong>Email client :</strong> ${devis.email}</li>
-      <li><strong>ID :</strong> ${devis.id}</li>
+      <li><strong>Numéro :</strong> ${escapeHtml(devis.devis_numero)}</li>
+      <li><strong>Client :</strong> ${escapeHtml(devis.prenom)} ${escapeHtml(devis.nom)} (${escapeHtml(devis.societe || 'Particulier')})</li>
+      <li><strong>Email client :</strong> ${escapeHtml(devis.email)}</li>
+      <li><strong>ID :</strong> ${escapeHtml(devis.id)}</li>
     </ul>
     <p>Le client n'a reçu aucun email. Veuillez relancer manuellement.</p>
   `;
