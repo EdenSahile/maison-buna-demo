@@ -148,8 +148,6 @@ Copier `.env.example` en `.env` et renseigner :
 | `BASE_URL`                             | URL publique de l'application, utilisée pour les images des emails en cas de repli sur l'API REST       |
 | `COUNTER_SEED`                         | Valeur de départ du compteur de numéros de devis                                                       |
 
-Le nommage des variables SMTP hérite de l'historique du projet et prête à confusion : `SMTP_USER`/`SMTP_PASS` ne sont pas les identifiants d'authentification SMTP (ce sont `BREVO_SMTP_USER`/`BREVO_SMTP_PASS`). À nettoyer si l'occasion se présente.
-
 ### Développement
 
 ```bash
@@ -177,7 +175,7 @@ Les tests serveur couvrent notamment les routes et services, avec génération P
 
 ## Déploiement
 
-L'application est pensée pour un déploiement type Render.
+L'application est déployée sur Render pour l'environnement de démonstration.
 
 ```bash
 npm run build
