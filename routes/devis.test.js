@@ -137,6 +137,27 @@ describe('POST /api/devis — référentiels café et quantité', () => {
     expect((await res.json()).error).toBe('Café inconnu : constructor');
   });
 
+  // String({toString: 1}) lève un TypeError : la valeur venant du client, cela
+  // ressortait en 500 alors que le corps doit être refusé en 400.
+  it.each([
+    ['café', { cafes: [{ toString: 1 }], quantiteParCafe: {} }, 'Café inconnu : objet'],
+    ['quantité', { quantiteParCafe: { Limmu: { toString: 1 } } }, 'Quantité inconnue pour Limmu : objet'],
+  ])('rejette un %s dont toString n est pas appelable en 400, jamais 500', async (_l, patch, attendu) => {
+    const res = await post({ ...devisB2B, ...patch });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe(attendu);
+  });
+
+  it.each([
+    { valeur: ['x'], attendu: 'Café inconnu : tableau' },
+    { valeur: null,  attendu: 'Café inconnu : null' },
+    { valeur: 42,    attendu: 'Café inconnu : 42' },
+  ])('nomme le type reçu plutôt que de le convertir en chaîne vide ($attendu)', async ({ valeur, attendu }) => {
+    const res = await post({ ...devisB2B, cafes: [valeur], quantiteParCafe: {} });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe(attendu);
+  });
+
   it('tronque la valeur renvoyée dans le message d erreur', async () => {
     const res = await post({ ...devisB2B, cafes: ['X'.repeat(500)], quantiteParCafe: {} });
     expect(res.status).toBe(400);

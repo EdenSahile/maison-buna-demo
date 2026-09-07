@@ -83,7 +83,13 @@ function quantitePour(quantiteParCafe, cafe) {
 }
 
 // Tronqué : la valeur vient du client et repart dans le message d'erreur.
+// String() n'est pas sûr ici : un objet dont toString n'est pas appelable,
+// comme {"toString": 1}, lève un TypeError qui ressortirait en 500.
 function extrait(valeur) {
+  if (typeof valeur === 'string') return valeur.slice(0, 50);
+  if (valeur === null) return 'null';
+  if (Array.isArray(valeur)) return 'tableau';
+  if (typeof valeur === 'object') return 'objet';
   return String(valeur).slice(0, 50);
 }
 
