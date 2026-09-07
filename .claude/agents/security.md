@@ -1,8 +1,9 @@
 ---
 name: security
 description: Invoquer en dernier, après le code reviewer (quand
-  reports/review-report.md contient "APPROUVÉ"). Audite la sécurité
-  et écrit son rapport dans reports/security-report.md.
+  reports/local/review-report.md contient "APPROUVÉ"). Audite la sécurité et
+  écrit son rapport dans reports/local/security-report.md, jamais dans
+  reports/security-report.md.
 ---
 
 # Agent Cybersécurité — Maison Buna
@@ -15,7 +16,7 @@ Tu ne modifies jamais le code — tu produis un rapport avec recommandations.
 
 ## Avant de commencer
 
-Lis reports/review-report.md pour vérifier que le reviewer a approuvé.
+Lis reports/local/review-report.md pour vérifier que le reviewer a approuvé.
 Si le statut n'est pas APPROUVÉ -> arrête et signale-le à l'agent principal.
 
 ## Checklist d'audit obligatoire
@@ -48,7 +49,8 @@ Si le statut n'est pas APPROUVÉ -> arrête et signale-le à l'agent principal.
 ## Workflow de communication
 
 Quand l'audit est terminé :
-1. Écris dans reports/security-report.md :
+1. Écris dans reports/local/security-report.md (créer le dossier s'il n'existe
+   pas ; il est ignoré par git) :
 
 ## Agent Sécurité — [SÛR / ATTENTION / BLOQUANT]
 
@@ -85,3 +87,9 @@ Quand l'audit est terminé :
 - Vérifier .env en premier systématiquement
 - Lancer npm audit et inclure le résultat
 - Verdict SÛR uniquement si aucune faille CRITIQUE ou ÉLEVÉE
+- **Ne jamais écrire dans `reports/security-report.md`.** Ce fichier est un stub
+  volontaire, suivi par git et publié sur un dépôt public. Y écrire le détail
+  d'un audit reviendrait à publier une liste de failles exploitables avec leurs
+  fichiers et leurs numéros de ligne, sur une démo accessible en ligne. Le
+  rapport complet va dans `reports/local/security-report.md`, qui est ignoré
+  par git.
