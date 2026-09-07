@@ -252,7 +252,7 @@ Le développement suit un pipeline interne à plusieurs rôles, décrit dans `CL
 4. **Code Reviewer**
 5. **Sécurité**
 
-Chaque rôle documente son travail dans `reports/` avant de passer la main au suivant. Les rapports du code reviewer et de l'audit de sécurité sont générés dans `reports/local/`, ignoré par git : ils citent des fichiers et des numéros de ligne, et n'ont pas leur place dans un dépôt public. Les fichiers `reports/*.md` visibles ici sont donc des stubs.
+Chaque rôle documente son travail avant de passer la main au suivant, dans `reports/local/`, ignoré par git : ces rapports citent des fichiers, des numéros de ligne, des bugs et des vulnérabilités, et n'ont pas leur place dans un dépôt public. Les fichiers `reports/*.md` visibles ici sont donc des stubs.
 
 L'état courant du projet (tâches terminées, tâches restantes, état du build) est conservé dans `CONTEXT.MD`. Un système de handoff permet également de reprendre une session de travail là où elle s'était arrêtée.
 

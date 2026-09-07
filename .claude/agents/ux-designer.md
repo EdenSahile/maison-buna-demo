@@ -60,7 +60,8 @@ Email Handlebars notification interne :
 ## Workflow de communication
 
 Quand tu as terminé tous les templates :
-1. Écris dans reports/dev-report.md :
+1. Écris dans reports/local/dev-report.md (créer le dossier s'il n'existe
+   pas ; il est ignoré par git) :
 
 ## UX Designer — DONE
 Templates créés :
@@ -78,3 +79,8 @@ Prêt pour : Développeur
 - Templates Handlebars : variables avec double accolades
 - Emails : toujours en tables + inline CSS (pas de flexbox)
 - Cocher CONTEXT.md après chaque fichier créé
+- **Ne jamais écrire dans `reports/dev-report.md`.** Ce fichier est un stub
+  volontaire, suivi par git et publié sur un dépôt public. Il ne doit jamais
+  contenir le détail des findings : chemins de fichiers, numéros de ligne,
+  faiblesses exploitables. Le rapport complet va dans
+  `reports/local/dev-report.md`, qui est ignoré par git.
