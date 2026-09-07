@@ -148,8 +148,6 @@ Copier `.env.example` en `.env` et renseigner :
 | `BASE_URL`                             | URL publique de l'application, utilisée pour les images des emails en cas de repli sur l'API REST       |
 | `COUNTER_SEED`                         | Valeur de départ du compteur de numéros de devis                                                       |
 
-Le nommage des variables SMTP hérite de l'historique du projet et prête à confusion : `SMTP_USER`/`SMTP_PASS` ne sont pas les identifiants d'authentification SMTP (ce sont `BREVO_SMTP_USER`/`BREVO_SMTP_PASS`). À nettoyer si l'occasion se présente.
-
 ### Développement
 
 ```bash
@@ -177,7 +175,7 @@ Les tests serveur couvrent notamment les routes et services, avec génération P
 
 ## Déploiement
 
-L'application est pensée pour un déploiement type Render.
+L'application est déployée sur Render pour l'environnement de démonstration.
 
 ```bash
 npm run build
@@ -185,6 +183,25 @@ npm start
 ```
 
 Le build installe Chrome pour Puppeteer, installe les dépendances du client puis construit le frontend (`client/dist`). En production, `npm start` démarre l'API Express (`NODE_ENV=production`) et sert les fichiers statiques issus du build frontend.
+
+### Disponibilité de l'environnement de démonstration
+
+L'application est déployée sur Render. Sur l'offre gratuite utilisée pour cette démonstration, un service est mis en veille après 15 minutes d'inactivité, ce qui peut entraîner un temps de redémarrage lors du premier accès.
+
+Pour limiter ce phénomène et maintenir l'environnement de démonstration disponible, une tâche planifiée externe (cron-job.org) appelle l'application toutes les 10 minutes, un intervalle volontairement inférieur au seuil de mise en veille de Render.
+
+```text
+cron-job.org
+     │
+     │ requête HTTP GET toutes les 10 minutes
+     ▼
+Application déployée sur Render
+     │
+     ▼
+Maintien de l'environnement actif
+```
+
+Cette solution permet de limiter les temps de réveil de l'environnement de démonstration tout en conservant une infrastructure légère et adaptée à un projet de démonstration.
 
 ## Règles absolues du projet
 
