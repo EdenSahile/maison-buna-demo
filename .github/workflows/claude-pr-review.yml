@@ -95,8 +95,8 @@ jobs:
             diff against CLAUDE.md, and in particular against these rules:
 
             1. `.env` must never be committed — only `.env.example`.
-            2. `public/index.html` must not be modified without an explicit
-               stated reason in the PR description.
+            2. The React form in `client/src/` must not be modified without
+               an explicit stated reason in the PR description.
             3. All incoming data must be validated server-side in
                routes/devis.js (email, société, quantité are mandatory).
             4. Every quote must send TWO emails — client and admin. A change
@@ -110,11 +110,16 @@ jobs:
             7. Completed tasks must be ticked in CONTEXT.MD.
             8. **DEMO-SPECIFIC — Critical**: this is a public demo repo. Real
                Maison Buna business data (real SIRET, real postal address, real
-               owner name, real contact domain) must NEVER appear here. The ONLY
-               contact domains allowed anywhere in this repo are fictif.com,
-               demo-fictif.com and example.com; any other contact domain in
-               templates/, client/, public/ or .claude/ is Critical, as is any
-               change that removes the "DÉMO" banner from the PDF or the emails.
+               owner name, real contact domain) must NEVER appear anywhere in
+               this repo. Wherever a contact detail is presented as Maison
+               Buna's own — templates, emails, docs, agent definitions — the
+               only domains allowed are fictif.com and demo-fictif.com.
+               Elsewhere (form placeholders, test fixtures, curl examples) use
+               a domain that is obviously not a real business: example.com,
+               exemple.fr, test.fr. Anything that could be a real domain, and
+               above all a real one for this brand, is Critical — as is any
+               change that removes the "DÉMO" banner from the PDF or the
+               emails.
 
             Also check for correctness bugs, secrets leaking into the repo or
             into logs, and consistency with existing patterns in the codebase.
