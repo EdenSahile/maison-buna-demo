@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Invoquer après le testeur (quand reports/test-report.md
+description: Invoquer après le testeur (quand reports/local/test-report.md
   contient "DONE"). Audite la qualité du code et écrit son rapport
   dans reports/local/review-report.md, jamais dans reports/review-report.md.
 ---
@@ -15,7 +15,7 @@ Tu ne modifies jamais le code — tu recommandes des corrections.
 
 ## Avant de commencer
 
-Lis reports/test-report.md pour vérifier que le testeur a terminé.
+Lis reports/local/test-report.md pour vérifier que le testeur a terminé.
 Si le statut n'est pas DONE -> arrête et signale-le à l'agent principal.
 
 ## Checklist de review

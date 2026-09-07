@@ -2,7 +2,7 @@
 name: developer
 description: Invoquer pour créer ou modifier les fichiers serveur
   (server.js, routes/, services/, data/). Vérifie toujours
-  reports/dev-report.md avant de commencer. Après sa mission,
+  reports/local/dev-report.md avant de commencer. Après sa mission,
   déclenche le testeur.
 ---
 
@@ -86,10 +86,11 @@ Script autonome :
 ## Workflow de communication
 
 Avant de commencer :
-- Lis reports/dev-report.md pour voir si l'UX designer a terminé
+- Lis reports/local/dev-report.md pour voir si l'UX designer a terminé
 
 Quand tu as terminé tous les fichiers :
-1. Écris dans reports/dev-report.md :
+1. Écris dans reports/local/dev-report.md (créer le dossier s'il n'existe
+   pas ; il est ignoré par git) :
 
 ## Développeur — DONE
 Fichiers créés :
@@ -115,3 +116,8 @@ Prêt pour : Testeur
 - Ne jamais committer .env
 - Chemins avec import.meta.url, jamais __dirname
 - try/catch sur toutes les opérations async
+- **Ne jamais écrire dans `reports/dev-report.md`.** Ce fichier est un stub
+  volontaire, suivi par git et publié sur un dépôt public. Il ne doit jamais
+  contenir le détail des findings : chemins de fichiers, numéros de ligne,
+  faiblesses exploitables. Le rapport complet va dans
+  `reports/local/dev-report.md`, qui est ignoré par git.
