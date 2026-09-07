@@ -20,7 +20,8 @@ sont envoyés (client + admin) → la demande est sauvegardée.
 - **Runtime** : Node.js (ESM — `"type": "module"` dans package.json)
 - **Serveur** : Express 4
 - **PDF** : Puppeteer (headless Chrome → HTML → PDF)
-- **Templates** : Handlebars (`.html` avec `{{variables}}`)
+- **Front** : React 19 + Vite + styled-components (dossier `client/`)
+- **Templates PDF/emails** : Handlebars (`.html` avec `{{variables}}`)
 - **Emails** : Nodemailer + SMTP Brevo
 - **Stockage** : JSON simple (`data/devis.json`)
 - **Dev** : Nodemon
@@ -54,7 +55,14 @@ maison-buna-devis/
 ├── package.json
 ├── server.js                 ← point d'entrée Express (port 3000)
 ├── public/
-│   └── index.html            ← formulaire HTML (NE PAS MODIFIER sans raison)
+│   └── images/               ← images servies en statique
+├── client/                   ← app React (Vite + styled-components)
+│   ├── index.html
+│   └── src/
+│       ├── App.jsx
+│       ├── components/       ← DevisForm.jsx et sections du formulaire
+│       ├── styles/
+│       └── utils/
 ├── routes/
 │   └── devis.js              ← POST /api/devis
 ├── services/
@@ -90,7 +98,7 @@ maison-buna-devis/
 ## Règles absolues
 
 1. **Ne jamais committer `.env`** — uniquement `.env.example`
-2. **Ne jamais modifier `public/index.html`** sans raison explicite demandée
+2. **Ne jamais modifier le formulaire React (`client/src/`)** sans raison explicite demandée
 3. **Toujours valider les données côté serveur** (email, société, quantité obligatoires)
 4. **Toujours envoyer 2 emails** à chaque devis : client + admin
 5. **Toujours sauvegarder** dans `data/devis.json` avec timestamp + id unique
@@ -135,7 +143,7 @@ Ils ne savent que ce qui est dans leur prompt.
 - Stack : Node.js ESM + Express + Nodemailer + Puppeteer + Handlebars
 - Couleurs Maison Buna : #2e2010, #4F3422, #D3C2AC, #AB9679, #FAF7F3
 - Ne jamais hardcoder d'autres couleurs
-- Ne jamais modifier public/index.html sans raison explicite
+- Ne jamais modifier le formulaire React (client/src/) sans raison explicite
 - Polices : Cormorant Garamond (serif) + Jost (sans-serif)
 
 **2. Règles absolues**
