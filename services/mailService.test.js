@@ -120,7 +120,7 @@ describe('sendPdfFailureAlert', () => {
       prenom: '<script>alert(1)</script>',
       nom: 'O\'Brien & Co',
       societe: '"Café" <b>gras</b>',
-      email: 'x@y.fr" onmouseover="alert(1)',
+      email: 'x@example.fr" onmouseover="alert(1)',
     });
 
     const { html } = sendMail.mock.calls[0][0];
@@ -129,7 +129,7 @@ describe('sendPdfFailureAlert', () => {
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
     expect(html).toContain('O&#39;Brien &amp; Co');
     expect(html).toContain('&quot;Café&quot; &lt;b&gt;gras&lt;/b&gt;');
-    expect(html).toContain('x@y.fr&quot; onmouseover=&quot;alert(1)');
+    expect(html).toContain('x@example.fr&quot; onmouseover=&quot;alert(1)');
   });
 
   it('n insère pas "undefined" quand un champ client est absent', async () => {

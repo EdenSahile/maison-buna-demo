@@ -144,6 +144,62 @@ describe('POST /api/devis — référentiels café et quantité', () => {
   });
 });
 
+describe('POST /api/devis — typage des champs texte', () => {
+  // Avant, .trim() sur un objet levait un TypeError capté par le catch de la
+  // route : le client recevait 500 pour une saisie qu'il fallait refuser en 400.
+  it.each([
+    ['prenom', {}],
+    ['nom', []],
+    ['societe', ['x']],
+    ['collaborateurs', {}],
+    ['email', 42],
+    ['telephone', { a: 'x' }],
+    ['ville', 12345],
+    ['frequence', ['a', 'b']],
+    ['message', { texte: 'x' }],
+  ])('rejette %s reçu en non-texte avec 400, jamais 500', async (champ, valeur) => {
+    const res = await post({ ...devisB2B, [champ]: valeur });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe(`Champ invalide : ${champ} (texte attendu)`);
+    expect(saveDevis).not.toHaveBeenCalled();
+  });
+
+  it('accepte un champ optionnel absent ou null', async () => {
+    expect((await post({ ...devisB2B, telephone: undefined })).status).toBe(200);
+    expect((await post({ ...devisB2B, ville: null })).status).toBe(200);
+  });
+});
+
+describe('POST /api/devis — bornes sur cafes', () => {
+  it('rejette une liste de cafés plus longue que le catalogue', async () => {
+    const res = await post({ ...devisB2B, cafes: Array(2000).fill('Limmu') });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe('Champ invalide : cafes (3 valeurs maximum)');
+    expect(saveDevis).not.toHaveBeenCalled();
+  });
+
+  it('rejette les doublons', async () => {
+    const res = await post({ ...devisB2B, cafes: ['Limmu', 'Limmu'] });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe('Champ invalide : cafes (doublons)');
+  });
+
+  it('accepte les trois cafés du catalogue', async () => {
+    const res = await post({
+      ...devisB2B,
+      cafes: ['Limmu', 'Sidamo', 'Yirgacheffe'],
+      quantiteParCafe: { Limmu: '250 g', Sidamo: '250 g', Yirgacheffe: '500 g' },
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it('ne persiste que les quantités des cafés retenus', async () => {
+    const bruit = Object.fromEntries(Array.from({ length: 500 }, (_, i) => [`X${i}`, '250 g']));
+    await post({ ...devisB2B, quantiteParCafe: { Limmu: '250 g', ...bruit } });
+    expect(saveDevis.mock.calls[0][0].quantiteParCafe).toEqual({ Limmu: '250 g' });
+  });
+});
+
 describe('POST /api/devis — longueurs maximales', () => {
   it.each([
     ['message', 2000],
@@ -165,7 +221,7 @@ describe('POST /api/devis — longueurs maximales', () => {
   });
 
   it('rejette un email de plus de 254 caractères', async () => {
-    const res = await post({ ...devisB2B, email: `${'a'.repeat(250)}@x.fr` });
+    const res = await post({ ...devisB2B, email: `${'a'.repeat(248)}@example.fr` });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('Champ trop long : email (254 caractères maximum)');
   });

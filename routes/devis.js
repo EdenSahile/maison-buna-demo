@@ -58,6 +58,9 @@ const MAX_LENGTHS = {
   frequence: 50, message: 2000,
 };
 
+// Le catalogue compte trois cafés : au-delà, ce sont forcément des doublons ou
+// du remplissage. Sans borne, 2000 entrées produisaient 2000 lignes de PDF.
+const MAX_CAFES = Object.keys(CAFES_META).length;
 const MAX_MOUTURES = 10;
 const MAX_MOUTURE_LENGTH = 50;
 
@@ -150,10 +153,30 @@ router.post('/devis', async (req, res) => {
     const isParticulier = societe === 'Particulier';
 
     // Validation
+
+    // Typage et longueur d'abord : un champ texte reçu en objet, en nombre ou
+    // en tableau faisait lever .trim() plus bas, donc 500 au lieu de 400.
+    for (const [champ, max] of Object.entries(MAX_LENGTHS)) {
+      const valeur = req.body[champ];
+      if (valeur === undefined || valeur === null) continue;
+      if (typeof valeur !== 'string') {
+        return res.status(400).json({ error: `Champ invalide : ${champ} (texte attendu)` });
+      }
+      if (valeur.length > max) {
+        return res.status(400).json({ error: `Champ trop long : ${champ} (${max} caractères maximum)` });
+      }
+    }
+
     if (!prenom?.trim()) return res.status(400).json({ error: 'Champ manquant : prenom' });
     if (!nom?.trim())    return res.status(400).json({ error: 'Champ manquant : nom' });
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Email invalide' });
     if (!Array.isArray(cafes) || cafes.length === 0) return res.status(400).json({ error: 'Champ manquant : cafes' });
+    if (cafes.length > MAX_CAFES) {
+      return res.status(400).json({ error: `Champ invalide : cafes (${MAX_CAFES} valeurs maximum)` });
+    }
+    if (new Set(cafes).size !== cafes.length) {
+      return res.status(400).json({ error: 'Champ invalide : cafes (doublons)' });
+    }
     if (!quantiteParCafe || typeof quantiteParCafe !== 'object' || Array.isArray(quantiteParCafe)) {
       return res.status(400).json({ error: 'Champ manquant : quantiteParCafe' });
     }
@@ -166,13 +189,6 @@ router.post('/devis', async (req, res) => {
       if (!qte) return res.status(400).json({ error: `Quantité manquante pour : ${cafe}` });
       if (!pricingEntry(qte)) {
         return res.status(400).json({ error: `Quantité inconnue pour ${cafe} : ${extrait(qte)}` });
-      }
-    }
-
-    for (const [champ, max] of Object.entries(MAX_LENGTHS)) {
-      const valeur = req.body[champ];
-      if (typeof valeur === 'string' && valeur.length > max) {
-        return res.status(400).json({ error: `Champ trop long : ${champ} (${max} caractères maximum)` });
       }
     }
 
@@ -214,7 +230,7 @@ router.post('/devis', async (req, res) => {
       ville:         ville || '',
       // Commande
       cafes,
-      quantiteParCafe,
+      quantiteParCafe: Object.fromEntries(cafes.map(c => [c, quantitePour(quantiteParCafe, c)])),
       quantite_resume: buildQuantiteResume(quantiteParCafe, cafes),
       frequence: frequence || '',
       moutures: moutures || [],
