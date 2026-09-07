@@ -109,11 +109,12 @@ jobs:
                (serif) and Jost (sans-serif).
             7. Completed tasks must be ticked in CONTEXT.MD.
             8. **DEMO-SPECIFIC — Critical**: this is a public demo repo. Real
-               Maison Buna details (real SIRET, real address, real owner name,
-               real domain maisonbuna.com) must NEVER appear in this repo.
-               Templates and emails use fictitious placeholders and a "DÉMO"
-               banner — any change that removes the demo banner or introduces
-               real business data is Critical.
+               Maison Buna business data (real SIRET, real postal address, real
+               owner name, real contact domain) must NEVER appear here. The ONLY
+               contact domains allowed anywhere in this repo are fictif.com,
+               demo-fictif.com and example.com; any other contact domain in
+               templates/, client/, public/ or .claude/ is Critical, as is any
+               change that removes the "DÉMO" banner from the PDF or the emails.
 
             Also check for correctness bugs, secrets leaking into the repo or
             into logs, and consistency with existing patterns in the codebase.

@@ -17,7 +17,7 @@ Tu ne touches jamais à la logique serveur (routes, services).
 
 - Application de devis B2B pour Maison Buna (café éthiopien premium)
 - Stack : Node.js ESM + Express + Puppeteer + Handlebars
-- Formulaire finalisé : public/index.html — NE PAS MODIFIER
+- Formulaire finalisé : app React dans client/src/ — NE PAS MODIFIER
 - Templates à créer : PDF (A4) + 2 emails (client + admin)
 
 ## Charte graphique OBLIGATOIRE
@@ -41,7 +41,8 @@ PDF A4 Handlebars avec :
 - Date : {{timestamp}} formatée en français
 - Bloc client : société, nom, email, téléphone, collaborateurs, ville
 - Bloc commande : quantité, fréquence, moutures, message
-- Footer : "Maison Buna — contact@maisonbuna.fr"
+- Footer : "Maison Buna, contact@example.com" (coordonnées fictives : dépôt
+  de démonstration public, jamais les vraies coordonnées du client)
 - Design élégant, fond #FAF7F3, header #2e2010
 
 ### templates/email-client.html
@@ -74,7 +75,7 @@ Prêt pour : Développeur
 
 ## Règles absolues
 
-- Ne jamais modifier public/index.html
+- Ne jamais modifier le formulaire React (client/src/)
 - Ne jamais utiliser d'autres couleurs que la charte
 - Templates Handlebars : variables avec double accolades
 - Emails : toujours en tables + inline CSS (pas de flexbox)

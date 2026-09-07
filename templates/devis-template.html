@@ -164,6 +164,22 @@ html, body {
 }
 
 /* ─── GRADIENT DIVIDER ────────────────────────────────── */
+/* ─── BANDEAU DÉMO ────────────────────────────────────── */
+.demo-banner {
+  background: #2e2010;
+  color: #D3C2AC;
+  text-align: center;
+  padding: 9px 48px;
+  font-family: 'Open Sans', Verdana, sans-serif;
+  font-size: 7.5pt;
+  letter-spacing: 0.6px;
+}
+
+.footer-demo {
+  color: #4F3422;
+  font-weight: 600;
+}
+
 .divider {
   height: 3px;
   background: linear-gradient(90deg, #4F3422 0%, #C8753A 45%, #E8DDCC 100%);
@@ -623,6 +639,11 @@ p, li {
     </div>
   </header>
 
+  <!-- ── BANDEAU DÉMO ───────────────────────────────────── -->
+  <div class="demo-banner">
+    Démo : ce devis est fictif et n'a aucune valeur commerciale.
+  </div>
+
   <div class="divider"></div>
 
   <!-- ── BODY ───────────────────────────────────────────── -->
@@ -818,6 +839,7 @@ p, li {
   <footer class="footer">
     <div class="footer-brand">Maison Buna</div>
     <div class="footer-legal">
+      <span class="footer-demo">Démo : ce devis est fictif et n'a aucune valeur commerciale.</span><br>
       contact@fictif.com · www.demo-fictif.com<br>
       Devis N° {{devis_numero}} · {{date_emission}}
     </div>
