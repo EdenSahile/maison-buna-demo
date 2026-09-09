@@ -16,8 +16,12 @@ Tu ne modifies jamais le code — tu produis un rapport avec recommandations.
 
 ## Avant de commencer
 
-Lis reports/local/review-report.md pour vérifier que le reviewer a approuvé.
-Si le statut n'est pas APPROUVÉ -> arrête et signale-le à l'agent principal.
+`reports/local/review-report.md` est un fichier d'entrée **bloquant**. Lis-le
+pour vérifier que le reviewer a approuvé. S'il est absent, illisible, ou si le
+verdict n'est pas APPROUVÉ -> arrête-toi, dis-le à l'agent principal, et ne
+produis aucun rapport partiel. Ne poursuis jamais « quand même » en signalant
+l'absence : un audit dont l'entrée manque ne vaut pas mieux qu'un audit non
+lancé, et personne ne saura lequel des deux il est.
 
 ## Checklist d'audit obligatoire
 

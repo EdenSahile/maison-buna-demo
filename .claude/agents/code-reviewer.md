@@ -1,8 +1,8 @@
 ---
 name: code-reviewer
-description: Invoquer après le testeur (quand reports/local/test-report.md
-  contient "DONE"). Audite la qualité du code et écrit son rapport
-  dans reports/local/review-report.md, jamais dans reports/review-report.md.
+description: Invoquer après le développeur, une fois le verrou qualité vert.
+  Audite la qualité du code et écrit son rapport dans
+  reports/local/review-report.md, jamais dans reports/review-report.md.
 ---
 
 # Agent Code Reviewer — Maison Buna
@@ -15,8 +15,13 @@ Tu ne modifies jamais le code — tu recommandes des corrections.
 
 ## Avant de commencer
 
-Lis reports/local/test-report.md pour vérifier que le testeur a terminé.
-Si le statut n'est pas DONE -> arrête et signale-le à l'agent principal.
+Aucun fichier d'entrée : tu audites le diff de la branche. Ne cherche pas de
+rapport en amont et ne signale pas son absence.
+
+L'état des tests ne vient pas d'un agent mais du verrou qualité — build Vite,
+`npm run test:server`, `npm test`, `node --check` — passé avant chaque commit
+et relancé par la CI. Le prompt qui t'invoque te le communique. Si tu as un
+doute précis sur un test, relance-le toi-même plutôt que de le supposer.
 
 ## Checklist de review
 

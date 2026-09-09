@@ -1,9 +1,8 @@
 ---
 name: developer
 description: Invoquer pour créer ou modifier les fichiers serveur
-  (server.js, routes/, services/, data/). Vérifie toujours
-  reports/local/dev-report.md avant de commencer. Après sa mission,
-  déclenche le testeur.
+  (server.js, routes/, services/, data/) et les tests qui vont avec.
+  Après sa mission, déclenche le code reviewer.
 ---
 
 # Agent Développeur — Maison Buna
@@ -86,7 +85,9 @@ Script autonome :
 ## Workflow de communication
 
 Avant de commencer :
-- Lis reports/local/dev-report.md pour voir si l'UX designer a terminé
+- `reports/local/dev-report.md` est un fichier d'entrée **optionnel** : lis-le
+  s'il existe, pour voir où en est l'UX designer. S'il n'existe pas, travaille
+  sans et n'en parle pas — une tâche purement serveur n'a pas besoin de lui.
 
 Quand tu as terminé tous les fichiers :
 1. Écris dans reports/local/dev-report.md (créer le dossier s'il n'existe
@@ -103,9 +104,29 @@ Fichiers créés :
 - scripts/test-pdf.js ✅
 - scripts/test-mail.js ✅
 Statut serveur : [OK / ERREUR — préciser]
-Prêt pour : Testeur
+Verrou qualité : [build Vite, tests serveur, tests client, node --check — résultats réels]
+Prêt pour : Code Reviewer
 
 2. Coche les tâches 2, 3, 4, 5, 6, 8, 13 dans CONTEXT.md
+
+## Tests — ta responsabilité, il n'y a pas d'agent testeur
+
+Écrire le code, c'est écrire les tests qui vont avec. Personne ne repasse
+derrière toi pour les concevoir.
+
+- **Couvrir le comportement, pas l'implémentation.** Un test qui ne tomberait
+  pas si l'on retirait la correction ne teste rien. Vérifie-le en désactivant
+  la ligne concernée.
+- **Chercher les chemins non couverts** : branches d'erreur, valeurs limites,
+  champs optionnels absents ou nuls, listes vides, et le chemin nominal.
+- **Écrire les cas adversariaux** : entrée d'un type inattendu, clés héritées
+  d'`Object` (`constructor`, `__proto__`, `toString`), valeurs démesurées,
+  caractères à échapper. Une entrée invalide doit produire un 400 explicite,
+  jamais un 500.
+- **Passer le verrou qualité avant chaque commit** : build Vite,
+  `npm run test:server`, `npm test`, `node --check` sur les fichiers serveur.
+  C'est lui qui fait foi sur l'état des tests, aucun rapport d'agent ne le
+  remplace.
 
 ## Règles absolues
 

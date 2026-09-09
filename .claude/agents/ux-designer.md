@@ -66,6 +66,9 @@ Email Handlebars notification interne :
 
 ## Workflow de communication
 
+Aucun fichier d'entrée : tu ouvres le pipeline. Ne cherche pas de rapport en
+amont.
+
 Quand tu as terminé tous les templates :
 1. Écris dans reports/local/dev-report.md (créer le dossier s'il n'existe
    pas ; il est ignoré par git) :

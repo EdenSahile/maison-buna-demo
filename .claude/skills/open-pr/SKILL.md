@@ -27,11 +27,13 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
    npm test                      # → client, vitest run
    node --check server.js && node --check routes/devis.js && \
      node --check services/pdfService.js && node --check services/mailService.js && \
-     node --check data/storage.js
+     node --check data/storage.js && node --check middleware/errorHandler.js && \
+     node --check services/limiteConcurrence.js
 ```
 
    Raccourci : `npm run test:all` enchaîne les deux suites de tests.
-   Ce verrou est **le miroir exact du job `Tests` de la CI** — s'il passe en local, la CI passe.
+   Ce verrou est la **source de vérité sur l'état des tests** : il n'y a pas d'agent testeur, aucun rapport d'agent ne le remplace.
+   ⚠️ Il couvre sept fichiers serveur, le job `Tests` de la CI n'en vérifie que cinq — `middleware/errorHandler.js` et `services/limiteConcurrence.js`, ajoutés par la PR #19, manquent à `.github/workflows/claude-pr-review.yml:45-49`. À aligner dans une PR dédiée : toucher au workflow bloque la review automatique de la PR qui le modifie.
 
 3. **Mettre à jour `CONTEXT.MD`.** Règle absolue n°7 du `CLAUDE.md` : cocher `[x]` les tâches accomplies et rafraîchir le tableau « État du build ». Commiter cette mise à jour avec le reste avant de pousser.
 
