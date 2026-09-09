@@ -52,6 +52,8 @@
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)
 
+- [ ] `.github/workflows/claude-pr-review.yml:45-49` ne fait `node --check` que sur cinq fichiers serveur : `middleware/errorHandler.js` et `services/limiteConcurrence.js`, ajoutés par la PR #19, manquent. Le verrou local en couvre sept. PR dédiée, parce que toucher au workflow bloque la review automatique de la PR qui le modifie.
+
 - [ ] `CLAUDE.MD:21` annonce Express 4, `package.json` déclare Express 5 (la ligne était en `:19` avant l'ajout de la ligne React à la section Stack)
 - [ ] La section « Commandes utiles » omet `dev:all`, `test:server` et quatre autres scripts
 
