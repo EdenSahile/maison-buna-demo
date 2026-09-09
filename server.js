@@ -5,6 +5,7 @@ import { rateLimit } from 'express-rate-limit';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import devisRouter from './routes/devis.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,11 +36,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Middleware d'erreur global — évite d'exposer la stack trace Express au client
-app.use((err, _req, res, next) => {
-  console.error('Erreur non gérée :', err);
-  if (res.headersSent) return next(err);
-  res.status(500).json({ error: 'Une erreur est survenue. Veuillez réessayer.' });
-});
+app.use(errorHandler);
 
 if (process.env.NODE_ENV === 'production' && !process.env.BASE_URL) {
   console.warn('⚠️  BASE_URL non défini en production — les images des emails REST pointeront vers le fallback démo.');
