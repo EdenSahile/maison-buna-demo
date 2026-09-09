@@ -89,6 +89,26 @@ describe('creerLimiteur — libération du créneau', () => {
     await expect(limiteur.executer(async () => 'suivante')).resolves.toBe('suivante');
   });
 
+  // Chemin non couvert jusqu'ici : la branche `if (suivant) suivant()` de
+  // liberer(), celle du passage de relais, empruntée depuis un échec.
+  it('sert la tâche en attente quand la précédente échoue', async () => {
+    const limiteur = creerLimiteur({ max: 1, fileMax: 10 });
+    const a = tacheManuelle();
+    const enCours = limiteur.executer(a.tache);
+    await tick();
+
+    let servie = false;
+    const suivante = limiteur.executer(async () => { servie = true; return 'ok'; });
+    await tick();
+    expect(limiteur.etat()).toEqual({ actifs: 1, enAttente: 1 });
+
+    a.echouer(new Error('panne'));
+    await expect(enCours).rejects.toThrow('panne');
+    await expect(suivante).resolves.toBe('ok');
+    expect(servie).toBe(true);
+    expect(limiteur.etat()).toEqual({ actifs: 0, enAttente: 0 });
+  });
+
   it('propage la valeur de retour de la tâche', async () => {
     const limiteur = creerLimiteur({ max: 2, fileMax: 10 });
     await expect(limiteur.executer(async () => 42)).resolves.toBe(42);

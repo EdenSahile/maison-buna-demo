@@ -48,12 +48,11 @@ describe('generatePDF — timeout par génération', () => {
     expect(erreur.message).toContain('400 ms');
   });
 
-  // Ce test vérifie l'état final : aucun processus fils ne subsiste après un
-  // échec. Il passe avec ou sans le SIGKILL du timeout, parce que le finally
-  // de rendre() ferme déjà le navigateur quand le lancement s'est terminé
-  // normalement. Le SIGKILL couvre l'autre cas, celui d'un rendu bloqué où
-  // browser.close() attendrait le protocole — cas que je n'ai pas su
-  // reproduire de façon déterministe.
+  // Ce test vérifie l'état final avec un vrai Chromium : aucun processus fils
+  // ne subsiste après un échec. Il passe avec ou sans le SIGKILL, le finally
+  // de rendre() fermant déjà le navigateur. Que le kill et l'annulation
+  // soient bien déclenchés est vérifié dans pdfTimeout.test.js, sur un
+  // navigateur simulé.
   it('ne laisse aucun processus Chromium derrière lui', async () => {
     await generatePDF(devis).catch(() => {});
     await new Promise((r) => setTimeout(r, 300));
