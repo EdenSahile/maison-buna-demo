@@ -13,7 +13,7 @@ const { generatePDF, PdfTimeoutError, FileSatureeError, etatFilePDF } = await im
 const devis = {
   id: 'concurrence', devis_numero: 'MBE-20260909-00001',
   date_emission: '9 septembre 2026', date_validite: '9 octobre 2026',
-  societe: 'Café Test', prenom: 'Marie', nom: 'Dupont', email: 'marie@example.fr',
+  societe: 'Café Test', prenom: 'Marie', nom: 'Dupont', email: 'marie@example.com',
   collaborateurs: '12', ville: 'Paris', cafes: ['Limmu'],
   quantite_resume: 'Limmu : 250 g', frequence: 'Mensuelle', moutures: ['Grains entiers'],
   pricing_rows: [{

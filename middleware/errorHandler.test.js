@@ -63,8 +63,8 @@ describe('errorHandler — aucune fuite dans la réponse', () => {
   });
 
   it('ne renvoie pas le corps brut, qui contient les données du client', async () => {
-    const texte = await (await post('{"email":"marie@example.fr",')).text();
-    expect(texte).not.toContain('marie@example.fr');
+    const texte = await (await post('{"email":"marie@example.com",')).text();
+    expect(texte).not.toContain('marie@example.com');
   });
 
   it('ne renvoie pas la stack trace sur une erreur applicative', async () => {
