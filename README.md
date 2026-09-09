@@ -247,12 +247,13 @@ Un second workflow (`claude.yml`) permet également de solliciter Claude directe
 Le développement suit un pipeline interne à plusieurs rôles, décrit dans `CLAUDE.MD` et `.claude/agents/` :
 
 1. **UX Designer**
-2. **Développeur**
-3. **Testeur**
-4. **Code Reviewer**
-5. **Sécurité**
+2. **Développeur** — écrit le code et les tests qui vont avec
+3. **Code Reviewer**
+4. **Sécurité**
 
 Chaque rôle documente son travail avant de passer la main au suivant, dans `reports/local/`, ignoré par git : ces rapports citent des fichiers, des numéros de ligne, des bugs et des vulnérabilités, et n'ont pas leur place dans un dépôt public. Les fichiers `reports/*.md` visibles ici sont donc des stubs.
+
+Il n'y a pas de rôle Testeur : l'état des tests vient du verrou qualité — build Vite, suite Vitest serveur et client, `node --check` — passé avant chaque commit et relancé par la CI sur chaque pull request. Un contrôle déterministe n'a pas besoin d'être reformulé par un agent.
 
 L'état courant du projet (tâches terminées, tâches restantes, état du build) est conservé dans `CONTEXT.MD`. Un système de handoff permet également de reprendre une session de travail là où elle s'était arrêtée.
 

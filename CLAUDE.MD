@@ -174,26 +174,58 @@ Ne pas compter sur eux pour la validation — l'inclure dans le prompt.
 Quand on construit une feature, toujours respecter cet ordre :
 
 1. UX Designer    -> crée les templates (reports/local/dev-report.md : "UX Designer — DONE")
-2. Développeur    -> construit le serveur (reports/local/dev-report.md : "Développeur — DONE")
-3. Testeur        -> valide les fonctionnalités (reports/local/test-report.md : "DONE")
-4. Code Reviewer  -> audite la qualité (reports/local/review-report.md : "APPROUVÉ")
-5. Sécurité       -> audite les vulnérabilités (reports/local/security-report.md : "SÛR")
+2. Développeur    -> construit le serveur et ses tests (reports/local/dev-report.md : "Développeur — DONE")
+3. Code Reviewer  -> audite la qualité (reports/local/review-report.md : "APPROUVÉ")
+4. Sécurité       -> audite les vulnérabilités (reports/local/security-report.md : "SÛR")
 
 En cas d'échec :
-- Testeur FAILED -> retour Développeur avec reports/local/test-report.md
 - Reviewer BLOQUANT -> retour Développeur avec reports/local/review-report.md
 - Sécurité BLOQUANT -> retour Développeur avec reports/local/security-report.md
 
+### L'état des tests vient du verrou qualité, pas d'un agent
+
+Il n'y a pas d'étape Testeur. Aucun agent ne produit de rapport de tests :
+la source de vérité est le verrou qualité, passé avant chaque commit.
+
+```bash
+cd client && npm run build    # build Vite
+npm run test:server           # Vitest racine — tests serveur, Puppeteer réel
+npm test                      # tests client
+node --check <fichiers serveur>
+```
+
+C'est un contrôle déterministe, et la CI relance la même chose sur chaque PR
+comme vérification obligatoire. Un agent qui rédigerait un rapport de
+résultats de tests ne ferait que recopier ce que ces commandes établissent
+déjà, avec le risque de le paraphraser de travers.
+
+Ce que l'étape Testeur avait d'utile est versé dans l'étape Développement :
+concevoir les tests nécessaires, chercher les chemins non couverts, écrire
+les cas adversariaux. Ce travail relève de qui écrit le code.
+
 Fichiers de communication entre agents :
 - reports/local/dev-report.md      <- UX Designer + Développeur écrivent ici
-- reports/local/test-report.md     <- Testeur écrit ici
 - reports/local/review-report.md   <- Reviewer écrit ici
 - reports/local/security-report.md <- Sécurité écrit ici
 
 Le dépôt est public. `reports/local/` est ignoré par git : c'est là que vont
-les quatre rapports, qui citent des fichiers, des numéros de ligne, des bugs et
-des vulnérabilités. Les quatre fichiers `reports/*.md` restent des stubs
-versionnés et ne doivent jamais contenir de findings.
+les trois rapports, qui citent des fichiers, des numéros de ligne, des bugs et
+des vulnérabilités. Les fichiers `reports/*.md` restent des stubs versionnés et
+ne doivent jamais contenir de findings.
+
+### Fichiers d'entrée des agents : bloquant ou optionnel, jamais entre les deux
+
+Un agent qui attend un fichier, ne le trouve pas et continue quand même en le
+signalant produit un audit dont personne ne sait s'il vaut. Chaque définition
+d'agent tranche donc explicitement, pour chaque fichier qu'elle lit en entrée :
+
+- **bloquant** : absent ou sans le verdict attendu, l'agent s'arrête et le dit
+  à l'agent principal. Il ne produit pas de rapport partiel.
+- **optionnel** : l'agent travaille sans, et n'en parle pas.
+
+État actuel : `reports/local/review-report.md` est bloquant pour l'agent
+Sécurité. `reports/local/dev-report.md` est optionnel pour le Développeur. Le
+Code Reviewer n'a aucun fichier d'entrée : il audite le diff.
 
 ---
 
