@@ -18,6 +18,9 @@ vi.mock('puppeteer', () => ({
 process.env.PDF_TIMEOUT_MS = '50';
 process.env.PDF_MAX_CONCURRENT = '1';
 process.env.PDF_MAX_FILE = '5';
+// Délai de grâce court : le navigateur simulé ne meurt jamais vraiment, donc
+// c'est ce plafond qui rend le créneau dans le test du timeout en plein rendu.
+process.env.PDF_FERMETURE_MS = '300';
 
 const { generatePDF, PdfTimeoutError, etatFilePDF } = await import('./pdfService.js');
 
@@ -63,10 +66,24 @@ describe('generatePDF — timeout pendant le lancement', () => {
 
     const erreur = await generatePDF(devis).catch((e) => e);
     expect(erreur).toBeInstanceOf(PdfTimeoutError);
-    expect(kill).not.toHaveBeenCalled();
-
-    await new Promise((r) => setTimeout(r, 200));
+    // Fermé par le drapeau d'annulation, pas par le SIGKILL du minuteur :
+    // au moment du timeout, le navigateur n'existait pas encore.
     expect(close).toHaveBeenCalled();
+  });
+
+  // Le limiteur libérait le créneau dès le rejet de la course, alors que le
+  // navigateur lancé juste après le timeout tournait encore : deux
+  // générations de plus pouvaient démarrer par-dessus.
+  it('ne rend pas le créneau avant la fermeture du navigateur', async () => {
+    lancement = async () => {
+      await new Promise((r) => setTimeout(r, 150));
+      return faussNavigateur();
+    };
+
+    await generatePDF(devis).catch(() => {});
+    // Au moment où generatePDF se règle, le navigateur est déjà fermé.
+    expect(close).toHaveBeenCalled();
+    expect(etatFilePDF()).toEqual({ actifs: 0, enAttente: 0 });
   });
 
   it('n entame aucun rendu après une annulation', async () => {

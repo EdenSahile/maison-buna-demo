@@ -42,9 +42,26 @@ const MAX_FILE = entier('PDF_MAX_FILE', 10, 0);
 // pas. Sans ce plafond, une génération bloquée gèlerait la file.
 const TIMEOUT_MS = entier('PDF_TIMEOUT_MS', 45000, 1);
 
+// Délai de grâce après un timeout : on garde le créneau le temps que le
+// navigateur se ferme vraiment, mais pas plus. Attendre sans borne rendrait
+// le créneau définitivement indisponible si le processus refusait de mourir,
+// ce qui est pire que la borne dépassée un instant.
+const FERMETURE_MS = entier('PDF_FERMETURE_MS', 5000, 1);
+
 const limiteur = creerLimiteur({ max: MAX_CONCURRENT, fileMax: MAX_FILE });
 
 export { FileSatureeError };
+
+// kill() peut lever (EPERM, processus déjà mort). Puppeteer n'attache aucun
+// écouteur 'error' sur le processus navigateur : une exception ici, dans un
+// callback de minuteur, arrêterait le serveur.
+function arretForce(browser) {
+  try {
+    browser?.process()?.kill('SIGKILL');
+  } catch (err) {
+    console.warn(`Arrêt forcé du navigateur impossible : ${err.message}`);
+  }
+}
 
 export class PdfTimeoutError extends Error {
   constructor(ms) {
@@ -81,6 +98,9 @@ async function rendre(devis, contexte) {
   // cette relecture, le navigateur démarrait puis rendait tout le devis hors
   // de la file, alors que le créneau était déjà rendu.
   if (contexte.annule) {
+    // Tuer d'abord : close() dialogue avec le navigateur et peut attendre
+    // indéfiniment si celui-ci ne répond pas.
+    arretForce(browser);
     await browser.close().catch(() => {});
     throw new PdfTimeoutError(TIMEOUT_MS);
   }
@@ -105,24 +125,41 @@ export function generatePDF(devis) {
   return limiteur.executer(async () => {
     const contexte = {};
     let minuteur;
+
+    const rendu = rendre(devis, contexte);
+    // La course rejette avant que `rendu` ne se règle : sans ce catch, son
+    // échec deviendrait un rejet non traité.
+    rendu.catch(() => {});
+
     try {
       return await Promise.race([
-        rendre(devis, contexte),
+        rendu,
         new Promise((_, rejeter) => {
           minuteur = setTimeout(() => {
-            // Rejet d'abord : si kill() levait, la course ne se réglerait
-            // jamais et le créneau serait perdu définitivement.
+            // Rejet d'abord : si l'arrêt forcé levait, la course ne se
+            // réglerait jamais et le créneau serait perdu définitivement.
             contexte.annule = true;
             rejeter(new PdfTimeoutError(TIMEOUT_MS));
             // SIGKILL quand le navigateur tourne déjà. S'il est encore en
             // train de démarrer, c'est le drapeau ci-dessus qui le ferme,
             // juste après le lancement.
-            contexte.browser?.process()?.kill('SIGKILL');
+            arretForce(contexte.browser);
           }, TIMEOUT_MS);
         }),
       ]);
     } finally {
       clearTimeout(minuteur);
+      // Le créneau n'est rendu qu'une fois le navigateur réellement fermé.
+      // Sinon le limiteur libère la place dès le rejet de la course, alors
+      // qu'un Chromium lancé juste après le timeout tourne encore : deux
+      // générations de plus démarraient par-dessus, et la borne sautait.
+      // Borné par FERMETURE_MS pour ne pas geler le créneau indéfiniment.
+      let grace;
+      await Promise.race([
+        rendu.catch(() => {}),
+        new Promise((resoudre) => { grace = setTimeout(resoudre, FERMETURE_MS); }),
+      ]);
+      clearTimeout(grace);
     }
   });
 }

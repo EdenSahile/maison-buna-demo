@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 66/66 (2026-09-09) |
+| Tests serveur (`npm run test:server`) | ✅ 99/99 (2026-09-09) |
 
 ---
 
@@ -25,6 +25,8 @@
 | `chore/reports-local-agents` | convention reports/local/ pour les 4 agents | mergée (PR #15) |
 | `chore/demo-safety` | mention DÉMO sur le PDF, retrait des coordonnées réelles | mergée (PR #16) |
 | `fix/devis-validation` | validation stricte des entrées du devis | mergée (PR #17) |
+| `docs/context-backlog` | remise à jour de CONTEXT.MD et backlog | mergée (PR #18) |
+| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | en cours |
 
 ---
 
@@ -43,8 +45,10 @@
 
 ### Priorité 1 — durcissement serveur (`fix/server-hardening`)
 
-- [ ] `server.js:38-42` : le handler d'erreur global ignore `err.status`, donc un JSON malformé (400) et un corps de plus de 100 ko (413) sortent en 500. Dernier reste non tenu du critère « jamais un 500 sur une entrée invalide ». Transmettre le statut porté par l'erreur s'il est inférieur à 500. Garder le message générique dans la réponse, ne jamais renvoyer `err.message`.
-- [ ] `services/pdfService.js:18-40` : un Chromium complet lancé par devis, sans limite de concurrence. Trois ou quatre générations simultanées saturent les 512 Mo de l'instance Render et font tomber la démo. Piste : file d'attente, sémaphore, ou réutilisation d'une instance.
+- [x] `server.js:38-42` : statut porté par l'erreur relayé quand il est entre 400 et 499, message de réponse toujours générique. Handler extrait dans `middleware/errorHandler.js` pour être testable. Audité le 09/09/2026.
+- [x] `services/pdfService.js` : concurrence bornée à 2, file d'attente de 10, timeout de 45 s par génération, refus immédiat au-delà de la file. Limite choisie sur mesure : ~100 Mo par instance Chromium concurrente, ~500 ms par génération. Audité le 09/09/2026.
+- [ ] `routes/devis.js` traite `FileSatureeError` comme une panne ordinaire : après trois tentatives, le client n'a pas d'email et seul l'admin est alerté. Tension avec la règle absolue n°4, à trancher.
+- [ ] `data/storage.js:8-17` relit et réécrit `data/devis.json` en synchrone à chaque demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)
 

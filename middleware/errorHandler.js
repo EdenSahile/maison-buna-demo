@@ -16,7 +16,9 @@ export function errorHandler(err, _req, res, next) {
   // contient la position de l'octet fautif, et err.body le corps brut de la
   // requête, donc des données personnelles.
   if (status >= 500) {
-    console.error('Erreur non gérée :', err);
+    // err.stack et non err : l'objet entier peut porter err.body, donc le
+    // corps brut de la requête.
+    console.error('Erreur non gérée :', err?.stack || err);
   } else {
     console.warn(`Requête rejetée (${status}) : ${err.type || err.name}`);
   }
