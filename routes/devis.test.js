@@ -9,11 +9,22 @@ const counterPath = join(__dirname, '../data/counter.json');
 // Dépendances externes neutralisées : ces tests portent sur la validation
 // et la construction du devis, pas sur le PDF ni sur l'envoi d'emails.
 const saveDevis = vi.fn();
+const majEtat = vi.fn();
 const generatePDF = vi.fn(async () => Buffer.from('%PDF-fake'));
 const sendDevisEmails = vi.fn(async () => {});
 const sendPdfFailureAlert = vi.fn(async () => {});
 
-vi.mock('../data/storage.js', () => ({ saveDevis: (d) => saveDevis(d) }));
+vi.mock('../data/storage.js', () => ({
+  saveDevis: (d) => saveDevis(d),
+  majEtat: (...a) => majEtat(...a),
+  ETATS: {
+    EN_COURS: 'en_cours',
+    ENVOYE: 'envoye',
+    ENVOYE_SANS_PDF: 'envoye_sans_pdf',
+    ECHEC_ENVOI: 'echec_envoi',
+    INTERROMPU: 'interrompu',
+  },
+}));
 vi.mock('../services/pdfService.js', () => ({
   generatePDF: (d) => generatePDF(d),
   BUDGET_PDF_MS: 345000,
@@ -52,9 +63,10 @@ afterAll(async () => {
 
 beforeEach(() => {
   saveDevis.mockClear();
+  majEtat.mockClear();
   generatePDF.mockClear().mockResolvedValue(Buffer.from('%PDF-fake'));
-  sendDevisEmails.mockClear();
-  sendPdfFailureAlert.mockClear();
+  sendDevisEmails.mockClear().mockResolvedValue(undefined);
+  sendPdfFailureAlert.mockClear().mockResolvedValue(undefined);
 });
 
 // La génération se fait après la réponse, dans un setImmediate : on attend
@@ -407,5 +419,53 @@ describe('POST /api/devis — chemin d abandon : règle absolue n°4', () => {
 
     expect(sendPdfFailureAlert).not.toHaveBeenCalled();
     expect(sendDevisEmails.mock.calls[0][1]).not.toBeNull();
+  });
+});
+
+describe('POST /api/devis — état de la demande', () => {
+  class AttenteDepasseeError extends Error {
+    constructor() {
+      super('Attente en file dépassée');
+      this.code = 'ATTENTE_DEPASSEE';
+    }
+  }
+
+  const idEnregistre = () => saveDevis.mock.calls[0][0].id;
+
+  it('passe à « envoye » quand le PDF et les emails sont partis', async () => {
+    await post(devisB2B);
+    await attendre(() => majEtat.mock.calls.length > 0);
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye');
+  });
+
+  // Sans cette distinction, rien ne permet de retrouver les devis dont le PDF
+  // manque, alors que ce sont ceux que l'admin doit relancer à la main.
+  it('passe à « envoye_sans_pdf » quand la génération a échoué', async () => {
+    generatePDF.mockRejectedValue(new AttenteDepasseeError());
+
+    await post(devisB2B);
+    await attendre(() => majEtat.mock.calls.length > 0);
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye_sans_pdf');
+  });
+
+  it('passe à « echec_envoi » et garde la cause quand l envoi échoue', async () => {
+    sendDevisEmails.mockRejectedValue(new Error('SMTP indisponible'));
+
+    await post(devisB2B);
+    await attendre(() => majEtat.mock.calls.length > 0);
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'echec_envoi', { etat_erreur: 'SMTP indisponible' });
+  });
+
+  // L'enregistrement précède toujours la mise à jour : c'est ce qui garantit
+  // qu'une demande existe en base avant qu'on cherche à la faire évoluer.
+  // Assertion sur l'ordre et non sur l'instant, les mocks se résolvant trop
+  // vite pour qu'un « pas encore appelé » veuille dire quoi que ce soit.
+  it('enregistre la demande avant d en faire évoluer l état', async () => {
+    await post(devisB2B);
+    await attendre(() => majEtat.mock.calls.length > 0);
+
+    expect(saveDevis.mock.invocationCallOrder[0])
+      .toBeLessThan(majEtat.mock.invocationCallOrder[0]);
+    expect(saveDevis.mock.calls[0][0].etat).toBeUndefined();
   });
 });

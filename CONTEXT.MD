@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 131/131 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 151/151 (2026-09-10) |
 
 ---
 
@@ -53,7 +53,7 @@
 - [x] `services/pdfService.js` : concurrence bornée à 2, file d'attente de 10, timeout de 45 s par génération, refus immédiat au-delà de la file. Limite choisie sur mesure : ~100 Mo par instance Chromium concurrente, ~500 ms par génération. Audité le 09/09/2026.
 - [x] `routes/devis.js` traitait `FileSatureeError` comme une panne ordinaire. La saturation est convertie en attente : plafond de 300 s en file, rejet seulement au-delà. Décision du 10/09/2026.
 - [x] Règle absolue n°4 tenue sur le chemin d'abandon : le client reçoit son email même sans PDF, et les templates annoncent la pièce jointe d'après sa présence réelle et non d'après `sur_devis`.
-- [ ] Aucun champ d'état dans `data/devis.json` : un redémarrage pendant l'attente en file perd le PDF et les emails de jusqu'à 52 devis, sans moyen de les retrouver. Relevé par l'audit du 10/09/2026 ; l'absence de gestion de SIGTERM allonge cette fenêtre à 300 s.
+- [x] Champ `etat` dans `data/devis.json`, cinq valeurs définies dans `ETATS`, plus `etat_maj` et `etat_erreur`. SIGTERM et SIGINT marquent « interrompu » tout ce qui était en cours avant de fermer le serveur. Les demandes à relancer à la main sont désormais retrouvables.
 - [x] `trust proxy` est réglable par `TRUST_PROXY`, valeur par défaut 1, via le lecteur d'environnement extrait dans `config/env.js`.
 - [ ] `data/storage.js:8-17` relit et réécrit `data/devis.json` en synchrone à chaque demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
 

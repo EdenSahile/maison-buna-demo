@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { saveDevis } from '../data/storage.js';
+import { saveDevis, majEtat, ETATS } from '../data/storage.js';
 import { generatePDF, BUDGET_PDF_MS } from '../services/pdfService.js';
 import { sendDevisEmails, sendPdfFailureAlert } from '../services/mailService.js';
 
@@ -295,8 +295,10 @@ router.post('/devis', async (req, res) => {
       }
       try {
         await sendDevisEmails(devis, pdfBuffer);
+        majEtat(devis.id, pdfBuffer ? ETATS.ENVOYE : ETATS.ENVOYE_SANS_PDF);
       } catch (err) {
         console.error(`Erreur email id:${devis.id} :`, err.message);
+        majEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: err.message });
       }
     });
   } catch (err) {

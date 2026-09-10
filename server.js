@@ -7,6 +7,8 @@ import { dirname, join } from 'path';
 import devisRouter from './routes/devis.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { entier } from './config/env.js';
+import { marquerInterrompus } from './data/storage.js';
+import { installerArretPropre } from './services/arretPropre.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,6 +54,8 @@ if (process.env.NODE_ENV === 'production' && !process.env.BASE_URL) {
   console.warn('⚠️  BASE_URL non défini en production — les images des emails REST pointeront vers le fallback démo.');
 }
 
-app.listen(PORT, () => {
+const serveur = app.listen(PORT, () => {
   console.log(`Maison Buna Devis — http://localhost:${PORT}`);
 });
+
+installerArretPropre({ serveur, marquerInterrompus });
