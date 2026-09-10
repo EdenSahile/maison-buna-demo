@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import devisRouter from './routes/devis.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { entier } from './config/env.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,7 +14,16 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-app.set('trust proxy', 1);
+// Nombre de proxys de confiance devant l'application. Ce réglage décide de
+// l'adresse IP retenue pour chaque requête, donc du comptage du limiteur de
+// débit : 1 est correct derrière Render, 0 s'il n'y a aucun proxy. Codé en
+// dur, un changement d'hébergeur fausserait le comptage sans rien signaler.
+//
+// Plafonné à 3 : au-delà, req.ip devient une valeur que le client choisit
+// lui-même dans X-Forwarded-For, et le limiteur de débit se contourne en
+// faisant varier l'en-tête. Sans plafond, une valeur énorme équivaut à
+// « trust proxy: true », qu'express-rate-limit ne signale pas non plus.
+app.set('trust proxy', entier('TRUST_PROXY', 1, 0, 3));
 
 const devisLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
