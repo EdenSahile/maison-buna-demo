@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 112/112 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 126/126 (2026-09-10) |
 
 ---
 
@@ -28,7 +28,8 @@
 | `docs/context-backlog` | remise à jour de CONTEXT.MD et backlog | mergée (PR #18) |
 | `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | PR #19 ouverte |
 | `docs/pipeline-testeur` | suppression de l'étape Testeur | PR #20 ouverte |
-| `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | en cours |
+| `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | mergée (PR #21) |
+| `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | en cours |
 
 ---
 
@@ -52,12 +53,12 @@
 - [x] `routes/devis.js` traitait `FileSatureeError` comme une panne ordinaire. La saturation est convertie en attente : plafond de 300 s en file, rejet seulement au-delà. Décision du 10/09/2026.
 - [x] Règle absolue n°4 tenue sur le chemin d'abandon : le client reçoit son email même sans PDF, et les templates annoncent la pièce jointe d'après sa présence réelle et non d'après `sur_devis`.
 - [ ] Aucun champ d'état dans `data/devis.json` : un redémarrage pendant l'attente en file perd le PDF et les emails de jusqu'à 52 devis, sans moyen de les retrouver. Relevé par l'audit du 10/09/2026 ; l'absence de gestion de SIGTERM allonge cette fenêtre à 300 s.
-- [ ] `server.js:15` code en dur `trust proxy: 1` : le rate limit devient contournable si l'application tourne un jour sans proxy devant elle.
+- [x] `trust proxy` est réglable par `TRUST_PROXY`, valeur par défaut 1, via le lecteur d'environnement extrait dans `config/env.js`.
 - [ ] `data/storage.js:8-17` relit et réécrit `data/devis.json` en synchrone à chaque demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)
 
-- [ ] `.github/workflows/claude-pr-review.yml:45-49` ne fait `node --check` que sur cinq fichiers serveur : `middleware/errorHandler.js` et `services/limiteConcurrence.js`, ajoutés par la PR #19, manquent. Le verrou local en couvre sept. PR dédiée, parce que toucher au workflow bloque la review automatique de la PR qui le modifie.
+- [x] Contrôle de syntaxe unifié : `npm run check:syntax` parcourt l'arborescence au lieu d'énumérer des fichiers. La CI, la skill `open-pr` et les définitions d'agents appellent tous ce script. Vérifié qu'il attrape une faute dans `middleware/errorHandler.js` et `services/limiteConcurrence.js`.
 
 - [ ] `CLAUDE.MD:21` annonce Express 4, `package.json` déclare Express 5 (la ligne était en `:19` avant l'ajout de la ligne React à la section Stack)
 - [ ] La section « Commandes utiles » omet `dev:all`, `test:server` et quatre autres scripts

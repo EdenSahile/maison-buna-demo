@@ -191,7 +191,7 @@ la source de vérité est le verrou qualité, passé avant chaque commit.
 cd client && npm run build    # build Vite
 npm run test:server           # Vitest racine — tests serveur, Puppeteer réel
 npm test                      # tests client
-node --check <fichiers serveur>
+npm run check:syntax        # node --check sur tout le JS serveur
 ```
 
 C'est un contrôle déterministe, et la CI relance la même chose sur chaque PR

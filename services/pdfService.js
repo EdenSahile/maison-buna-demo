@@ -4,23 +4,10 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { creerLimiteur, FileSatureeError, AttenteDepasseeError } from './limiteConcurrence.js';
+import { entier } from '../config/env.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const templatePath = join(__dirname, '../templates/devis-template.html');
-
-// Une valeur d'environnement illisible ne doit pas désactiver la borne en
-// silence : Number('deux') donne NaN, et `actifs < NaN` étant toujours faux,
-// toutes les générations partaient en file sans jamais être servies.
-function entier(nom, defaut, minimum) {
-  const brut = process.env[nom];
-  if (brut === undefined || brut === '') return defaut;
-  const valeur = Number(brut);
-  if (!Number.isInteger(valeur) || valeur < minimum) {
-    console.warn(`${nom} invalide (${brut}) — valeur par défaut conservée : ${defaut}.`);
-    return defaut;
-  }
-  return valeur;
-}
 
 // Concurrence bornée. Mesuré sur ce projet : une instance Chromium
 // supplémentaire coûte environ 100 Mo (coût marginal relevé à 23, 86, 96 puis

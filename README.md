@@ -253,7 +253,7 @@ Le développement suit un pipeline interne à plusieurs rôles, décrit dans `CL
 
 Chaque rôle documente son travail avant de passer la main au suivant, dans `reports/local/`, ignoré par git : ces rapports citent des fichiers, des numéros de ligne, des bugs et des vulnérabilités, et n'ont pas leur place dans un dépôt public. Les fichiers `reports/*.md` visibles ici sont donc des stubs.
 
-Il n'y a pas de rôle Testeur : l'état des tests vient du verrou qualité — build Vite, suite Vitest serveur et client, `node --check` — passé avant chaque commit et relancé par la CI sur chaque pull request. Un contrôle déterministe n'a pas besoin d'être reformulé par un agent.
+Il n'y a pas de rôle Testeur : l'état des tests vient du verrou qualité — build Vite, suite Vitest serveur et client, `npm run check:syntax` — passé avant chaque commit et relancé par la CI sur chaque pull request. Un contrôle déterministe n'a pas besoin d'être reformulé par un agent.
 
 L'état courant du projet (tâches terminées, tâches restantes, état du build) est conservé dans `CONTEXT.MD`. Un système de handoff permet également de reprendre une session de travail là où elle s'était arrêtée.
 
