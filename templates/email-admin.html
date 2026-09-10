@@ -405,11 +405,13 @@
         <!-- SECTION : Statut PDF -->
         <div class="pdf-status">
           <p>
-            {{#if sur_devis}}
+            {{#if avec_pdf}}
+              Le PDF du devis est joint à cet email.
+            {{else}}{{#if sur_devis}}
               Demande sur mesure — aucun PDF joint. À traiter manuellement.
             {{else}}
-              Le PDF du devis est joint à cet email.
-            {{/if}}
+              Génération du PDF échouée — aucun PDF joint. Le client a reçu son email sans pièce jointe : relancer à la main.
+            {{/if}}{{/if}}
           </p>
         </div>
 

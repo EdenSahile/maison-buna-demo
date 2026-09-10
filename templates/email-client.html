@@ -279,7 +279,11 @@
         <p class="intro-text">Votre sélection inclut une ou plusieurs quantités à estimer. Un membre de notre équipe prendra contact avec vous dans les meilleurs délais pour finaliser votre devis complet.</p>
         {{else}}
         <p class="intro-text">{{#if is_particulier}}Nous avons bien reçu votre demande de devis et nous vous en remercions chaleureusement.{{else}}Nous avons bien reçu la demande de devis de <strong>{{societe}}</strong> et nous vous en remercions chaleureusement.{{/if}}</p>
+        {{#if avec_pdf}}
         <p class="intro-text">Vous trouverez votre devis en pièce jointe. N'hésitez pas à nous contacter pour toute question.</p>
+        {{else}}
+        <p class="intro-text">Votre devis vous parviendra dans un second message : notre équipe finalise son édition. N'hésitez pas à nous contacter pour toute question.</p>
+        {{/if}}
         {{/if}}
 
         <!-- Récapitulatif -->

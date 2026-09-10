@@ -88,14 +88,16 @@ export async function sendPdfFailureAlert(devis) {
   const from = { name: 'Maison Buna', email: process.env.SMTP_USER };
   const subject = `[ALERTE] PDF non généré — ${devis.devis_numero}`;
   const html = `
-    <p>La génération du PDF a échoué après 3 tentatives pour le devis suivant :</p>
+    <p>La génération du PDF a échoué pour le devis suivant :</p>
     <ul>
       <li><strong>Numéro :</strong> ${escapeHtml(devis.devis_numero)}</li>
       <li><strong>Client :</strong> ${escapeHtml(devis.prenom)} ${escapeHtml(devis.nom)} (${escapeHtml(devis.societe || 'Particulier')})</li>
       <li><strong>Email client :</strong> ${escapeHtml(devis.email)}</li>
       <li><strong>ID :</strong> ${escapeHtml(devis.id)}</li>
     </ul>
-    <p>Le client n'a reçu aucun email. Veuillez relancer manuellement.</p>
+    <p>Le client a reçu son email de confirmation, sans le PDF et sans mention
+    d'incident : il attend son devis. Veuillez générer et transmettre le PDF
+    manuellement.</p>
   `;
   try {
     await sendViaSMTP({ from, to: process.env.ADMIN_EMAIL, subject, html, attachments: [], inlineImages: [] });
@@ -116,8 +118,13 @@ export async function sendDevisEmails(devis, pdfBuffer) {
     contentType: 'application/pdf',
   }] : [];
 
-  const clientHtml = Handlebars.compile(loadTemplate('email-client.html'))(devis);
-  const adminHtml  = Handlebars.compile(loadTemplate('email-admin.html'))(devis);
+  // Les templates annonçaient la pièce jointe d'après sur_devis, pas d'après
+  // sa présence réelle : un devis dont le PDF a échoué promettait un fichier
+  // absent. C'est cette variable qui décide, et elle vient de l'envoi lui-même.
+  const contexte = { ...devis, avec_pdf: pdfAttachments.length > 0 };
+
+  const clientHtml = Handlebars.compile(loadTemplate('email-client.html'))(contexte);
+  const adminHtml  = Handlebars.compile(loadTemplate('email-admin.html'))(contexte);
 
   const clientSubject = devis.sur_devis
     ? `Maison Buna — Votre demande a bien été reçue`

@@ -101,6 +101,37 @@ describe('sendDevisEmails — bascule Brevo REST quand SMTP échoue', () => {
   });
 });
 
+describe('sendDevisEmails — annonce de la pièce jointe', () => {
+  const phrase = 'devis en pièce jointe';
+
+  it('annonce la pièce jointe quand le PDF est bien joint', async () => {
+    await sendDevisEmails(devis, Buffer.from('%PDF-1.4 fake'));
+    const [clientMail, adminMail] = sendMail.mock.calls.map((c) => c[0]);
+    expect(clientMail.html).toContain(phrase);
+    expect(adminMail.html).toContain('joint à cet email');
+  });
+
+  // Le template se fiait à sur_devis, pas à la présence réelle du fichier :
+  // un devis dont le PDF a échoué promettait une pièce jointe absente.
+  it('ne promet aucune pièce jointe quand le PDF a échoué', async () => {
+    await sendDevisEmails(devis, null);
+    const [clientMail, adminMail] = sendMail.mock.calls.map((c) => c[0]);
+
+    expect(clientMail.attachments.filter((a) => a.contentType === 'application/pdf')).toHaveLength(0);
+    expect(clientMail.html).not.toContain(phrase);
+    expect(clientMail.html).toContain('dans un second message');
+    expect(adminMail.html).toContain('Génération du PDF échouée');
+  });
+
+  it('garde la formulation sur-mesure quand il n y a pas de PDF à produire', async () => {
+    await sendDevisEmails({ ...devis, sur_devis: true }, null);
+    const [clientMail, adminMail] = sendMail.mock.calls.map((c) => c[0]);
+    expect(clientMail.html).not.toContain(phrase);
+    expect(adminMail.html).toContain('Demande sur mesure');
+    expect(adminMail.html).not.toContain('Génération du PDF échouée');
+  });
+});
+
 describe('sendPdfFailureAlert', () => {
   it('alerte uniquement l admin, sans pièce jointe', async () => {
     await sendPdfFailureAlert(devis);
@@ -135,5 +166,35 @@ describe('sendPdfFailureAlert', () => {
   it('n insère pas "undefined" quand un champ client est absent', async () => {
     await sendPdfFailureAlert({ ...devis, prenom: undefined, nom: undefined });
     expect(sendMail.mock.calls[0][0].html).not.toContain('undefined');
+  });
+
+  // L'alerte disait « Le client n'a reçu aucun email », ce qui est devenu faux
+  // le jour où l'échec de génération a cessé de priver le client de son email.
+  // Aucune assertion ne portait sur cette phrase : la contradiction est passée.
+  it('décrit ce que le client a réellement reçu', async () => {
+    await sendPdfFailureAlert(devis);
+    const { html } = sendMail.mock.calls[0][0];
+
+    // Le HTML est indenté sur plusieurs lignes : on compare sur une version
+    // à espaces normalisés, sinon le test casserait au moindre reformatage.
+    const texte = html.replace(/\s+/g, ' ');
+    expect(texte).toContain(
+      "Le client a reçu son email de confirmation, sans le PDF et sans mention d'incident : il attend son devis.",
+    );
+    expect(texte).toContain('Veuillez générer et transmettre le PDF manuellement.');
+    expect(texte).not.toContain("n'a reçu aucun email");
+  });
+
+  it('donne à l admin de quoi retrouver le devis', async () => {
+    await sendPdfFailureAlert(devis);
+    const { subject, html } = sendMail.mock.calls[0][0];
+
+    expect(subject).toBe('[ALERTE] PDF non généré — MBE-20260903-00042');
+    expect(html).toContain('MBE-20260903-00042');
+    expect(html).toContain('Marie');
+    expect(html).toContain('Dupont');
+    expect(html).toContain('Café du Coin');
+    expect(html).toContain('marie@cafeducoin.fr');
+    expect(html).toContain('test-id-1234');
   });
 });
