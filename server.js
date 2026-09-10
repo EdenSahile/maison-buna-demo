@@ -18,7 +18,12 @@ const __dirname = dirname(__filename);
 // l'adresse IP retenue pour chaque requête, donc du comptage du limiteur de
 // débit : 1 est correct derrière Render, 0 s'il n'y a aucun proxy. Codé en
 // dur, un changement d'hébergeur fausserait le comptage sans rien signaler.
-app.set('trust proxy', entier('TRUST_PROXY', 1, 0));
+//
+// Plafonné à 3 : au-delà, req.ip devient une valeur que le client choisit
+// lui-même dans X-Forwarded-For, et le limiteur de débit se contourne en
+// faisant varier l'en-tête. Sans plafond, une valeur énorme équivaut à
+// « trust proxy: true », qu'express-rate-limit ne signale pas non plus.
+app.set('trust proxy', entier('TRUST_PROXY', 1, 0, 3));
 
 const devisLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

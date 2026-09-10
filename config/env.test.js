@@ -41,6 +41,29 @@ describe('entier', () => {
     },
   );
 
+  // Sans plafond, TRUST_PROXY=999999999999999999999 passait le contrôle et
+  // équivalait à « trust proxy: true » : req.ip devenait alors une valeur
+  // choisie par le client, et le limiteur de débit se contournait.
+  it.each(['4', '99', '999999999999999999999'])(
+    'refuse la valeur %s au-dessus du maximum',
+    (brut) => {
+      const avertir = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.stubEnv('REGLAGE', brut);
+      expect(entier('REGLAGE', 1, 0, 3)).toBe(1);
+      expect(avertir).toHaveBeenCalledWith(expect.stringContaining('REGLAGE invalide'));
+    },
+  );
+
+  it('accepte le maximum lui-même', () => {
+    vi.stubEnv('REGLAGE', '3');
+    expect(entier('REGLAGE', 1, 0, 3)).toBe(3);
+  });
+
+  it('n impose aucun plafond quand le maximum n est pas précisé', () => {
+    vi.stubEnv('REGLAGE', '300000');
+    expect(entier('REGLAGE', 1, 0)).toBe(300000);
+  });
+
   it('refuse une valeur sous le minimum, et le dit', () => {
     const avertir = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubEnv('REGLAGE', '0');

@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 126/126 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 131/131 (2026-09-10) |
 
 ---
 
@@ -64,6 +64,8 @@
 - [ ] La section « Commandes utiles » omet `dev:all`, `test:server` et quatre autres scripts
 
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
+
+- [ ] `.env.example:4,8` utilise `email.com` et les scripts de test `gmail.com` : deux domaines réels, là où la règle 8 demande `example.com`. Relevé par l'audit du 10/09/2026.
 
 - [ ] Tirets cadratins restants dans `email-client.html:268` et `email-admin.html:288`, à aligner sur la ponctuation du PDF (PR #13)
 - [ ] `README.md:211` mentionne encore `public/index.html`, troisième endroit désynchronisé après `ux-designer.md` et le workflow
