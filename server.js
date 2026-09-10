@@ -54,10 +54,12 @@ if (process.env.NODE_ENV === 'production' && !process.env.BASE_URL) {
   console.warn('⚠️  BASE_URL non défini en production — les images des emails REST pointeront vers le fallback démo.');
 }
 
-balayerAuDemarrage(marquerInterrompus);
-
 const serveur = app.listen(PORT, () => {
   console.log(`Maison Buna Devis — http://localhost:${PORT}`);
+  // Après l'ouverture du port : la lecture de la base croît avec sa taille
+  // (mesuré : 3 ms à 0,65 Mo, 126 ms à 33 Mo) et n'a pas à retarder le
+  // démarrage. La garantie est la même, rien ne peut être en cours avant.
+  balayerAuDemarrage(marquerInterrompus);
 });
 
 installerArretPropre({ serveur, marquerInterrompus });

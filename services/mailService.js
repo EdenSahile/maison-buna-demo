@@ -79,7 +79,10 @@ async function sendViaBrevoREST({ from, to, subject, html, attachments }) {
   });
 
   if (!res.ok) {
-    const err = await res.text();
+    // Tronqué : Brevo renvoie en écho la charge utile envoyée, donc le nom,
+    // l'email et le HTML du client. Ce message finit dans etat_erreur, en
+    // base, et de là volontiers dans un ticket.
+    const err = (await res.text()).slice(0, 300);
     throw new Error(`Brevo API ${res.status}: ${err}`);
   }
 }

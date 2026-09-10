@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import crypto from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, renameSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { saveDevis, majEtat, ETATS } from '../data/storage.js';
@@ -22,7 +22,11 @@ function nextDevisNumero(isParticulier) {
   }
   _counter++;
   try {
-    writeFileSync(counterPath, JSON.stringify({ counter: _counter }));
+    // Même précaution que pour data/devis.json : un compteur tronqué repart à
+    // zéro par le catch de la lecture, donc deux devis au même numéro.
+    const temporaire = `${counterPath}.tmp`;
+    writeFileSync(temporaire, JSON.stringify({ counter: _counter }));
+    renameSync(temporaire, counterPath);
   } catch (err) {
     console.error(`Compteur non persisté (${err.message}) — dérive possible entre mémoire et disque.`);
   }
@@ -318,7 +322,10 @@ router.post('/devis', async (req, res) => {
         noterEtat(devis.id, pdfEchoue ? ETATS.ENVOYE_SANS_PDF : ETATS.ENVOYE);
       } catch (err) {
         console.error(`Erreur email id:${devis.id} : ${err.message}`);
-        noterEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: err.message });
+        // Second garde-fou : ce champ est le seul de l'enregistrement dont le
+        // contenu ne vient pas du formulaire, donc le seul non plafonné par
+        // MAX_LENGTHS.
+        noterEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: String(err.message).slice(0, 300) });
       }
     });
   } catch (err) {
