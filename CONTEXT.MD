@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 99/99 (2026-09-09) |
+| Tests serveur (`npm run test:server`) | ✅ 106/106 (2026-09-10) |
 
 ---
 
@@ -26,7 +26,9 @@
 | `chore/demo-safety` | mention DÉMO sur le PDF, retrait des coordonnées réelles | mergée (PR #16) |
 | `fix/devis-validation` | validation stricte des entrées du devis | mergée (PR #17) |
 | `docs/context-backlog` | remise à jour de CONTEXT.MD et backlog | mergée (PR #18) |
-| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | en cours |
+| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | PR #19 ouverte |
+| `docs/pipeline-testeur` | suppression de l'étape Testeur | PR #20 ouverte |
+| `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | en cours |
 
 ---
 
@@ -47,7 +49,7 @@
 
 - [x] `server.js:38-42` : statut porté par l'erreur relayé quand il est entre 400 et 499, message de réponse toujours générique. Handler extrait dans `middleware/errorHandler.js` pour être testable. Audité le 09/09/2026.
 - [x] `services/pdfService.js` : concurrence bornée à 2, file d'attente de 10, timeout de 45 s par génération, refus immédiat au-delà de la file. Limite choisie sur mesure : ~100 Mo par instance Chromium concurrente, ~500 ms par génération. Audité le 09/09/2026.
-- [ ] `routes/devis.js` traite `FileSatureeError` comme une panne ordinaire : après trois tentatives, le client n'a pas d'email et seul l'admin est alerté. Tension avec la règle absolue n°4, à trancher.
+- [x] `routes/devis.js` traitait `FileSatureeError` comme une panne ordinaire. La saturation est convertie en attente : plafond de 300 s en file, rejet seulement au-delà, et le délai est annoncé au client dans la réponse. Décision du 10/09/2026.
 - [ ] `data/storage.js:8-17` relit et réécrit `data/devis.json` en synchrone à chaque demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)
@@ -65,6 +67,20 @@
 - [ ] Message d'erreur trompeur : `['Limmu','Sidamo','Yirgacheffe','Limmu']` renvoie « 3 valeurs maximum » alors que la vraie cause est le doublon
 - [ ] `.claude/skills/open-pr/SKILL.md:66` expose une arborescence locale (`.../Documents/Claude/maison-buna-demo/…`) dans un dépôt public. Chemin tronqué, sans `/Users/<nom>`, donc pas de nom d'utilisateur exposé — la ligne 67 voisine en contient un second pour le dépôt prod.
 - [ ] Avant de corriger les 8 couleurs hors charte du CSS du PDF, auditer les couleurs réellement utilisées dans chaque artefact. Même piège que pour les polices : si la charte couleur documentée est périmée, « corriger » alignerait du code correct sur une référence fictive.
+
+### Solution cible — le jour où ce code servira en production réelle
+
+Ce n'est pas une tâche courante : à faire quand le projet quittera l'état de
+démonstration, pas avant.
+
+- **Découplage durable de la génération et de l'envoi.** La réponse au client
+  est déjà immédiate et le travail déjà hors du fil de la requête
+  (`routes/devis.js`, `setImmediate` après `res.json`), mais dans le même
+  processus : un redémarrage de l'instance perd les demandes en cours et celles
+  en file. La vraie réponse est une file persistante et un worker séparé, ce
+  qui apporte aussi la reprise après échec et l'observabilité. Aujourd'hui,
+  refondre le flux central serait disproportionné face au risque réel sur une
+  démo dont le trafic tient dans deux créneaux.
 
 ### Priorité 4 — idée de fond, sans urgence
 
