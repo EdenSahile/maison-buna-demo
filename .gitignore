@@ -2,6 +2,7 @@
 node_modules/
 **/.DS_Store
 data/devis.json
+data/devis.json.*
 data/bg-errors.log
 scripts/test-output.pdf
 scripts/test-output-particulier.pdf

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
-import { readFileSync, writeFileSync, unlinkSync, mkdtempSync, rmSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, unlinkSync, mkdtempSync, mkdirSync, rmSync, readdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -71,6 +71,36 @@ describe('saveDevis — état initial', () => {
     saveDevis(devis('a'));
     expect(readdirSync(dossier).filter((f) => f.endsWith('.tmp'))).toHaveLength(0);
   });
+
+  // Le nom .tmp occupé par un dossier fait échouer l'écriture temporaire.
+  // Avec une écriture directe, la base serait déjà écrasée à cet instant ;
+  // avec le passage par renameSync, elle est intacte.
+  it('laisse la base intacte quand l écriture échoue', () => {
+    saveDevis(devis('a'));
+    const avant = readFileSync(filePath, 'utf8');
+    mkdirSync(`${filePath}.tmp`);
+
+    expect(() => saveDevis(devis('b'))).toThrow();
+    expect(readFileSync(filePath, 'utf8')).toBe(avant);
+
+    rmSync(`${filePath}.tmp`, { recursive: true });
+  });
+
+  // Un JSON valide mais qui n'est pas un tableau faisait échouer data.push,
+  // donc toute demande en 500, indéfiniment.
+  it.each(['{}', 'null', '"texte"', '42'])(
+    'met de côté un contenu qui n est pas un tableau (%s)',
+    (contenu) => {
+      const erreur = vi.spyOn(console, 'error').mockImplementation(() => {});
+      writeFileSync(filePath, contenu, 'utf8');
+
+      saveDevis(devis('a'));
+
+      expect(lire()).toHaveLength(1);
+      expect(erreur).toHaveBeenCalledWith(expect.stringContaining("n'est pas un tableau"));
+      erreur.mockRestore();
+    },
+  );
 });
 
 describe('majEtat', () => {

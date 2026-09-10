@@ -145,6 +145,18 @@ function buildQuantiteResume(quantiteParCafe, cafes) {
   }).join(' · ');
 }
 
+// L'enregistrement de l'état ne doit jamais faire tomber le traitement de
+// fond : sur un disque plein, majEtat levait dans le try, le catch le rappelait,
+// et le rejet sortait du setImmediate sans personne pour le rattraper — le
+// processus s'arrêtait, et toutes les demandes en vol restaient « en cours ».
+function noterEtat(id, etat, details = {}) {
+  try {
+    majEtat(id, etat, details);
+  } catch (err) {
+    console.error(`État non enregistré id:${id} (${etat}) : ${err.message}`);
+  }
+}
+
 router.post('/devis', async (req, res) => {
   try {
     if (!req.is('application/json')) return res.status(415).json({ error: 'Content-Type application/json requis' });
@@ -299,10 +311,10 @@ router.post('/devis', async (req, res) => {
       }
       try {
         await sendDevisEmails(devis, pdfBuffer);
-        majEtat(devis.id, pdfEchoue ? ETATS.ENVOYE_SANS_PDF : ETATS.ENVOYE);
+        noterEtat(devis.id, pdfEchoue ? ETATS.ENVOYE_SANS_PDF : ETATS.ENVOYE);
       } catch (err) {
-        console.error(`Erreur email id:${devis.id} :`, err.message);
-        majEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: err.message });
+        console.error(`Erreur email id:${devis.id} : ${err.message}`);
+        noterEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: err.message });
       }
     });
   } catch (err) {

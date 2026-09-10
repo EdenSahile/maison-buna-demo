@@ -435,7 +435,7 @@ describe('POST /api/devis — état de la demande', () => {
   it('passe à « envoye » quand le PDF et les emails sont partis', async () => {
     await post(devisB2B);
     await attendre(() => majEtat.mock.calls.length > 0);
-    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye');
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye', {});
   });
 
   // Sans cette distinction, rien ne permet de retrouver les devis dont le PDF
@@ -448,7 +448,7 @@ describe('POST /api/devis — état de la demande', () => {
     await attendre(() => majEtat.mock.calls.length > 0);
 
     expect(generatePDF).not.toHaveBeenCalled();
-    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye');
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye', {});
   });
 
   it('passe à « envoye_sans_pdf » quand la génération a échoué', async () => {
@@ -456,7 +456,7 @@ describe('POST /api/devis — état de la demande', () => {
 
     await post(devisB2B);
     await attendre(() => majEtat.mock.calls.length > 0);
-    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye_sans_pdf');
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye_sans_pdf', {});
   });
 
   it('passe à « echec_envoi » et garde la cause quand l envoi échoue', async () => {
@@ -465,6 +465,24 @@ describe('POST /api/devis — état de la demande', () => {
     await post(devisB2B);
     await attendre(() => majEtat.mock.calls.length > 0);
     expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'echec_envoi', { etat_erreur: 'SMTP indisponible' });
+  });
+
+  // Sur un disque plein, majEtat levait dans le try, le catch le rappelait, et
+  // le rejet sortait du setImmediate sans personne pour le rattraper : le
+  // processus s'arrêtait, et toutes les demandes en vol restaient « en cours ».
+  it('survit à un enregistrement d état impossible', async () => {
+    const erreur = vi.spyOn(console, 'error').mockImplementation(() => {});
+    majEtat.mockImplementation(() => { throw new Error('ENOSPC : disque plein'); });
+
+    const res = await post(devisB2B);
+    expect(res.status).toBe(200);
+
+    await attendre(() => erreur.mock.calls.some((c) => String(c[0]).includes('État non enregistré')));
+    // La requête suivante passe toujours : le processus est vivant.
+    expect((await post(devisB2B)).status).toBe(200);
+
+    majEtat.mockReset();
+    erreur.mockRestore();
   });
 
   // L'enregistrement précède toujours la mise à jour : c'est ce qui garantit

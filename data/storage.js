@@ -22,22 +22,40 @@ export const ETATS = {
   INTERROMPU: 'interrompu',
 };
 
+function mettreDeCote(raison) {
+  // Repartir de [] en silence effacerait la base à l'écriture suivante. Le
+  // fichier abîmé est mis de côté pour pouvoir être récupéré à la main.
+  const secours = `${filePath}.corrompu-${Date.now()}`;
+  renameSync(filePath, secours);
+  console.error(`${filePath} inexploitable (${raison}) — mis de côté dans ${secours}, on repart d'une base vide.`);
+  return [];
+}
+
 function lire() {
   if (!existsSync(filePath)) return [];
 
-  const brut = readFileSync(filePath, 'utf8');
+  let brut;
+  try {
+    brut = readFileSync(filePath, 'utf8');
+  } catch (err) {
+    // Lecture impossible : ne pas écrire par-dessus, l'appelant décidera.
+    throw new Error(`Lecture de ${filePath} impossible : ${err.message}`);
+  }
+
   if (brut.trim() === '') return [];
 
+  let data;
   try {
-    return JSON.parse(brut);
+    data = JSON.parse(brut);
   } catch (err) {
-    // Repartir de [] en silence effacerait la base à l'écriture suivante. Le
-    // fichier abîmé est mis de côté pour pouvoir être récupéré à la main.
-    const secours = `${filePath}.corrompu-${Date.now()}`;
-    renameSync(filePath, secours);
-    console.error(`data/devis.json illisible (${err.message}) — mis de côté dans ${secours}, on repart d'une base vide.`);
-    return [];
+    return mettreDeCote(err.message);
   }
+
+  // Un JSON valide mais qui n'est pas un tableau — `{}`, `null`, `"texte"` —
+  // faisait échouer data.push, donc toute demande en 500, indéfiniment.
+  if (!Array.isArray(data)) return mettreDeCote('le contenu n\'est pas un tableau');
+
+  return data;
 }
 
 // Écriture atomique : sans le fichier temporaire, une interruption au milieu
