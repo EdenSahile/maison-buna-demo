@@ -35,8 +35,9 @@ const MAX_CONCURRENT = entier('PDF_MAX_CONCURRENT', 2, 1);
 //
 // Calcul : une file réaliste de dix demandes sur deux créneaux prend une
 // quinzaine de secondes au rythme normal (~500 ms par PDF en local, le double
-// sur Render), et jusqu'à 5 × 45 s = 225 s si chaque génération va au bout de
-// son propre plafond. 300 s couvrent donc le pire cas d'une file réaliste.
+// sur Render). Au pire, si chaque génération va au bout de son propre plafond
+// de 45 s, la dernière de dix demandes attend 4 × 45 = 180 s avant de démarrer.
+// 300 s couvrent donc le pire cas d'une file réaliste, avec de la marge.
 //
 // Render documente un délai de 100 minutes par requête HTTP, très au-dessus :
 // ce n'est pas la contrainte. Et elle ne s'applique de toute façon pas ici,
@@ -64,8 +65,10 @@ const limiteur = creerLimiteur({ max: MAX_CONCURRENT, fileMax: MAX_FILE, attente
 
 export { FileSatureeError, AttenteDepasseeError };
 
-// Exposé au client : le message de confirmation annonce ce délai.
-export const ATTENTE_MAX_SECONDES = Math.round(ATTENTE_MAX_MS / 1000);
+// Exposé au client : le message de confirmation annonce ce délai. C'est
+// l'attente en file plus la génération elle-même, pas la seule attente —
+// annoncer 300 s quand le pire cas est 345 s serait une promesse fausse.
+export const DELAI_MAX_SECONDES = Math.round((ATTENTE_MAX_MS + TIMEOUT_MS) / 1000);
 
 // kill() peut lever (EPERM, processus déjà mort). Puppeteer n'attache aucun
 // écouteur 'error' sur le processus navigateur : une exception ici, dans un

@@ -16,7 +16,7 @@ const sendPdfFailureAlert = vi.fn(async () => {});
 vi.mock('../data/storage.js', () => ({ saveDevis: (d) => saveDevis(d) }));
 vi.mock('../services/pdfService.js', () => ({
   generatePDF: (d) => generatePDF(d),
-  ATTENTE_MAX_SECONDES: 300,
+  DELAI_MAX_SECONDES: 345,
 }));
 vi.mock('../services/mailService.js', () => ({
   sendDevisEmails: (...a) => sendDevisEmails(...a),
@@ -343,13 +343,25 @@ describe('POST /api/devis — file saturée', () => {
   it('annonce au client le délai maximum de génération', async () => {
     const res = await post(devisB2B);
     expect(res.status).toBe(200);
-    expect((await res.json()).delai_max_secondes).toBe(300);
+    expect((await res.json()).delai_max_secondes).toBe(345);
   });
 
   // La demande a déjà attendu son plafond : la remettre en file donnerait le
   // même résultat, avec le même délai.
   it('ne réessaie pas quand la file a saturé, et alerte l admin', async () => {
     generatePDF.mockRejectedValue(new AttenteDepasseeError());
+
+    await post(devisB2B);
+    await attendre(() => sendPdfFailureAlert.mock.calls.length > 0);
+
+    expect(generatePDF).toHaveBeenCalledTimes(1);
+    expect(sendDevisEmails).not.toHaveBeenCalled();
+  });
+
+  it('n insiste pas non plus quand la file a atteint sa longueur maximale', async () => {
+    const erreur = new Error("File d'attente saturée : 50 tâches déjà en attente");
+    erreur.code = 'FILE_SATUREE';
+    generatePDF.mockRejectedValue(erreur);
 
     await post(devisB2B);
     await attendre(() => sendPdfFailureAlert.mock.calls.length > 0);

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { creerLimiteur, FileSatureeError, AttenteDepasseeError } from './limiteConcurrence.js';
 
 // Tâche contrôlable : on décide quand elle se termine.
@@ -149,7 +149,7 @@ describe('creerLimiteur — plafond d attente', () => {
   });
 
   it('rejette seulement la tâche dont l attente dépasse le plafond', async () => {
-    const limiteur = creerLimiteur({ max: 1, fileMax: 50, attenteMax: 60 });
+    const limiteur = creerLimiteur({ max: 1, fileMax: 50, attenteMax: 200 });
     const a = tacheManuelle();
     const enCours = limiteur.executer(a.tache);
     await tick();
@@ -166,20 +166,31 @@ describe('creerLimiteur — plafond d attente', () => {
     expect(limiteur.etat()).toEqual({ actifs: 0, enAttente: 0 });
   });
 
-  it('n arme plus le plafond une fois la tâche servie', async () => {
-    const limiteur = creerLimiteur({ max: 1, fileMax: 50, attenteMax: 80 });
-    const a = tacheManuelle();
-    const enCours = limiteur.executer(a.tache);
-    await tick();
+  // Sans le clearTimeout de liberer(), le minuteur d'une tâche déjà servie
+  // reste armé. Le rejet qu'il déclenche ensuite est un no-op silencieux sur
+  // une promesse déjà résolue : aucune assertion de comportement ne le voit.
+  // On compte donc les minuteurs restants, seule preuve directe.
+  it('désarme le plafond dès que la tâche est servie', async () => {
+    vi.useFakeTimers();
+    try {
+      const limiteur = creerLimiteur({ max: 1, fileMax: 50, attenteMax: 10000 });
+      const a = tacheManuelle();
+      const enCours = limiteur.executer(a.tache);
+      await Promise.resolve();
 
-    const suivante = limiteur.executer(async () => 'servie');
-    setTimeout(() => a.terminer(), 20);
+      const suivante = limiteur.executer(async () => 'servie');
+      await Promise.resolve();
+      expect(vi.getTimerCount()).toBe(1);
 
-    await expect(suivante).resolves.toBe('servie');
-    // Au-delà du plafond, la tâche déjà servie ne doit pas être rejetée après coup.
-    await new Promise((r) => setTimeout(r, 120));
-    await enCours;
-    expect(limiteur.etat()).toEqual({ actifs: 0, enAttente: 0 });
+      a.terminer();
+      await enCours;
+      await expect(suivante).resolves.toBe('servie');
+
+      expect(vi.getTimerCount()).toBe(0);
+      expect(limiteur.etat()).toEqual({ actifs: 0, enAttente: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('garde le garde-fou de longueur de file', async () => {

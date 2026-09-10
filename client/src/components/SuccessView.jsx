@@ -103,9 +103,11 @@ const Tagline = styled.p`
 
 // Le serveur annonce le délai qu'il s'accorde au maximum pour générer le PDF.
 // S'il ne l'a pas transmis, on reste vague plutôt que d'inventer un chiffre.
-function delaiLisible(delaiMax) {
+export function delaiLisible(delaiMax) {
   if (!Number.isFinite(delaiMax) || delaiMax <= 0) return "Cela peut prendre quelques minutes."
-  if (delaiMax < 60) return `Cela peut prendre jusqu'à ${delaiMax} secondes.`
+  if (delaiMax < 60) {
+    return `Cela peut prendre jusqu'à ${delaiMax} seconde${delaiMax > 1 ? 's' : ''}.`
+  }
   const minutes = Math.round(delaiMax / 60)
   return `Cela peut prendre jusqu'à ${minutes} minute${minutes > 1 ? 's' : ''}.`
 }
