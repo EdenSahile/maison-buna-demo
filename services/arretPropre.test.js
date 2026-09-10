@@ -31,7 +31,8 @@ describe('installerArretPropre', () => {
 
     process.emit(signal);
 
-    expect(marquerInterrompus).toHaveBeenCalledTimes(1);
+    // Deux passages : avant la fermeture, puis juste avant de sortir.
+    expect(marquerInterrompus).toHaveBeenCalledTimes(2);
     expect(serveur.close).toHaveBeenCalled();
     expect(sortir).toHaveBeenCalledWith(0);
   });
@@ -46,7 +47,7 @@ describe('installerArretPropre', () => {
     retirer = installerArretPropre({ serveur, marquerInterrompus, delaiMs: 50, sortir });
 
     process.emit('SIGTERM');
-    expect(ordre).toEqual(['marquage', 'close']);
+    expect(ordre).toEqual(['marquage', 'close', 'marquage']);
   });
 
   it('ignore un second signal pendant l arrêt', () => {
@@ -69,6 +70,53 @@ describe('installerArretPropre', () => {
 
     await new Promise((r) => setTimeout(r, 80));
     expect(sortir).toHaveBeenCalledWith(1);
+  });
+
+  // close() ne refuse que les nouvelles connexions : une requête arrivée sur
+  // une connexion déjà ouverte peut encore enregistrer une demande pendant le
+  // drainage. Sans second passage, elle resterait « en_cours » pour toujours.
+  it('marque une seconde fois juste avant de sortir', () => {
+    let rappelClose;
+    const marquerInterrompus = vi.fn(() => 1);
+    const sortir = vi.fn();
+    const serveur = { close: vi.fn((rappel) => { rappelClose = rappel; }) };
+    retirer = installerArretPropre({ serveur, marquerInterrompus, delaiMs: 500, sortir });
+
+    process.emit('SIGTERM');
+    expect(marquerInterrompus).toHaveBeenCalledTimes(1);
+
+    rappelClose();
+    expect(marquerInterrompus).toHaveBeenCalledTimes(2);
+    expect(sortir).toHaveBeenCalledWith(0);
+  });
+
+  it('marque aussi avant une sortie forcée', async () => {
+    const marquerInterrompus = vi.fn(() => 1);
+    const sortir = vi.fn();
+    const serveur = { close: vi.fn(() => {}) };
+    retirer = installerArretPropre({ serveur, marquerInterrompus, delaiMs: 40, sortir });
+
+    process.emit('SIGTERM');
+    await new Promise((r) => setTimeout(r, 80));
+
+    expect(marquerInterrompus).toHaveBeenCalledTimes(2);
+    expect(sortir).toHaveBeenCalledWith(1);
+  });
+
+  // Le minuteur de sortie forcée doit être désarmé quand la fermeture aboutit,
+  // sinon il reste actif et peut faire sortir en code 1 un arrêt réussi.
+  it('désarme le minuteur de sortie forcée quand le serveur se ferme', async () => {
+    let rappelClose;
+    const sortir = vi.fn();
+    const serveur = { close: vi.fn((rappel) => { rappelClose = rappel; }) };
+    retirer = installerArretPropre({ serveur, marquerInterrompus: vi.fn(() => 0), delaiMs: 40, sortir });
+
+    process.emit('SIGTERM');
+    rappelClose();
+    expect(sortir).toHaveBeenCalledWith(0);
+
+    await new Promise((r) => setTimeout(r, 80));
+    expect(sortir).toHaveBeenCalledTimes(1);
   });
 
   // Si le marquage échoue, l'arrêt doit se poursuivre : mieux vaut un serveur

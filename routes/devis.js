@@ -251,6 +251,9 @@ router.post('/devis', async (req, res) => {
 
     setImmediate(async () => {
       let pdfBuffer = null;
+      // Distinct de « pdfBuffer est nul » : une demande sur mesure n'attend
+      // aucun PDF, elle n'a donc rien à relancer à la main.
+      let pdfEchoue = false;
       if (!devis.sur_devis) {
         const retryDelays = [0, 5000, 10000];
         // Chaque tentative peut repartir pour un tour complet de file. Sans
@@ -283,6 +286,7 @@ router.post('/devis', async (req, res) => {
           }
         }
         if (!success) {
+          pdfEchoue = true;
           // Règle absolue n°4 : deux emails, quoi qu'il arrive. La demande est
           // enregistrée et le client a vu un écran de confirmation — ne rien
           // lui envoyer serait le pire des cas. Il reçoit donc son email sans
@@ -295,7 +299,7 @@ router.post('/devis', async (req, res) => {
       }
       try {
         await sendDevisEmails(devis, pdfBuffer);
-        majEtat(devis.id, pdfBuffer ? ETATS.ENVOYE : ETATS.ENVOYE_SANS_PDF);
+        majEtat(devis.id, pdfEchoue ? ETATS.ENVOYE_SANS_PDF : ETATS.ENVOYE);
       } catch (err) {
         console.error(`Erreur email id:${devis.id} :`, err.message);
         majEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: err.message });

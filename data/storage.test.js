@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
-import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { readFileSync, writeFileSync, unlinkSync, mkdtempSync, rmSync, readdirSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const filePath = join(__dirname, 'devis.json');
-
-// Le module écrit dans le vrai data/devis.json : on préserve l'état du poste.
-const sauvegarde = existsSync(filePath) ? readFileSync(filePath, 'utf8') : null;
+// DEVIS_PATH détourne le module vers un fichier temporaire : la base réelle
+// n'est jamais touchée, même si le run est interrompu au milieu — elle est
+// dans .gitignore, une restauration ratée serait irrécupérable.
+const dossier = mkdtempSync(join(tmpdir(), 'maison-buna-storage-'));
+const filePath = join(dossier, 'devis.json');
+process.env.DEVIS_PATH = filePath;
 
 const { saveDevis, majEtat, marquerInterrompus, ETATS } = await import('./storage.js');
 
@@ -17,8 +18,8 @@ const devis = (id) => ({ id, devis_numero: `MBE-${id}`, timestamp: new Date().to
 beforeEach(() => writeFileSync(filePath, '[]', 'utf8'));
 
 afterAll(() => {
-  if (sauvegarde !== null) writeFileSync(filePath, sauvegarde, 'utf8');
-  else if (existsSync(filePath)) unlinkSync(filePath);
+  rmSync(dossier, { recursive: true, force: true });
+  delete process.env.DEVIS_PATH;
 });
 
 describe('saveDevis — état initial', () => {
@@ -38,10 +39,37 @@ describe('saveDevis — état initial', () => {
     expect(lire().map((d) => d.id)).toEqual(['a', 'b']);
   });
 
-  it('repart de zéro si le fichier est illisible', () => {
-    writeFileSync(filePath, '{ pas du JSON', 'utf8');
+  it('accepte un fichier absent ou vide', () => {
+    unlinkSync(filePath);
     saveDevis(devis('a'));
     expect(lire()).toHaveLength(1);
+
+    writeFileSync(filePath, '   ', 'utf8');
+    saveDevis(devis('b'));
+    expect(lire().map((d) => d.id)).toEqual(['b']);
+  });
+
+  // Repartir de [] en silence effacerait la base à l'écriture suivante.
+  it('met de côté un fichier illisible au lieu de l écraser', () => {
+    const erreur = vi.spyOn(console, 'error').mockImplementation(() => {});
+    writeFileSync(filePath, '{ pas du JSON', 'utf8');
+
+    saveDevis(devis('a'));
+
+    expect(lire()).toHaveLength(1);
+    expect(erreur).toHaveBeenCalledWith(expect.stringContaining('mis de côté'));
+
+    const secours = readdirSync(dossier).find((f) => f.includes('.corrompu-'));
+    expect(secours).toBeDefined();
+    expect(readFileSync(join(dossier, secours), 'utf8')).toBe('{ pas du JSON');
+    erreur.mockRestore();
+  });
+
+  // Sans fichier temporaire, une interruption au milieu de l'écriture laisse
+  // un JSON tronqué, donc toute la base perdue.
+  it('écrit de façon atomique, sans laisser de fichier temporaire', () => {
+    saveDevis(devis('a'));
+    expect(readdirSync(dossier).filter((f) => f.endsWith('.tmp'))).toHaveLength(0);
   });
 });
 
@@ -59,6 +87,26 @@ describe('majEtat', () => {
     saveDevis(devis('a'));
     majEtat('a', ETATS.ECHEC_ENVOI, { etat_erreur: 'SMTP indisponible' });
     expect(lire()[0].etat_erreur).toBe('SMTP indisponible');
+  });
+
+  it('refuse qu un détail écrase l identité ou l état de la demande', () => {
+    saveDevis(devis('a'));
+    const avant = lire()[0];
+
+    majEtat('a', ETATS.ENVOYE, {
+      id: 'usurpe',
+      timestamp: '1999-01-01T00:00:00.000Z',
+      etat: ETATS.EN_COURS,
+      etat_maj: '1999-01-01T00:00:00.000Z',
+      etat_erreur: 'conservé',
+    });
+
+    const apres = lire()[0];
+    expect(apres.id).toBe('a');
+    expect(apres.timestamp).toBe(avant.timestamp);
+    expect(apres.etat).toBe(ETATS.ENVOYE);
+    expect(apres.etat_maj).not.toBe('1999-01-01T00:00:00.000Z');
+    expect(apres.etat_erreur).toBe('conservé');
   });
 
   it('ne touche pas aux autres demandes', () => {

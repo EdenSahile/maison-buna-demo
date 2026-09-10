@@ -131,10 +131,11 @@ sans quoi un redémarrage perdait ce travail sans laisser de trace.
 | `envoye` | les deux emails sont partis, avec le PDF |
 | `envoye_sans_pdf` | les deux emails sont partis sans PDF — à relancer à la main |
 | `echec_envoi` | l'envoi a échoué, cause dans `etat_erreur` |
-| `interrompu` | le processus s'est arrêté avant la fin du traitement |
+| `interrompu` | le processus s'est arrêté pendant le traitement — vérifier PDF et emails avant de relancer, le signal a pu tomber juste après l'envoi |
 
 Les états sont définis dans `data/storage.js` (`ETATS`), et `etat_maj` porte
-l'horodatage du dernier changement. Pour retrouver ce qui demande une action :
+l'horodatage du dernier changement. Une demande sur mesure ne produit aucun PDF
+et termine donc en `envoye`, pas en `envoye_sans_pdf`. Pour retrouver ce qui demande une action :
 
 ```bash
 grep -c '"etat": "envoye_sans_pdf"' data/devis.json

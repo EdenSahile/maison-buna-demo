@@ -10,6 +10,22 @@ const DELAI_FORCE_MS = 10000;
 export function installerArretPropre({ serveur, marquerInterrompus, delaiMs = DELAI_FORCE_MS, sortir = (code) => process.exit(code) }) {
   let enCours = false;
 
+  function marquer() {
+    try {
+      const interrompus = marquerInterrompus();
+      if (interrompus > 0) {
+        // Formulation prudente : le signal peut tomber entre l'acceptation
+        // SMTP et l'enregistrement de l'état, auquel cas les emails sont
+        // partis alors que la demande est marquée « interrompu ».
+        console.warn(`${interrompus} demande(s) marquée(s) « interrompu » : traitement non terminé, PDF et emails à vérifier avant de relancer.`);
+      }
+      return interrompus;
+    } catch (err) {
+      console.error(`Marquage des demandes en cours impossible : ${err.message}`);
+      return 0;
+    }
+  }
+
   function arreter(signal) {
     // Render envoie SIGTERM puis SIGKILL : un second signal ne doit pas
     // relancer la procédure au milieu de la première.
@@ -19,27 +35,24 @@ export function installerArretPropre({ serveur, marquerInterrompus, delaiMs = DE
 
     // Marquage d'abord : c'est synchrone et rapide, et c'est la seule chose
     // qui serait définitivement perdue si la fermeture traînait.
-    try {
-      const interrompus = marquerInterrompus();
-      if (interrompus > 0) {
-        console.warn(`${interrompus} demande(s) marquée(s) « interrompu » : ni PDF ni emails envoyés, à relancer à la main.`);
-      }
-    } catch (err) {
-      console.error(`Marquage des demandes en cours impossible : ${err.message}`);
-    }
+    marquer();
 
-    serveur.close(() => {
-      console.log('Serveur arrêté proprement.');
-      sortir(0);
-    });
-
-    // Une connexion qui traîne ne doit pas retenir le processus jusqu'au
-    // SIGKILL de l'hébergeur, une trentaine de secondes plus tard.
+    // Une connexion déjà ouverte peut encore déposer une demande pendant le
+    // drainage : close() ne refuse que les nouvelles connexions. Second
+    // passage juste avant de sortir, pour ne pas la laisser en_cours.
     const minuteur = setTimeout(() => {
       console.warn(`Fermeture forcée après ${delaiMs} ms.`);
+      marquer();
       sortir(1);
     }, delaiMs);
     minuteur.unref?.();
+
+    serveur.close(() => {
+      clearTimeout(minuteur);
+      marquer();
+      console.log('Serveur arrêté proprement.');
+      sortir(0);
+    });
   }
 
   const gestionnaires = [];

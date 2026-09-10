@@ -1,9 +1,10 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const filePath = join(__dirname, 'devis.json');
+// DEVIS_PATH permet aux tests d'écrire ailleurs que dans la base réelle.
+const filePath = process.env.DEVIS_PATH || join(__dirname, 'devis.json');
 
 // États d'une demande. Le PDF et les emails partent après la réponse au
 // client : sans ce champ, un redémarrage pendant ce travail perdait les deux
@@ -22,16 +23,30 @@ export const ETATS = {
 };
 
 function lire() {
+  if (!existsSync(filePath)) return [];
+
+  const brut = readFileSync(filePath, 'utf8');
+  if (brut.trim() === '') return [];
+
   try {
-    return JSON.parse(readFileSync(filePath, 'utf8'));
-  } catch {
-    // fichier absent, vide ou illisible — on part de []
+    return JSON.parse(brut);
+  } catch (err) {
+    // Repartir de [] en silence effacerait la base à l'écriture suivante. Le
+    // fichier abîmé est mis de côté pour pouvoir être récupéré à la main.
+    const secours = `${filePath}.corrompu-${Date.now()}`;
+    renameSync(filePath, secours);
+    console.error(`data/devis.json illisible (${err.message}) — mis de côté dans ${secours}, on repart d'une base vide.`);
     return [];
   }
 }
 
+// Écriture atomique : sans le fichier temporaire, une interruption au milieu
+// du writeFileSync laissait un JSON tronqué, donc une base entière perdue au
+// prochain démarrage.
 function ecrire(data) {
-  writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  const temporaire = `${filePath}.tmp`;
+  writeFileSync(temporaire, JSON.stringify(data, null, 2), 'utf8');
+  renameSync(temporaire, filePath);
 }
 
 export function saveDevis(devis) {
@@ -47,9 +62,13 @@ export function majEtat(id, etat, details = {}) {
   const devis = data.find((d) => d.id === id);
   if (!devis) return false;
 
+  // Les détails d'abord : ni l'état, ni son horodatage, ni l'identité de la
+  // demande ne doivent pouvoir être écrasés par un appelant distrait.
+  const { id: _id, timestamp: _ts, etat: _etat, etat_maj: _maj, ...reste } = details;
+  Object.assign(devis, reste);
   devis.etat = etat;
   devis.etat_maj = new Date().toISOString();
-  Object.assign(devis, details);
+
   ecrire(data);
   return true;
 }

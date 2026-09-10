@@ -440,6 +440,17 @@ describe('POST /api/devis — état de la demande', () => {
 
   // Sans cette distinction, rien ne permet de retrouver les devis dont le PDF
   // manque, alors que ce sont ceux que l'admin doit relancer à la main.
+  // Une demande sur mesure n'attend aucun PDF : la marquer « envoye_sans_pdf »
+  // la ferait remonter dans la liste des devis à relancer à la main, et une
+  // relance renverrait au client ses deux emails une seconde fois.
+  it('passe à « envoye » sur une demande sur mesure, sans PDF attendu', async () => {
+    await post({ ...devisB2B, quantiteParCafe: { Limmu: 'Sur mesure' } });
+    await attendre(() => majEtat.mock.calls.length > 0);
+
+    expect(generatePDF).not.toHaveBeenCalled();
+    expect(majEtat).toHaveBeenCalledWith(idEnregistre(), 'envoye');
+  });
+
   it('passe à « envoye_sans_pdf » quand la génération a échoué', async () => {
     generatePDF.mockRejectedValue(new AttenteDepasseeError());
 
