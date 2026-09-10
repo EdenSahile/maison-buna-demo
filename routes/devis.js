@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { saveDevis } from '../data/storage.js';
-import { generatePDF, ATTENTE_MAX_SECONDES } from '../services/pdfService.js';
+import { generatePDF, DELAI_MAX_SECONDES } from '../services/pdfService.js';
 import { sendDevisEmails, sendPdfFailureAlert } from '../services/mailService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -247,7 +247,7 @@ router.post('/devis', async (req, res) => {
     };
 
     saveDevis(devis);
-    res.json({ success: true, id: devis.id, delai_max_secondes: ATTENTE_MAX_SECONDES });
+    res.json({ success: true, id: devis.id, delai_max_secondes: DELAI_MAX_SECONDES });
 
     setImmediate(async () => {
       let pdfBuffer = null;

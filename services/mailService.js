@@ -88,7 +88,7 @@ export async function sendPdfFailureAlert(devis) {
   const from = { name: 'Maison Buna', email: process.env.SMTP_USER };
   const subject = `[ALERTE] PDF non généré — ${devis.devis_numero}`;
   const html = `
-    <p>La génération du PDF a échoué après 3 tentatives pour le devis suivant :</p>
+    <p>La génération du PDF a échoué pour le devis suivant :</p>
     <ul>
       <li><strong>Numéro :</strong> ${escapeHtml(devis.devis_numero)}</li>
       <li><strong>Client :</strong> ${escapeHtml(devis.prenom)} ${escapeHtml(devis.nom)} (${escapeHtml(devis.societe || 'Particulier')})</li>
