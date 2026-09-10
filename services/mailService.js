@@ -95,7 +95,9 @@ export async function sendPdfFailureAlert(devis) {
       <li><strong>Email client :</strong> ${escapeHtml(devis.email)}</li>
       <li><strong>ID :</strong> ${escapeHtml(devis.id)}</li>
     </ul>
-    <p>Le client n'a reçu aucun email. Veuillez relancer manuellement.</p>
+    <p>Le client a reçu son email de confirmation, sans le PDF et sans mention
+    d'incident : il attend son devis. Veuillez générer et transmettre le PDF
+    manuellement.</p>
   `;
   try {
     await sendViaSMTP({ from, to: process.env.ADMIN_EMAIL, subject, html, attachments: [], inlineImages: [] });
