@@ -485,6 +485,17 @@ describe('POST /api/devis — état de la demande', () => {
     erreur.mockRestore();
   });
 
+  it('journalise une demande introuvable au lieu de la laisser périmée', async () => {
+    const erreur = vi.spyOn(console, 'error').mockImplementation(() => {});
+    majEtat.mockReturnValue(false);
+
+    await post(devisB2B);
+    await attendre(() => erreur.mock.calls.some((c) => String(c[0]).includes('introuvable en base')));
+
+    majEtat.mockReset();
+    erreur.mockRestore();
+  });
+
   // L'enregistrement précède toujours la mise à jour : c'est ce qui garantit
   // qu'une demande existe en base avant qu'on cherche à la faire évoluer.
   // Assertion sur l'ordre et non sur l'instant, les mocks se résolvant trop

@@ -151,7 +151,11 @@ function buildQuantiteResume(quantiteParCafe, cafes) {
 // processus s'arrêtait, et toutes les demandes en vol restaient « en cours ».
 function noterEtat(id, etat, details = {}) {
   try {
-    majEtat(id, etat, details);
+    // majEtat rend false sur un id introuvable : sans ce test, la demande
+    // gardait un état périmé et rien ne le signalait.
+    if (!majEtat(id, etat, details)) {
+      console.error(`État non enregistré id:${id} (${etat}) : demande introuvable en base.`);
+    }
   } catch (err) {
     console.error(`État non enregistré id:${id} (${etat}) : ${err.message}`);
   }

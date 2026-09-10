@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { installerArretPropre } from './arretPropre.js';
+import { installerArretPropre, balayerAuDemarrage } from './arretPropre.js';
 
 let retirer;
 
@@ -130,6 +130,28 @@ describe('installerArretPropre', () => {
 
     expect(serveur.close).toHaveBeenCalled();
     expect(sortir).toHaveBeenCalledWith(0);
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('disque plein'));
+  });
+});
+
+describe('balayerAuDemarrage', () => {
+  // Un dépassement mémoire arrive en SIGKILL : aucun signal à intercepter,
+  // donc rien n'est marqué. Au démarrage suivant, ce qui porte encore
+  // « en_cours » vient forcément de l'exécution précédente.
+  it('marque ce qui restait en cours de l exécution précédente', () => {
+    const marquerInterrompus = vi.fn(() => 4);
+    expect(balayerAuDemarrage(marquerInterrompus)).toBe(4);
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('arrêt précédent'));
+  });
+
+  it('reste silencieux quand il n y a rien à reprendre', () => {
+    expect(balayerAuDemarrage(vi.fn(() => 0))).toBe(0);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  // Le démarrage ne doit pas dépendre de l'état du disque.
+  it('n empêche pas le démarrage si le marquage lève', () => {
+    expect(balayerAuDemarrage(vi.fn(() => { throw new Error('disque plein'); }))).toBe(0);
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('disque plein'));
   });
 });

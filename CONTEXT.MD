@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 151/151 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 168/168 (2026-09-10) |
 
 ---
 
@@ -26,11 +26,13 @@
 | `chore/demo-safety` | mention DÉMO sur le PDF, retrait des coordonnées réelles | mergée (PR #16) |
 | `fix/devis-validation` | validation stricte des entrées du devis | mergée (PR #17) |
 | `docs/context-backlog` | remise à jour de CONTEXT.MD et backlog | mergée (PR #18) |
-| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | PR #19 ouverte |
-| `docs/pipeline-testeur` | suppression de l'étape Testeur | PR #20 ouverte |
+| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | mergée (PR #19) |
+| `docs/pipeline-testeur` | suppression de l'étape Testeur | mergée (PR #20) |
 | `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | mergée (PR #21) |
 | `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | mergée (PR #22) |
-| `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | en cours |
+| `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | mergée (PR #23) |
+| `docs/claude-md` | CLAUDE.MD remis au niveau du code | mergée (PR #24) |
+| `feat/devis-etat` | champ d'état, arrêt propre et balayage au démarrage | en cours |
 
 ---
 

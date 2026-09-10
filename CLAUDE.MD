@@ -134,7 +134,10 @@ sans quoi un redémarrage perdait ce travail sans laisser de trace.
 | `interrompu` | le processus s'est arrêté pendant le traitement — vérifier PDF et emails avant de relancer, le signal a pu tomber juste après l'envoi |
 
 Les états sont définis dans `data/storage.js` (`ETATS`), et `etat_maj` porte
-l'horodatage du dernier changement. Une demande sur mesure ne produit aucun PDF
+l'horodatage du dernier changement. Au démarrage, tout ce qui porte encore
+`en_cours` vient forcément de l'exécution précédente et bascule en
+`interrompu` : c'est ce qui rattrape les arrêts sans signal, un dépassement
+mémoire par exemple. Une demande sur mesure ne produit aucun PDF
 et termine donc en `envoye`, pas en `envoye_sans_pdf`. Pour retrouver ce qui demande une action :
 
 ```bash

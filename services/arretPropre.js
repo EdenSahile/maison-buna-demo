@@ -7,6 +7,24 @@
 
 const DELAI_FORCE_MS = 10000;
 
+// Balayage au démarrage. Tous les arrêts ne laissent pas le temps de marquer :
+// un dépassement mémoire — le plus probable sur une instance de 512 Mo qui
+// lance Chromium — arrive en SIGKILL, sans signal à intercepter. Au démarrage
+// suivant, plus rien n'est en cours par définition : ce qui porte encore
+// « en_cours » vient forcément de l'exécution précédente.
+export function balayerAuDemarrage(marquerInterrompus) {
+  try {
+    const interrompus = marquerInterrompus();
+    if (interrompus > 0) {
+      console.warn(`${interrompus} demande(s) restée(s) en cours après un arrêt précédent, marquée(s) « interrompu » : PDF et emails à vérifier.`);
+    }
+    return interrompus;
+  } catch (err) {
+    console.error(`Balayage au démarrage impossible : ${err.message}`);
+    return 0;
+  }
+}
+
 export function installerArretPropre({ serveur, marquerInterrompus, delaiMs = DELAI_FORCE_MS, sortir = (code) => process.exit(code) }) {
   let enCours = false;
 
