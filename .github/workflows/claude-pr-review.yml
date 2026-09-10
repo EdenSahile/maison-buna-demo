@@ -5,16 +5,18 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+# Permissions declarees par job, et non pour tout le workflow : le job `test`
+# execute du code du depot (postinstall, suites de tests, check:syntax) et n'a
+# aucun besoin d'ecrire sur la PR.
 permissions:
   contents: read
-  pull-requests: write
-  issues: write
-  id-token: write
 
 jobs:
   test:
     name: Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -39,14 +41,10 @@ jobs:
         run: npm ci
 
       # Le code Node ESM n'a aucune etape de build : sans ce controle, une faute
-      # de syntaxe serveur ne casserait qu'au demarrage sur Render.
+      # de syntaxe serveur ne casserait qu'au demarrage sur Render. Le script
+      # parcourt l'arborescence : pas de liste a tenir a jour ici.
       - name: Syntaxe serveur
-        run: |
-          node --check server.js
-          node --check routes/devis.js
-          node --check services/pdfService.js
-          node --check services/mailService.js
-          node --check data/storage.js
+        run: npm run check:syntax
 
       - name: Tests serveur (Vitest + Puppeteer reel)
         run: npx vitest run
@@ -68,6 +66,11 @@ jobs:
   claude-review:
     name: Claude review
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
     needs: [test]
     steps:
       - uses: actions/checkout@v4
@@ -124,7 +127,8 @@ jobs:
             Also check for correctness bugs, secrets leaking into the repo or
             into logs, and consistency with existing patterns in the codebase.
 
-            The `test` job already ran `node --check` on the server files,
+            The `test` job already ran `npm run check:syntax` (every server
+            JS file, found by walking the tree — not a hand-written list),
             `npx vitest run` (server, real Puppeteer), the client Vitest suite
             and the Vite build before this step — treat that as ground truth
             for whether they pass. Don't re-run them yourself; run a single

@@ -19,7 +19,7 @@ Aucun fichier d'entrée : tu audites le diff de la branche. Ne cherche pas de
 rapport en amont et ne signale pas son absence.
 
 L'état des tests ne vient pas d'un agent mais du verrou qualité — build Vite,
-`npm run test:server`, `npm test`, `node --check` — passé avant chaque commit
+`npm run test:server`, `npm test`, `npm run check:syntax` — passé avant chaque commit
 et relancé par la CI. Le prompt qui t'invoque te le communique. Si tu as un
 doute précis sur un test, relance-le toi-même plutôt que de le supposer.
 

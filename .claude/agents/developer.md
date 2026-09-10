@@ -104,7 +104,7 @@ Fichiers créés :
 - scripts/test-pdf.js ✅
 - scripts/test-mail.js ✅
 Statut serveur : [OK / ERREUR — préciser]
-Verrou qualité : [build Vite, tests serveur, tests client, node --check — résultats réels]
+Verrou qualité : [build Vite, tests serveur, tests client, check:syntax — résultats réels]
 Prêt pour : Code Reviewer
 
 2. Coche les tâches 2, 3, 4, 5, 6, 8, 13 dans CONTEXT.md
@@ -124,7 +124,7 @@ derrière toi pour les concevoir.
   caractères à échapper. Une entrée invalide doit produire un 400 explicite,
   jamais un 500.
 - **Passer le verrou qualité avant chaque commit** : build Vite,
-  `npm run test:server`, `npm test`, `node --check` sur les fichiers serveur.
+  `npm run test:server`, `npm test`, `npm run check:syntax`.
   C'est lui qui fait foi sur l'état des tests, aucun rapport d'agent ne le
   remplace.
 
