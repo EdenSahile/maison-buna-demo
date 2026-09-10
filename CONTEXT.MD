@@ -61,8 +61,8 @@
 
 - [x] Contrôle de syntaxe unifié : `npm run check:syntax` parcourt l'arborescence au lieu d'énumérer des fichiers. La CI, la skill `open-pr` et les définitions d'agents appellent tous ce script. Vérifié qu'il attrape une faute dans `middleware/errorHandler.js` et `services/limiteConcurrence.js`.
 
-- [ ] `CLAUDE.MD:21` annonce Express 4, `package.json` déclare Express 5 (la ligne était en `:19` avant l'ajout de la ligne React à la section Stack)
-- [ ] La section « Commandes utiles » omet `dev:all`, `test:server` et quatre autres scripts
+- [x] `CLAUDE.MD` annonçait Express 4, `package.json` déclare Express 5. Corrigé, avec Helmet, express-rate-limit et Vitest ajoutés à la section Stack.
+- [x] La section « Commandes utiles » liste les treize scripts, avec l'avertissement sur `mail:test` qui envoie de vrais emails, et le rappel que `npm run dev` ne sert pas le formulaire. Les variables d'environnement et l'arborescence sont également remises à jour.
 
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
 
