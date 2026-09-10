@@ -3,7 +3,7 @@ import Handlebars from 'handlebars';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { creerLimiteur, FileSatureeError } from './limiteConcurrence.js';
+import { creerLimiteur, FileSatureeError, AttenteDepasseeError } from './limiteConcurrence.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const templatePath = join(__dirname, '../templates/devis-template.html');
@@ -30,12 +30,25 @@ function entier(nom, defaut, minimum) {
 // laissent environ 150 Mo de marge, trois n'en laisseraient presque aucune.
 const MAX_CONCURRENT = entier('PDF_MAX_CONCURRENT', 2, 1);
 
-// Dix tâches en attente représentent une quinzaine de secondes au rythme
-// normal (~500 ms par PDF en local, le double sur Render), mais jusqu'à
-// 5 × 45 s si chaque génération va au bout de son plafond. Au-delà de dix,
-// mieux vaut refuser tout de suite : la demande est déjà enregistrée et
-// l'admin est alerté si le PDF ne part pas.
-const MAX_FILE = entier('PDF_MAX_FILE', 10, 0);
+// Plafond d'attente en file. C'est lui qui décide du rejet : une demande
+// attend jusqu'à cette durée avant qu'on renonce.
+//
+// Calcul : une file réaliste de dix demandes sur deux créneaux prend une
+// quinzaine de secondes au rythme normal (~500 ms par PDF en local, le double
+// sur Render). Au pire, si chaque génération va au bout de son propre plafond
+// de 45 s, la dernière de dix demandes attend 4 × 45 = 180 s avant de démarrer.
+// 300 s couvrent donc le pire cas d'une file réaliste, avec de la marge.
+//
+// Render documente un délai de 100 minutes par requête HTTP, très au-dessus :
+// ce n'est pas la contrainte. Et elle ne s'applique de toute façon pas ici,
+// puisque la génération se fait hors du fil de la requête, après la réponse
+// au client (routes/devis.js). 300 s restent nettement en dessous.
+const ATTENTE_MAX_MS = entier('PDF_ATTENTE_MAX_MS', 300000, 1);
+
+// Garde-fou de dernier recours, pas critère de rejet normal : chaque entrée
+// en file retient un devis en mémoire. À 50, l'empreinte reste négligeable
+// devant les 100 Mo d'une instance Chromium.
+const MAX_FILE = entier('PDF_MAX_FILE', 50, 0);
 
 // Plafond par génération : les timeouts internes de Puppeteer (30 s pour le
 // contenu, 60 s pour le rendu) ne couvrent pas un navigateur qui ne démarre
@@ -48,9 +61,14 @@ const TIMEOUT_MS = entier('PDF_TIMEOUT_MS', 45000, 1);
 // ce qui est pire que la borne dépassée un instant.
 const FERMETURE_MS = entier('PDF_FERMETURE_MS', 5000, 1);
 
-const limiteur = creerLimiteur({ max: MAX_CONCURRENT, fileMax: MAX_FILE });
+const limiteur = creerLimiteur({ max: MAX_CONCURRENT, fileMax: MAX_FILE, attenteMax: ATTENTE_MAX_MS });
 
-export { FileSatureeError };
+export { FileSatureeError, AttenteDepasseeError };
+
+// Budget total accordé à une demande, relances comprises. Sans lui, chaque
+// nouvelle tentative repart pour un tour complet de file : trois tentatives
+// pouvaient occuper jusqu'à 17,5 minutes et trois créneaux pour un seul devis.
+export const BUDGET_PDF_MS = ATTENTE_MAX_MS + TIMEOUT_MS;
 
 // kill() peut lever (EPERM, processus déjà mort). Puppeteer n'attache aucun
 // écouteur 'error' sur le processus navigateur : une exception ici, dans un

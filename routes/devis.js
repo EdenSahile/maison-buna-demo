@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { saveDevis } from '../data/storage.js';
-import { generatePDF } from '../services/pdfService.js';
+import { generatePDF, BUDGET_PDF_MS } from '../services/pdfService.js';
 import { sendDevisEmails, sendPdfFailureAlert } from '../services/mailService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -253,14 +253,28 @@ router.post('/devis', async (req, res) => {
       let pdfBuffer = null;
       if (!devis.sur_devis) {
         const retryDelays = [0, 5000, 10000];
+        // Chaque tentative peut repartir pour un tour complet de file. Sans
+        // échéance commune, trois tentatives retiendraient la demande bien
+        // au-delà de ce que le plafond d'attente est censé garantir.
+        const echeance = Date.now() + BUDGET_PDF_MS;
         let success = false;
         for (let i = 0; i < retryDelays.length; i++) {
+          if (i > 0 && Date.now() >= echeance) {
+            console.error(`PDF abandonné id:${devis.id} — budget de ${BUDGET_PDF_MS} ms épuisé`);
+            break;
+          }
           if (retryDelays[i] > 0) await new Promise(r => setTimeout(r, retryDelays[i]));
           try {
             pdfBuffer = await generatePDF(devis);
             success = true;
             break;
           } catch (err) {
+            // File saturée : la demande a déjà attendu son plafond, réessayer
+            // la remettrait au bout de la même file pour le même résultat.
+            if (err.code === 'ATTENTE_DEPASSEE' || err.code === 'FILE_SATUREE') {
+              console.error(`PDF abandonné id:${devis.id} — file saturée : ${err.message}`);
+              break;
+            }
             if (i < retryDelays.length - 1) {
               console.warn(`PDF tentative ${i + 1} échouée (${err.message}), nouvel essai…`);
             } else {
@@ -269,9 +283,14 @@ router.post('/devis', async (req, res) => {
           }
         }
         if (!success) {
-          console.error(`PDF échoué id:${devis.id} — client non notifié, alerte admin envoyée`);
-          try { await sendPdfFailureAlert(devis); } catch {}
-          return;
+          // Règle absolue n°4 : deux emails, quoi qu'il arrive. La demande est
+          // enregistrée et le client a vu un écran de confirmation — ne rien
+          // lui envoyer serait le pire des cas. Il reçoit donc son email sans
+          // pièce jointe, et l'admin son alerte pour relancer à la main.
+          console.error(`PDF échoué id:${devis.id} — envoi sans pièce jointe, alerte admin`);
+          try { await sendPdfFailureAlert(devis); } catch (err) {
+            console.error(`Alerte admin échouée id:${devis.id} : ${err.message}`);
+          }
         }
       }
       try {
