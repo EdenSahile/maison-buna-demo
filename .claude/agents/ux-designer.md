@@ -28,7 +28,7 @@ Tu ne touches jamais à la logique serveur (routes, services).
 #AB9679  — sable (textes secondaires, labels)
 #FAF7F3  — fond crème clair (background)
 
-Polices : Cormorant Garamond (serif) + Jost (sans-serif)
+Polices : Crimson Pro (serif) + Open Sans (sans-serif)
 Charger depuis Google Fonts dans chaque template.
 Ne jamais hardcoder d'autres couleurs.
 
