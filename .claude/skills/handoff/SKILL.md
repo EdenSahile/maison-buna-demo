@@ -86,7 +86,7 @@ SMTP via Brevo (variables dans .env)
 ### Charte graphique
 #2e2010 · #4F3422 · #D3C2AC · #AB9679 · #FAF7F3
 Ne jamais hardcoder d'autres couleurs.
-Polices : Cormorant Garamond (serif) + Jost (sans-serif).
+Polices : Crimson Pro (serif) + Open Sans (sans-serif).
 
 ### Règles absolues
 - Ne jamais committer .env

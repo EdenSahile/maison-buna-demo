@@ -29,7 +29,8 @@
 | `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | PR #19 ouverte |
 | `docs/pipeline-testeur` | suppression de l'étape Testeur | PR #20 ouverte |
 | `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | mergée (PR #21) |
-| `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | en cours |
+| `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | mergée (PR #22) |
+| `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | en cours |
 
 ---
 
@@ -44,7 +45,7 @@
 - [x] Valider strictement les entrées du devis : référentiels café et quantité, typage, longueurs maximales (PR #17)
 - [x] Échapper le HTML de l'alerte admin `sendPdfFailureAlert` (PR #17)
 - [x] Ne plus persister `quantiteParCafe` brut, seulement les cafés retenus (PR #17)
-- [ ] PR dédiée à l'alignement de la charte : `CLAUDE.MD:42` et `:147`, `.claude/agents/ux-designer.md:31`, `.github/workflows/claude-pr-review.yml:108-109`, `templates/email-client.html:18` et `templates/email-admin.html:18` (ces deux derniers chargent DM Sans + DM Serif Display, les aligner change le rendu des emails). Ne pas toucher à `templates/devis-template.html` : polices intégrées en base64, rendu Puppeteer fonctionnel.
+- [x] Charte alignée sur Crimson Pro + Open Sans : documentation corrigée à cinq endroits, et les deux emails passent de DM Sans + DM Serif Display à la charte. `templates/devis-template.html` non touché, ses polices étant intégrées en base64.
 
 ### Priorité 1 — durcissement serveur (`fix/server-hardening`)
 
@@ -65,11 +66,14 @@
 
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
 
+- [ ] Les deux emails chargent leurs polices depuis `fonts.googleapis.com` par `@import` : à l'ouverture, l'adresse IP du destinataire, son User-Agent et l'horodatage partent chez Google, sans son consentement. Dette antérieure à la PR #23, qui ne fait qu'en changer les noms de familles. Le tribunal régional de Munich I a jugé ce point contraire au RGPD le 20/01/2022 (3 O 17493/20). Correction : intégrer les polices en base64 dans les templates d'email, comme le fait déjà `templates/devis-template.html`.
+
 - [ ] `.env.example:4,8` utilise `email.com` et les scripts de test `gmail.com` : deux domaines réels, là où la règle 8 demande `example.com`. Relevé par l'audit du 10/09/2026.
 
 - [ ] Tirets cadratins restants dans `email-client.html:268` et `email-admin.html:288`, à aligner sur la ponctuation du PDF (PR #13)
 - [ ] `README.md:211` mentionne encore `public/index.html`, troisième endroit désynchronisé après `ux-designer.md` et le workflow
 - [ ] Migrer les adresses `fictif.com` des fixtures vers `example.com` : seuls `example.com`, `.org` et `.net` sont réservés par la RFC 2606, `fictif.com` est enregistrable par un tiers. Concernés : `marie@cafeducoin.fr` dans deux fichiers de test, `sophie.martin@gmail.com` et `marie.dupont@gmail.com` dans les scripts de test PDF. Le seul cas qui envoyait vraiment, `scripts/test-mail.js:11`, est déjà corrigé.
+- [ ] `templates/email-admin.html:192` : le sélecteur `.recap-value.empty` ne vise pas les `<span class="empty">` imbriqués, donc « Non renseigné » n'est ni italique ni gris. Sans rapport avec les polices, relevé par la revue du 10/09/2026.
 - [ ] Message d'erreur trompeur : `['Limmu','Sidamo','Yirgacheffe','Limmu']` renvoie « 3 valeurs maximum » alors que la vraie cause est le doublon
 - [ ] `.claude/skills/open-pr/SKILL.md:66` expose une arborescence locale (`.../Documents/Claude/maison-buna-demo/…`) dans un dépôt public. Chemin tronqué, sans `/Users/<nom>`, donc pas de nom d'utilisateur exposé — la ligne 67 voisine en contient un second pour le dépôt prod.
 - [ ] Avant de corriger les 8 couleurs hors charte du CSS du PDF, auditer les couleurs réellement utilisées dans chaque artefact. Même piège que pour les polices : si la charte couleur documentée est périmée, « corriger » alignerait du code correct sur une référence fictive.
