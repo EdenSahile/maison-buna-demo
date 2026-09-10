@@ -108,8 +108,9 @@ jobs:
                timestamp and a unique id.
             6. The Maison Buna palette is fixed: #2e2010, #4F3422, #D3C2AC,
                #AB9679, #FAF7F3. Any other hardcoded colour in templates/,
-               client/ or public/ is a finding. Fonts: Cormorant Garamond
-               (serif) and Jost (sans-serif).
+               client/ or public/ is a finding. Fonts: Crimson Pro (serif)
+               and Open Sans (sans-serif), everywhere except the PDF template,
+               which embeds them as base64 rather than loading them.
             7. Completed tasks must be ticked in CONTEXT.MD.
             8. **DEMO-SPECIFIC — Critical**: this is a public demo repo. Real
                Maison Buna business data (real SIRET, real postal address, real

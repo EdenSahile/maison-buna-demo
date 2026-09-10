@@ -29,7 +29,8 @@
 | `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | PR #19 ouverte |
 | `docs/pipeline-testeur` | suppression de l'étape Testeur | PR #20 ouverte |
 | `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | mergée (PR #21) |
-| `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | en cours |
+| `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | mergée (PR #22) |
+| `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | en cours |
 
 ---
 
@@ -44,7 +45,7 @@
 - [x] Valider strictement les entrées du devis : référentiels café et quantité, typage, longueurs maximales (PR #17)
 - [x] Échapper le HTML de l'alerte admin `sendPdfFailureAlert` (PR #17)
 - [x] Ne plus persister `quantiteParCafe` brut, seulement les cafés retenus (PR #17)
-- [ ] PR dédiée à l'alignement de la charte : `CLAUDE.MD:42` et `:147`, `.claude/agents/ux-designer.md:31`, `.github/workflows/claude-pr-review.yml:108-109`, `templates/email-client.html:18` et `templates/email-admin.html:18` (ces deux derniers chargent DM Sans + DM Serif Display, les aligner change le rendu des emails). Ne pas toucher à `templates/devis-template.html` : polices intégrées en base64, rendu Puppeteer fonctionnel.
+- [x] Charte alignée sur Crimson Pro + Open Sans : documentation corrigée à cinq endroits, et les deux emails passent de DM Sans + DM Serif Display à la charte. `templates/devis-template.html` non touché, ses polices étant intégrées en base64.
 
 ### Priorité 1 — durcissement serveur (`fix/server-hardening`)
 
