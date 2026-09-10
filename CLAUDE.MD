@@ -18,13 +18,15 @@ sont envoyés (client + admin) → la demande est sauvegardée.
 ## Stack technique
 
 - **Runtime** : Node.js (ESM — `"type": "module"` dans package.json)
-- **Serveur** : Express 4
+- **Serveur** : Express 5
 - **PDF** : Puppeteer (headless Chrome → HTML → PDF)
 - **Front** : React 19 + Vite + styled-components (dossier `client/`)
 - **Templates PDF/emails** : Handlebars (`.html` avec `{{variables}}`)
 - **Emails** : Nodemailer + SMTP Brevo
 - **Stockage** : JSON simple (`data/devis.json`)
+- **Sécurité HTTP** : Helmet + express-rate-limit
 - **Dev** : Nodemon
+- **Tests** : Vitest (serveur à la racine, client dans `client/`)
 
 ---
 
@@ -64,9 +66,14 @@ maison-buna-devis/
 │       ├── styles/
 │       └── utils/
 ├── routes/
-│   └── devis.js              ← POST /api/devis
+│   └── devis.js              ← POST /api/devis, validation des entrées
+├── middleware/
+│   └── errorHandler.js       ← relaie le statut porté par l'erreur
+├── config/
+│   └── env.js                ← lecture des réglages d'environnement
 ├── services/
-│   ├── pdfService.js         ← génération PDF Puppeteer
+│   ├── pdfService.js         ← génération PDF Puppeteer, concurrence bornée
+│   ├── limiteConcurrence.js  ← file d'attente à concurrence bornée
 │   └── mailService.js        ← envoi emails Nodemailer
 ├── templates/
 │   ├── devis-template.html   ← template PDF charte Maison Buna
@@ -75,8 +82,11 @@ maison-buna-devis/
 ├── data/
 │   └── devis.json            ← stockage des demandes reçues
 ├── scripts/
+│   ├── check-syntax.js       ← node --check sur tout le JS serveur
 │   ├── test-pdf.js           ← test génération PDF sans formulaire
 │   └── test-mail.js          ← test envoi email sans formulaire
+├── vitest.config.js          ← tests serveur : routes, services, data,
+│                                middleware, config
 ├── .claude/
 │   ├── settings.json         ← config hooks
 │   ├── commands/
@@ -111,11 +121,32 @@ maison-buna-devis/
 
 ```
 PORT=3000
-SMTP_HOST=smtp.brevo.com
+TRUST_PROXY=1                 # proxys de confiance (0 à 3) — décide de req.ip,
+                              # donc du comptage du limiteur de débit
+
+SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
-SMTP_USER=votre@email.com
+SMTP_USER=votre@email.com     # expéditeur affiché
 SMTP_PASS=votre_cle_brevo
+BREVO_SMTP_USER=…@smtp-brevo.com   # identifiants du transport SMTP
+BREVO_SMTP_PASS=votre_cle_smtp
+BREVO_API_KEY=…               # bascule REST quand le SMTP échoue
 ADMIN_EMAIL=contact@fictif.com
+
+BASE_URL=https://…            # sert à résoudre les images des emails REST
+COUNTER_SEED=0                # point de départ du compteur de devis
+```
+
+Réglages de la génération PDF, tous facultatifs, valeurs par défaut entre
+parenthèses. Une valeur invalide est refusée avec un avertissement, et le
+défaut est conservé (`config/env.js`).
+
+```
+PDF_MAX_CONCURRENT=2          # générations simultanées (2)
+PDF_MAX_FILE=50               # longueur maximale de la file (50)
+PDF_ATTENTE_MAX_MS=300000     # attente maximale en file (300 s)
+PDF_TIMEOUT_MS=45000          # plafond d'une génération (45 s)
+PDF_FERMETURE_MS=5000         # délai de grâce à la fermeture du navigateur (5 s)
 ```
 
 ---
@@ -123,11 +154,25 @@ ADMIN_EMAIL=contact@fictif.com
 ## Commandes utiles
 
 ```bash
-npm run dev          # démarre avec nodemon
-npm run start        # démarre en production
-npm run pdf:test     # génère un PDF de test
-npm run mail:test    # envoie un email de test
+npm run dev          # API seule, avec nodemon
+npm run dev:client   # app React seule (Vite)
+npm run dev:all      # les deux en parallèle — c'est celle du quotidien
+npm run start        # production
+npm run build        # installe Chrome pour Puppeteer, puis build le client
+
+npm run test:server  # Vitest racine — tests serveur, Puppeteer réel
+npm test             # Vitest client
+npm run test:all     # enchaîne les deux
+npm run check:syntax # node --check sur tout le JS serveur
+
+npm run pdf:test     # génère un PDF de test dans scripts/
+npm run mail:test    # ⚠️ envoie de vrais emails via Brevo
+npm run docs:generate  # docs/technical-documentation.html → .pdf (docs/ ignoré par git)
 ```
+
+`npm run dev` ne sert pas le formulaire : l'API ne sert `client/dist` qu'en
+production (`server.js`). En développement, ouvrir l'URL de Vite, pas le
+port 3000, sans quoi la page affiche « Cannot GET / ».
 
 ---
 
