@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 106/106 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 112/112 (2026-09-10) |
 
 ---
 
@@ -49,7 +49,10 @@
 
 - [x] `server.js:38-42` : statut porté par l'erreur relayé quand il est entre 400 et 499, message de réponse toujours générique. Handler extrait dans `middleware/errorHandler.js` pour être testable. Audité le 09/09/2026.
 - [x] `services/pdfService.js` : concurrence bornée à 2, file d'attente de 10, timeout de 45 s par génération, refus immédiat au-delà de la file. Limite choisie sur mesure : ~100 Mo par instance Chromium concurrente, ~500 ms par génération. Audité le 09/09/2026.
-- [x] `routes/devis.js` traitait `FileSatureeError` comme une panne ordinaire. La saturation est convertie en attente : plafond de 300 s en file, rejet seulement au-delà, et le délai est annoncé au client dans la réponse. Décision du 10/09/2026.
+- [x] `routes/devis.js` traitait `FileSatureeError` comme une panne ordinaire. La saturation est convertie en attente : plafond de 300 s en file, rejet seulement au-delà. Décision du 10/09/2026.
+- [x] Règle absolue n°4 tenue sur le chemin d'abandon : le client reçoit son email même sans PDF, et les templates annoncent la pièce jointe d'après sa présence réelle et non d'après `sur_devis`.
+- [ ] Aucun champ d'état dans `data/devis.json` : un redémarrage pendant l'attente en file perd le PDF et les emails de jusqu'à 52 devis, sans moyen de les retrouver. Relevé par l'audit du 10/09/2026 ; l'absence de gestion de SIGTERM allonge cette fenêtre à 300 s.
+- [ ] `server.js:15` code en dur `trust proxy: 1` : le rate limit devient contournable si l'application tourne un jour sans proxy devant elle.
 - [ ] `data/storage.js:8-17` relit et réécrit `data/devis.json` en synchrone à chaque demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)

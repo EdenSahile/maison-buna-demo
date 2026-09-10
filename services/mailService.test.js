@@ -101,6 +101,37 @@ describe('sendDevisEmails — bascule Brevo REST quand SMTP échoue', () => {
   });
 });
 
+describe('sendDevisEmails — annonce de la pièce jointe', () => {
+  const phrase = 'devis en pièce jointe';
+
+  it('annonce la pièce jointe quand le PDF est bien joint', async () => {
+    await sendDevisEmails(devis, Buffer.from('%PDF-1.4 fake'));
+    const [clientMail, adminMail] = sendMail.mock.calls.map((c) => c[0]);
+    expect(clientMail.html).toContain(phrase);
+    expect(adminMail.html).toContain('joint à cet email');
+  });
+
+  // Le template se fiait à sur_devis, pas à la présence réelle du fichier :
+  // un devis dont le PDF a échoué promettait une pièce jointe absente.
+  it('ne promet aucune pièce jointe quand le PDF a échoué', async () => {
+    await sendDevisEmails(devis, null);
+    const [clientMail, adminMail] = sendMail.mock.calls.map((c) => c[0]);
+
+    expect(clientMail.attachments.filter((a) => a.contentType === 'application/pdf')).toHaveLength(0);
+    expect(clientMail.html).not.toContain(phrase);
+    expect(clientMail.html).toContain('dans un second message');
+    expect(adminMail.html).toContain('Génération du PDF échouée');
+  });
+
+  it('garde la formulation sur-mesure quand il n y a pas de PDF à produire', async () => {
+    await sendDevisEmails({ ...devis, sur_devis: true }, null);
+    const [clientMail, adminMail] = sendMail.mock.calls.map((c) => c[0]);
+    expect(clientMail.html).not.toContain(phrase);
+    expect(adminMail.html).toContain('Demande sur mesure');
+    expect(adminMail.html).not.toContain('Génération du PDF échouée');
+  });
+});
+
 describe('sendPdfFailureAlert', () => {
   it('alerte uniquement l admin, sans pièce jointe', async () => {
     await sendPdfFailureAlert(devis);

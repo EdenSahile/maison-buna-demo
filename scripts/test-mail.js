@@ -8,7 +8,9 @@ const devisTest = {
   societe: 'Startup Café SAS',
   prenom: 'Marie',
   nom: 'Dupont',
-  email: 'marie@startup.fr',
+  // example.com est réservé par la RFC 2606 : ce script envoie de vrais
+  // emails, l'adresse ne doit appartenir à personne.
+  email: 'marie@example.com',
   telephone: '06 12 34 56 78',
   collaborateurs: '11 - 25',
   secteur: 'Tech / Startup',
