@@ -101,18 +101,7 @@ const Tagline = styled.p`
   flex: 1;
 `
 
-// Le serveur annonce le délai qu'il s'accorde au maximum pour générer le PDF.
-// S'il ne l'a pas transmis, on reste vague plutôt que d'inventer un chiffre.
-export function delaiLisible(delaiMax) {
-  if (!Number.isFinite(delaiMax) || delaiMax <= 0) return "Cela peut prendre quelques minutes."
-  if (delaiMax < 60) {
-    return `Cela peut prendre jusqu'à ${delaiMax} seconde${delaiMax > 1 ? 's' : ''}.`
-  }
-  const minutes = Math.round(delaiMax / 60)
-  return `Cela peut prendre jusqu'à ${minutes} minute${minutes > 1 ? 's' : ''}.`
-}
-
-export default function SuccessView({ formData, audience, onReset, surDevis, delaiMax }) {
+export default function SuccessView({ formData, audience, onReset, surDevis }) {
   const isEnt = audience === 'entreprise'
 
   const rows = []
@@ -146,7 +135,7 @@ export default function SuccessView({ formData, audience, onReset, surDevis, del
       <Lead>
         {surDevis
           ? "Notre équipe étudie votre demande et reviendra vers vous sous 48 heures avec une proposition personnalisée."
-          : `Votre devis est en cours de génération et vous sera envoyé par email. ${delaiLisible(delaiMax)} Pensez à vérifier vos spams si vous ne le recevez pas.`}
+          : "Votre devis a été généré et vous sera envoyé par email. Cela peut prendre quelques minutes. Pensez à vérifier vos spams si vous ne le recevez pas."}
       </Lead>
 
       <SummaryBox>

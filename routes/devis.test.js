@@ -16,7 +16,7 @@ const sendPdfFailureAlert = vi.fn(async () => {});
 vi.mock('../data/storage.js', () => ({ saveDevis: (d) => saveDevis(d) }));
 vi.mock('../services/pdfService.js', () => ({
   generatePDF: (d) => generatePDF(d),
-  DELAI_MAX_SECONDES: 345,
+  BUDGET_PDF_MS: 345000,
 }));
 vi.mock('../services/mailService.js', () => ({
   sendDevisEmails: (...a) => sendDevisEmails(...a),
@@ -340,12 +340,6 @@ describe('POST /api/devis — file saturée', () => {
     }
   }
 
-  it('annonce au client le délai maximum de génération', async () => {
-    const res = await post(devisB2B);
-    expect(res.status).toBe(200);
-    expect((await res.json()).delai_max_secondes).toBe(345);
-  });
-
   // La demande a déjà attendu son plafond : la remettre en file donnerait le
   // même résultat, avec le même délai.
   it('ne réessaie pas quand la file a saturé, et alerte l admin', async () => {
@@ -355,7 +349,6 @@ describe('POST /api/devis — file saturée', () => {
     await attendre(() => sendPdfFailureAlert.mock.calls.length > 0);
 
     expect(generatePDF).toHaveBeenCalledTimes(1);
-    expect(sendDevisEmails).not.toHaveBeenCalled();
   });
 
   it('n insiste pas non plus quand la file a atteint sa longueur maximale', async () => {
@@ -367,7 +360,6 @@ describe('POST /api/devis — file saturée', () => {
     await attendre(() => sendPdfFailureAlert.mock.calls.length > 0);
 
     expect(generatePDF).toHaveBeenCalledTimes(1);
-    expect(sendDevisEmails).not.toHaveBeenCalled();
   });
 
   // Une panne ordinaire, elle, reste rattrapable : la relance a un sens.
@@ -381,5 +373,39 @@ describe('POST /api/devis — file saturée', () => {
 
     expect(generatePDF).toHaveBeenCalledTimes(2);
     expect(sendPdfFailureAlert).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/devis — chemin d abandon : règle absolue n°4', () => {
+  class AttenteDepasseeError extends Error {
+    constructor() {
+      super('Attente en file dépassée');
+      this.code = 'ATTENTE_DEPASSEE';
+    }
+  }
+
+  // Ne rien envoyer au client serait le pire des cas : sa demande est
+  // enregistrée et il a vu un écran de confirmation.
+  it.each([
+    ['file saturée', () => new AttenteDepasseeError()],
+    ['tentatives épuisées', () => new Error('Chrome introuvable')],
+  ])('envoie quand même les deux emails quand le PDF échoue (%s)', async (_label, erreur) => {
+    generatePDF.mockRejectedValue(erreur());
+
+    await post(devisB2B);
+    await attendre(() => sendDevisEmails.mock.calls.length > 0, 20000);
+
+    expect(sendPdfFailureAlert).toHaveBeenCalledTimes(1);
+    expect(sendDevisEmails).toHaveBeenCalledTimes(1);
+    // Second argument : le buffer PDF, nul ici, donc aucune pièce jointe.
+    expect(sendDevisEmails.mock.calls[0][1]).toBeNull();
+  }, 30000);
+
+  it('envoie le PDF en pièce jointe quand la génération réussit', async () => {
+    await post(devisB2B);
+    await attendre(() => sendDevisEmails.mock.calls.length > 0);
+
+    expect(sendPdfFailureAlert).not.toHaveBeenCalled();
+    expect(sendDevisEmails.mock.calls[0][1]).not.toBeNull();
   });
 });

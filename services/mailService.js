@@ -116,8 +116,13 @@ export async function sendDevisEmails(devis, pdfBuffer) {
     contentType: 'application/pdf',
   }] : [];
 
-  const clientHtml = Handlebars.compile(loadTemplate('email-client.html'))(devis);
-  const adminHtml  = Handlebars.compile(loadTemplate('email-admin.html'))(devis);
+  // Les templates annonçaient la pièce jointe d'après sur_devis, pas d'après
+  // sa présence réelle : un devis dont le PDF a échoué promettait un fichier
+  // absent. C'est cette variable qui décide, et elle vient de l'envoi lui-même.
+  const contexte = { ...devis, avec_pdf: pdfAttachments.length > 0 };
+
+  const clientHtml = Handlebars.compile(loadTemplate('email-client.html'))(contexte);
+  const adminHtml  = Handlebars.compile(loadTemplate('email-admin.html'))(contexte);
 
   const clientSubject = devis.sur_devis
     ? `Maison Buna — Votre demande a bien été reçue`

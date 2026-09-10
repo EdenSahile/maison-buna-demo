@@ -65,10 +65,10 @@ const limiteur = creerLimiteur({ max: MAX_CONCURRENT, fileMax: MAX_FILE, attente
 
 export { FileSatureeError, AttenteDepasseeError };
 
-// Exposé au client : le message de confirmation annonce ce délai. C'est
-// l'attente en file plus la génération elle-même, pas la seule attente —
-// annoncer 300 s quand le pire cas est 345 s serait une promesse fausse.
-export const DELAI_MAX_SECONDES = Math.round((ATTENTE_MAX_MS + TIMEOUT_MS) / 1000);
+// Budget total accordé à une demande, relances comprises. Sans lui, chaque
+// nouvelle tentative repart pour un tour complet de file : trois tentatives
+// pouvaient occuper jusqu'à 17,5 minutes et trois créneaux pour un seul devis.
+export const BUDGET_PDF_MS = ATTENTE_MAX_MS + TIMEOUT_MS;
 
 // kill() peut lever (EPERM, processus déjà mort). Puppeteer n'attache aucun
 // écouteur 'error' sur le processus navigateur : une exception ici, dans un

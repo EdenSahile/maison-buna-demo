@@ -109,7 +109,6 @@ export default function DevisForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [surDevis, setSurDevis] = useState(false);
-  const [delaiMax, setDelaiMax] = useState(null);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -151,11 +150,6 @@ export default function DevisForm() {
       });
       if (!res.ok)
         throw new Error("Erreur lors de l'envoi. Veuillez réessayer.");
-      // Le serveur annonce le délai maximum qu'il s'accorde pour générer le
-      // PDF : le message de confirmation reprend ce chiffre plutôt qu'un
-      // « quelques minutes » qui ne veut rien dire.
-      const { delai_max_secondes } = await res.json().catch(() => ({}));
-      setDelaiMax(delai_max_secondes);
       const hasSurDevis = formData.cafes.some(
         (cafe) => formData.quantiteParCafe[cafe] === "Sur mesure",
       );
@@ -192,7 +186,6 @@ export default function DevisForm() {
             audience={audience}
             onReset={handleReset}
             surDevis={surDevis}
-            delaiMax={delaiMax}
           />
         </FormArea>
       </Shell>
