@@ -66,6 +66,8 @@
 
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
 
+- [ ] Les deux emails chargent leurs polices depuis `fonts.googleapis.com` par `@import` : à l'ouverture, l'adresse IP du destinataire, son User-Agent et l'horodatage partent chez Google, sans son consentement. Dette antérieure à la PR #23, qui ne fait qu'en changer les noms de familles. Le tribunal régional de Munich I a jugé ce point contraire au RGPD le 20/01/2022 (3 O 17493/20). Correction : intégrer les polices en base64 dans les templates d'email, comme le fait déjà `templates/devis-template.html`.
+
 - [ ] `.env.example:4,8` utilise `email.com` et les scripts de test `gmail.com` : deux domaines réels, là où la règle 8 demande `example.com`. Relevé par l'audit du 10/09/2026.
 
 - [ ] Tirets cadratins restants dans `email-client.html:268` et `email-admin.html:288`, à aligner sur la ponctuation du PDF (PR #13)
