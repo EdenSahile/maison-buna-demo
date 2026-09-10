@@ -30,7 +30,7 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
 
    Raccourci : `npm run test:all` enchaîne les deux suites de tests.
    Ce verrou est la **source de vérité sur l'état des tests** : il n'y a pas d'agent testeur, aucun rapport d'agent ne le remplace.
-   `check:syntax` parcourt l'arborescence — `node_modules`, `client/` et les fichiers de test exclus — plutôt que d'énumérer des fichiers. Ajouter un fichier serveur ne demande donc plus de mettre une liste à jour, ici ou ailleurs. La CI lance exactement le même script.
+   `check:syntax` parcourt l'arborescence plutôt que d'énumérer des fichiers ; les exclusions sont déclarées en tête de `scripts/check-syntax.js`. Ajouter un fichier serveur ne demande donc plus de mettre une liste à jour, ici ou ailleurs. La CI lance exactement le même script.
 
 3. **Mettre à jour `CONTEXT.MD`.** Règle absolue n°7 du `CLAUDE.md` : cocher `[x]` les tâches accomplies et rafraîchir le tableau « État du build ». Commiter cette mise à jour avec le reste avant de pousser.
 
@@ -48,7 +48,7 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
 
 - **Utiliser `cd client && npm run build`, pas `npm run build` à la racine.** Le script racine est `npx puppeteer browsers install chrome && cd client && npm install && npm run build` : il télécharge Chrome (~150 Mo) à chaque appel. C'est une étape de déploiement Render, pas un contrôle de qualité du code — elle ne valide rien et ralentit le verrou de plusieurs minutes.
 
-- **Toujours inclure `npm run check:syntax`.** Contrairement au client, le code Node ESM (`server.js`, `routes/`, `services/`, `middleware/`, `config/`, `data/`) n'a **aucune étape de build** : une erreur de syntaxe y passe le verrou sans être vue et ne casse qu'au démarrage sur Render. C'est le seul filet côté serveur. Le script parcourt l'arborescence, il n'y a aucune liste de fichiers à tenir à jour.
+- **Toujours inclure `npm run check:syntax`.** Contrairement au client, le code Node ESM n'a **aucune étape de build** : une erreur de syntaxe y passe le verrou sans être vue et ne casse qu'au démarrage sur Render. C'est le seul filet côté serveur. Le script parcourt l'arborescence, il n'y a aucune liste de fichiers à tenir à jour.
 
 - **Le lint ne fait pas partie du verrou.** `client/eslint.config.js` existe et `cd client && npm run lint` fonctionne, mais sort **rouge sur ~10 erreurs préexistantes**, réparties entre `client/src/playground/compo-reu/Field.jsx`, `client/src/components/Reusable-ui/Field.jsx`, `client/src/components/DevisForm.jsx` et `client/src/components/SectionPrecisions.jsx`. L'ajouter au verrou bloquerait toutes les PR dès la première. Nettoyer ces erreurs = une PR dédiée ; ce n'est pas une hypothèse à faire ici.
 

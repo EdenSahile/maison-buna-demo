@@ -7,30 +7,45 @@
 // et dans les définitions d'agents — qui dérivaient à chaque nouveau fichier
 // sans que rien ne le signale.
 
-import { readdirSync, statSync } from 'fs';
+import { readdirSync } from 'fs';
 import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join, relative } from 'path';
 
 const racine = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-// client/ a son propre build Vite, qui fait déjà ce contrôle.
-const DOSSIERS_EXCLUS = new Set([
-  'node_modules', 'client', 'dist', '.git', 'reports', 'handoffs', 'docs', '.cache',
+// Exclusions par chemin depuis la racine, et non par nom de dossier : un futur
+// `services/client/` ou `routes/docs/` sortirait sinon du contrôle en silence.
+// `client/` a son propre build Vite, qui fait déjà ce travail.
+const CHEMINS_EXCLUS = new Set([
+  'client', 'dist', 'reports', 'handoffs', 'docs', '.cache',
 ]);
+
+// Ceux-là s'excluent à n'importe quelle profondeur.
+const NOMS_EXCLUS = new Set(['node_modules', '.git']);
+
+// Les dossiers cachés sont ignorés, sauf `.claude/hooks/`, qui contient des
+// scripts Node réellement exécutés — l'ancienne liste de CI les oubliait.
+const CACHES_INCLUS = new Set(['.claude']);
 
 const estTest = (nom) => /\.test\.[cm]?js$/.test(nom);
 const estJs = (nom) => /\.[cm]?js$/.test(nom);
 
 function fichiersJs(dossier) {
   const trouves = [];
-  for (const entree of readdirSync(dossier)) {
-    if (entree.startsWith('.') && entree !== '.claude') continue;
-    const chemin = join(dossier, entree);
-    if (statSync(chemin).isDirectory()) {
-      if (DOSSIERS_EXCLUS.has(entree)) continue;
+  // withFileTypes : pas de statSync, donc pas de ENOENT sur un lien symbolique
+  // cassé, qui se lirait comme un échec de syntaxe. Un lien vers un dossier est
+  // traité comme un fichier et ignoré, ce qui évite aussi les boucles.
+  for (const entree of readdirSync(dossier, { withFileTypes: true })) {
+    const nom = entree.name;
+    const chemin = join(dossier, nom);
+    const cheminRelatif = relative(racine, chemin);
+
+    if (entree.isDirectory()) {
+      if (NOMS_EXCLUS.has(nom) || CHEMINS_EXCLUS.has(cheminRelatif)) continue;
+      if (nom.startsWith('.') && !CACHES_INCLUS.has(nom)) continue;
       trouves.push(...fichiersJs(chemin));
-    } else if (estJs(entree) && !estTest(entree)) {
+    } else if (entree.isFile() && estJs(nom) && !estTest(nom)) {
       trouves.push(chemin);
     }
   }

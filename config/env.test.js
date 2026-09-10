@@ -41,9 +41,10 @@ describe('entier', () => {
     },
   );
 
-  it('refuse une valeur sous le minimum', () => {
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('refuse une valeur sous le minimum, et le dit', () => {
+    const avertir = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubEnv('REGLAGE', '0');
     expect(entier('REGLAGE', 2, 1)).toBe(2);
+    expect(avertir).toHaveBeenCalledWith(expect.stringContaining('REGLAGE invalide (0)'));
   });
 });
