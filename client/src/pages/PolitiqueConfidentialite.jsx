@@ -41,17 +41,17 @@ export default function PolitiqueConfidentialite() {
       <h2>Qui reçoit ces données</h2>
       <p>
         <strong>Brevo</strong>, pour l'envoi des deux emails liés à votre
-        demande (confirmation et notification interne) — un prestataire
+        demande (confirmation et notification interne) : un prestataire
         technique, pas un tiers qui exploite vos données pour son propre
         compte. Et l'<strong>hébergeur</strong> du serveur qui les stocke.
         Aucun autre tiers : ce site ne charge aucun script publicitaire ou de
         mesure d'audience, ne dépose aucun cookie, et ne charge plus aucune
-        ressource — police ou autre — depuis un serveur extérieur.
+        ressource (police ou autre) depuis un serveur extérieur.
       </p>
 
       <h2>Durée de conservation</h2>
       <p>
-        <strong>180 jours</strong> à compter de la soumission du formulaire —
+        <strong>180 jours</strong> à compter de la soumission du formulaire :
         le devis est valable 30 jours, et ce délai laisse une marge
         raisonnable pour une relance ou une négociation. Passé ce délai, vos
         données sont supprimées de nos serveurs, automatiquement, qu'une
@@ -64,7 +64,7 @@ export default function PolitiqueConfidentialite() {
       <p>
         Accès, rectification et effacement de vos données : écrivez à{' '}
         <a href="mailto:contact@fictif.com">contact@fictif.com</a>. Votre
-        demande sera traitée à la main — cette démo n'a pas le volume qui
+        demande sera traitée à la main : cette démo n'a pas le volume qui
         justifierait un outil dédié.
       </p>
     </LegalPageShell>

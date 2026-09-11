@@ -30,7 +30,7 @@ export default function App() {
   return (
     <>
       <div style={demoBanner}>
-        Démo — les devis générés sont fictifs et n'ont aucune valeur commerciale.
+        Démo : les devis générés sont fictifs et n'ont aucune valeur commerciale.
       </div>
       <DevisForm />
     </>
