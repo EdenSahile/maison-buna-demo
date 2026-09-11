@@ -20,6 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Sans dependance npm, avant meme l'installation : la revue plus bas ne
+      # lit que le diff d'une PR, donc jamais un defaut deja present dans un
+      # fichier que personne ne touche. C'est ce qui a laisse une adresse
+      # email reelle survivre dans .claude/agents/ux-designer.md jusqu'a la
+      # PR #16. Ce controle scanne l'arbre entier, pas seulement le diff.
+      - name: Coordonnees reelles (arbre complet)
+        run: node scripts/check-coordonnees.js
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -106,16 +114,18 @@ jobs:
                that can drop one of them is Critical.
             5. Every quote must be persisted to data/devis.json with a
                timestamp and a unique id.
-            6. Colours: the source of truth is client/src/theme.js. A new
-               colour in client/src/ that is not declared there is a finding.
-               The PDF template and the two email templates each carry their
-               own palette — three sets coexist, documented in CLAUDE.md. Do
-               NOT flag a colour for differing from another artefact's palette,
-               and do not ask to align them: that convergence is a deliberate
-               design decision, not a cleanup. Fonts: Crimson Pro (serif)
-               and Open Sans (sans-serif) everywhere, including
-               templates/devis-template.html, which embeds those same two fonts
-               as base64 instead of loading them from Google Fonts.
+            6. Colours: the source of truth is client/src/theme.js. Since the
+               palette convergence (PR #35), the PDF template and the two
+               email templates use only colours from theme.js too — plus one
+               documented exception, the DÉMO banner (#2e2010 / #D3C2AC),
+               identical in all three artefacts and deliberately outside the
+               brand palette. A colour anywhere in client/src/, the PDF
+               template or the two email templates that is neither in
+               theme.js nor that exact DÉMO-banner exception is a finding.
+               Fonts: Crimson Pro (serif) and Open Sans (sans-serif)
+               everywhere, including templates/devis-template.html, which
+               embeds those same two fonts as base64 instead of loading them
+               from Google Fonts.
             7. Completed tasks must be ticked in CONTEXT.MD.
             8. **DEMO-SPECIFIC — Critical**: this is a public demo repo. Real
                Maison Buna business data (real SIRET, real postal address, real
@@ -133,8 +143,10 @@ jobs:
             Also check for correctness bugs, secrets leaking into the repo or
             into logs, and consistency with existing patterns in the codebase.
 
-            The `test` job already ran `npm run check:syntax` (every server
-            JS file, found by walking the tree — not a hand-written list),
+            The `test` job already ran `npm run check:coordonnees` (the whole
+            tracked tree, not just this PR's diff, against real Maison Buna
+            emails/SIRET/domain), `npm run check:syntax` (every server JS
+            file, found by walking the tree — not a hand-written list),
             `npx vitest run` (server, real Puppeteer), the client Vitest suite
             and the Vite build before this step — treat that as ground truth
             for whether they pass. Don't re-run them yourself; run a single

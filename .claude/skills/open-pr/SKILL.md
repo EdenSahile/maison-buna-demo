@@ -26,6 +26,7 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
    npm run test:server           # Vitest racine — tests serveur (Puppeteer réel, ~5 s)
    npm test                      # → client, vitest run
    npm run check:syntax          # node --check sur tout le JS serveur
+   npm run check:coordonnees     # arbre entier contre les coordonnées réelles
 ```
 
    Raccourci : `npm run test:all` enchaîne les deux suites de tests.
@@ -50,7 +51,9 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
 
 - **Toujours inclure `npm run check:syntax`.** Contrairement au client, le code Node ESM n'a **aucune étape de build** : une erreur de syntaxe y passe le verrou sans être vue et ne casse qu'au démarrage sur Render. C'est le seul filet côté serveur. Le script parcourt l'arborescence, il n'y a aucune liste de fichiers à tenir à jour.
 
-- **Le lint ne fait pas partie du verrou.** `client/eslint.config.js` existe et `cd client && npm run lint` fonctionne, mais sort **rouge sur ~10 erreurs préexistantes**, réparties entre `client/src/playground/compo-reu/Field.jsx`, `client/src/components/Reusable-ui/Field.jsx`, `client/src/components/DevisForm.jsx` et `client/src/components/SectionPrecisions.jsx`. L'ajouter au verrou bloquerait toutes les PR dès la première. Nettoyer ces erreurs = une PR dédiée ; ce n'est pas une hypothèse à faire ici.
+- **Toujours inclure `npm run check:coordonnees`.** Scanne l'arbre entier — pas seulement le diff de la PR — contre les coordonnées réelles de Maison Buna (email hors liste blanche, numéro à 14 chiffres en forme de SIRET, domaine réel de la marque). C'est le complément local du job CI du même nom : couvrir ce qu'une revue de diff ne voit jamais, un défaut déjà présent dans un fichier que la PR ne touche pas.
+
+- **Le lint ne fait pas partie du verrou.** `client/eslint.config.js` existe et `cd client && npm run lint` fonctionne, mais sort **rouge sur 3 erreurs préexistantes**, toutes dans `client/src/components/Reusable-ui/Field.jsx`. L'ajouter au verrou bloquerait toutes les PR dès la première. Nettoyer ces erreurs = une PR dédiée ; ce n'est pas une hypothèse à faire ici.
 
 ### Le périmètre
 
@@ -75,7 +78,7 @@ Le repo a une CI : `.github/workflows/claude-pr-review.yml`, déclenchée sur ch
 
 | Job | Ce qu'il vérifie |
 |---|---|
-| **Tests** | `npm ci`, `npm run check:syntax` (tout le JS serveur), `npx vitest run` (tests serveur, Puppeteer réel avec Chrome mis en cache), `npm ci && npm test` côté client, puis `npm run build` client |
+| **Tests** | `npm run check:coordonnees` (arbre entier, avant même `npm ci`), `npm ci`, `npm run check:syntax` (tout le JS serveur), `npx vitest run` (tests serveur, Puppeteer réel avec Chrome mis en cache), `npm ci && npm test` côté client, puis `npm run build` client |
 | **Claude review** | `needs: [test]` — lit le diff, applique les règles absolues du `CLAUDE.md` (les 7 générales **+ la règle 8, spécifique à ce repo démo** : jamais de vraies coordonnées Maison Buna — vrai SIRET, vraie adresse, vrai nom, vrai domaine — et jamais de suppression du bandeau DÉMO), classe en Critical / Important / Minor, puis soumet `gh pr review --approve` ou `--request-changes` |
 
 Le verrou local de l'étape 2 reproduit le job `Tests` à l'identique : il reste bloquant, pour ne pas découvrir en CI ce qui se voyait en 5 secondes en local.

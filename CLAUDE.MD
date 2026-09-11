@@ -246,6 +246,31 @@ réapparaît.
 
 ---
 
+## Scan des coordonnées réelles — l'arbre entier, pas le diff
+
+Le job `claude-review` de la CI (`.github/workflows/claude-pr-review.yml`) ne
+lit que le diff d'une PR : un défaut déjà présent dans un fichier que
+personne ne touche ne remonte jamais. C'est ce qui a laissé une adresse email
+réelle survivre dans `.claude/agents/ux-designer.md`, et le vrai domaine de
+la marque écrit en toutes lettres dans ce workflow — jusqu'à la PR #16.
+
+`scripts/check-coordonnees.js` (`npm run check:coordonnees`) couvre ce point
+aveugle : il scanne l'arbre entier suivi par git, PR après PR, qu'elle touche
+ou non les fichiers concernés. Trois motifs précis, sans jugement :
+
+- un email dont le domaine n'est pas sur liste blanche (`fictif.com`,
+  `demo-fictif.com`, `example.com`, `example.fr`, `exemple.fr`, `test.fr`,
+  `smtp-brevo.com`) ;
+- un numéro à 14 chiffres, la forme d'un SIRET réel — le placeholder du
+  dépôt les remplace par des X ;
+- le vrai domaine de la marque, sous n'importe quel TLD, même en prose sans
+  email ni lien — c'est exactement ainsi qu'il avait fui la première fois.
+
+La CI le lance avant même `npm ci`, en premier. Il est bloquant dans le
+verrou qualité local (voir « Commandes utiles » et « Pipeline multi-agents »).
+
+---
+
 ## Variables d'environnement
 
 ```
@@ -255,7 +280,7 @@ TRUST_PROXY=1                 # proxys de confiance (0 à 3) — décide de req.
 
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
-SMTP_USER=votre@email.com     # expéditeur affiché
+SMTP_USER=votre@example.com   # expéditeur affiché
 SMTP_PASS=votre_cle_brevo
 BREVO_SMTP_USER=…@smtp-brevo.com   # identifiants du transport SMTP
 BREVO_SMTP_PASS=votre_cle_smtp
@@ -298,10 +323,11 @@ npm run dev:all      # les deux en parallèle — c'est celle du quotidien
 npm run start        # production
 npm run build        # installe Chrome pour Puppeteer, puis build le client
 
-npm run test:server  # Vitest racine — tests serveur, Puppeteer réel
-npm test             # Vitest client
-npm run test:all     # enchaîne les deux
-npm run check:syntax # node --check sur tout le JS serveur
+npm run test:server     # Vitest racine — tests serveur, Puppeteer réel
+npm test                # Vitest client
+npm run test:all        # enchaîne les deux
+npm run check:syntax    # node --check sur tout le JS serveur
+npm run check:coordonnees # arbre entier (pas le diff) contre les coordonnées réelles
 
 npm run pdf:test     # génère un PDF de test dans scripts/
 npm run mail:test    # ⚠️ envoie de vrais emails via Brevo
@@ -404,7 +430,8 @@ la source de vérité est le verrou qualité, passé avant chaque commit.
 cd client && npm run build    # build Vite
 npm run test:server           # Vitest racine — tests serveur, Puppeteer réel
 npm test                      # tests client
-npm run check:syntax        # node --check sur tout le JS serveur
+npm run check:syntax          # node --check sur tout le JS serveur
+npm run check:coordonnees     # arbre entier contre les coordonnées réelles
 ```
 
 C'est un contrôle déterministe, et la CI relance la même chose sur chaque PR
