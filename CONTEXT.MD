@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 170/170 (2026-09-11) |
+| Tests serveur (`npm run test:server`) | ✅ 172/172 (2026-09-11) |
 
 ---
 
