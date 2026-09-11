@@ -212,7 +212,7 @@ Ces règles sont documentées dans `CLAUDE.MD` et appliquées aussi bien en dév
 3. Toujours valider les données côté serveur (email, identité, café et quantité obligatoires).
 4. Toujours envoyer les deux emails à chaque devis (voir l'exception ci-dessus en cas d'échec définitif du PDF).
 5. Toujours sauvegarder la demande avec un horodatage et un identifiant unique.
-6. Respecter la charte graphique Maison Buna dans tous les templates (`#2e2010`, `#4F3422`, `#D3C2AC`, `#AB9679`, `#FAF7F3`).
+6. Respecter la charte graphique Maison Buna, dont la source de vérité est `client/src/theme.js`.
 7. Ne jamais introduire d'information réelle de l'entreprise dans ce dépôt de démo.
 
 ## CI et review automatique

@@ -106,9 +106,13 @@ jobs:
                that can drop one of them is Critical.
             5. Every quote must be persisted to data/devis.json with a
                timestamp and a unique id.
-            6. The Maison Buna palette is fixed: #2e2010, #4F3422, #D3C2AC,
-               #AB9679, #FAF7F3. Any other hardcoded colour in templates/,
-               client/ or public/ is a finding. Fonts: Crimson Pro (serif)
+            6. Colours: the source of truth is client/src/theme.js. A new
+               colour in client/src/ that is not declared there is a finding.
+               The PDF template and the two email templates each carry their
+               own palette — three sets coexist, documented in CLAUDE.md. Do
+               NOT flag a colour for differing from another artefact's palette,
+               and do not ask to align them: that convergence is a deliberate
+               design decision, not a cleanup. Fonts: Crimson Pro (serif)
                and Open Sans (sans-serif) everywhere, including
                templates/devis-template.html, which embeds those same two fonts
                as base64 instead of loading them from Google Fonts.
