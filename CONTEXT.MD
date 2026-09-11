@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 177/177 (2026-09-11) |
+| Tests serveur (`npm run test:server`) | ✅ 190/190 (2026-09-11) |
 
 ---
 
@@ -34,7 +34,8 @@
 | `docs/claude-md` | CLAUDE.MD remis au niveau du code | mergée (PR #24) |
 | `feat/devis-etat` | champ d'état, arrêt propre et balayage au démarrage | mergée (PR #25) |
 | `docs/politique-agents` | plus d'audit local sans demande | mergée (PR #26) |
-| `fix/backlog-priorite-3` | lot de petites corrections du backlog | en cours |
+| `fix/backlog-priorite-3` | lot de petites corrections du backlog | mergée (PR #27) |
+| `fix/storage-plafonds` | archivage du fichier vif, envoi d'emails borné | en cours |
 
 ---
 
@@ -59,7 +60,7 @@
 - [x] Règle absolue n°4 tenue sur le chemin d'abandon : le client reçoit son email même sans PDF, et les templates annoncent la pièce jointe d'après sa présence réelle et non d'après `sur_devis`.
 - [x] Champ `etat` dans `data/devis.json`, cinq valeurs définies dans `ETATS`, plus `etat_maj` et `etat_erreur`. SIGTERM et SIGINT marquent « interrompu » tout ce qui était en cours avant de fermer le serveur. Les demandes à relancer à la main sont désormais retrouvables.
 - [x] `trust proxy` est réglable par `TRUST_PROXY`, valeur par défaut 1, via le lecteur d'environnement extrait dans `config/env.js`.
-- [ ] `data/storage.js` relit et réécrit `data/devis.json` en entier à chaque appel, désormais deux fois par demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
+- [x] `data/storage.js` archive au-delà de `DEVIS_MAX` (1000 par défaut) : les demandes dont le traitement est terminé partent dans `data/devis.json.archive-<horodatage>`, jamais relu, et le coût de chaque cycle lecture/écriture cesse de croître. Une demande `en_cours` ou `envoi_en_cours` n'est jamais archivée, sinon le balayage au démarrage ne la retrouverait plus. L'envoi des emails est borné à `MAIL_MAX_CONCURRENT` (4) par le limiteur déjà utilisé pour les PDF : un email = une connexion SMTP. Le limiteur fait patienter, il ne refuse pas — la règle absolue n°4 tient. Décision du 11/09/2026. Cette tâche était inscrite deux fois, le doublon de priorité 3 est retiré.
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)
 
@@ -70,7 +71,6 @@
 
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
 
-- [ ] `data/storage.js` fait deux cycles lecture/écriture complets par demande, synchrones donc bloquants (~6 ms à 685 ko, linéaire avec la taille), et rien ne plafonne le nombre d'enregistrements. Relevé par l'audit du 10/09/2026.
 - [x] `envoi_en_cours` lève l'ambiguïté : un arrêt avant l'envoi donne `interrompu` (le client n'a rien reçu, c'est certain), un arrêt pendant donne `interrompu_pendant_envoi` (à vérifier avant de relancer). Le bilan de l'arrêt distingue les deux dans son message.
 
 - [x] Plus aucune ressource distante dans les emails : l'`@import` vers Google Fonts est retiré, les piles de repli suffisent. L'intégration en base64 envisagée au départ était impraticable — les blocs du PDF pèsent 1410 Ko pour une limite Gmail de 102 Ko, et les clients de messagerie ignorent `@font-face`. Un test vérifie qu'aucune ressource distante ne réapparaît.

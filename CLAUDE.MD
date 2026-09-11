@@ -179,6 +179,22 @@ grep -c '"etat": "interrompu_pendant_envoi"' data/devis.json # vérifier d'abord
 premier se relance sans risque, le second peut avoir déjà envoyé ses deux
 emails.
 
+### Archivage — le fichier vif ne dépasse pas `DEVIS_MAX`
+
+`data/storage.js` relit et réécrit `data/devis.json` en entier à chaque appel,
+de façon synchrone, et ce coût suit la taille du fichier : 3 ms à 0,65 Mo,
+126 ms à 33 Mo, pendant lesquelles le serveur ne répond à rien d'autre. Au-delà
+de `DEVIS_MAX` enregistrements (1000 par défaut), les plus anciennes demandes
+partent dans `data/devis.json.archive-<horodatage>`, un fichier qui n'est
+jamais relu ni réécrit.
+
+Ne partent en archive que les demandes dont le traitement est terminé. Une
+demande `en_cours` ou `envoi_en_cours` reste dans le fichier vif quel que soit
+son âge, sans quoi le balayage au démarrage ne la retrouverait plus. Quand le
+lot archivé contient des demandes qui appellent encore une action à la main,
+un avertissement le dit et nomme le fichier — les `grep` ci-dessus ne portent
+que sur le fichier vif.
+
 ---
 
 ## Emails — aucune ressource distante
@@ -234,6 +250,15 @@ PDF_MAX_FILE=50               # longueur maximale de la file (50)
 PDF_ATTENTE_MAX_MS=300000     # attente maximale en file (300 s)
 PDF_TIMEOUT_MS=45000          # plafond d'une génération (45 s)
 PDF_FERMETURE_MS=5000         # délai de grâce à la fermeture du navigateur (5 s)
+```
+
+Mêmes règles pour le stockage et l'envoi des emails.
+
+```
+DEVIS_MAX=1000                # enregistrements gardés dans data/devis.json (1000)
+MAIL_MAX_CONCURRENT=4         # envois simultanés (4)
+MAIL_ATTENTE_MAX_MS=120000    # attente maximale en file d'envoi (120 s)
+MAIL_MAX_FILE=500             # longueur maximale de la file d'envoi (500)
 ```
 
 ---

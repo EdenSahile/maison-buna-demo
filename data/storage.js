@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { entier } from '../config/env.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // DEVIS_PATH permet aux tests d'écrire ailleurs que dans la base réelle.
@@ -35,6 +36,35 @@ const APRES_ARRET = {
   [ETATS.EN_COURS]: ETATS.INTERROMPU,
   [ETATS.ENVOI_EN_COURS]: ETATS.INTERROMPU_PENDANT_ENVOI,
 };
+
+// Nombre maximal d'enregistrements gardés dans le fichier vif. Chaque appel
+// relit et réécrit le fichier en entier, de façon synchrone, et ce coût suit
+// sa taille : 3 ms à 0,65 Mo, 126 ms à 33 Mo. Sans plafond, il ne fait que
+// croître, et chaque milliseconde est du temps pendant lequel le serveur ne
+// répond à rien d'autre. 1000 demandes pèsent environ 1 Mo.
+const MAX_ENREGISTREMENTS = entier('DEVIS_MAX', 1000, 1);
+
+// États dont le traitement de fond est terminé : plus rien ne viendra les
+// modifier, ils peuvent donc partir en archive. `en_cours` et
+// `envoi_en_cours` restent dans le fichier vif quel que soit leur âge, sans
+// quoi le balayage au démarrage ne les retrouverait plus.
+const ETATS_TERMINES = new Set([
+  ETATS.ENVOYE,
+  ETATS.ENVOYE_SANS_PDF,
+  ETATS.ECHEC_ENVOI,
+  ETATS.INTERROMPU,
+  ETATS.INTERROMPU_PENDANT_ENVOI,
+]);
+
+// Parmi les états terminés, ceux qui demandent encore une action à la main.
+// Les archiver est correct, mais il faut le dire : les greps de CLAUDE.md
+// portent sur le fichier vif et ne les verraient plus.
+const ETATS_A_TRAITER = new Set([
+  ETATS.ENVOYE_SANS_PDF,
+  ETATS.ECHEC_ENVOI,
+  ETATS.INTERROMPU,
+  ETATS.INTERROMPU_PENDANT_ENVOI,
+]);
 
 function mettreDeCote(raison) {
   // Repartir de [] en silence effacerait la base à l'écriture suivante. Le
@@ -75,16 +105,79 @@ function lire() {
 // Écriture atomique : sans le fichier temporaire, une interruption au milieu
 // du writeFileSync laissait un JSON tronqué, donc une base entière perdue au
 // prochain démarrage.
-function ecrire(data) {
-  const temporaire = `${filePath}.tmp`;
+function ecrireFichier(chemin, data) {
+  const temporaire = `${chemin}.tmp`;
   writeFileSync(temporaire, JSON.stringify(data, null, 2), 'utf8');
-  renameSync(temporaire, filePath);
+  renameSync(temporaire, chemin);
+}
+
+function ecrire(data) {
+  ecrireFichier(filePath, data);
+}
+
+// Sort du fichier vif les demandes les plus anciennes dont le traitement est
+// terminé, et les écrit dans un fichier d'archive à part. L'archive n'est
+// jamais relue ni réécrite : son coût est celui du lot sorti, pas celui de
+// tout l'historique.
+//
+// L'archive est écrite avant le fichier vif. Dans l'autre ordre, un échec au
+// milieu perdait les demandes sorties ; dans celui-ci, il les laisse dans les
+// deux fichiers — un doublon se rattrape, une perte non.
+// Date.now() seul ne suffit pas comme nom : deux archivages dans la même
+// milliseconde produisaient le même fichier, et le second écrasait le premier
+// — les demandes qu'il contenait étaient perdues. Le suffixe numérique ne sert
+// que dans ce cas, pour que le nom courant reste lisible.
+function nomArchive() {
+  const base = `${filePath}.archive-${Date.now()}`;
+  if (!existsSync(base)) return base;
+  let n = 2;
+  while (existsSync(`${base}-${n}`)) n++;
+  return `${base}-${n}`;
+}
+
+function archiver(data) {
+  if (data.length <= MAX_ENREGISTREMENTS) return data;
+
+  let aSortir = data.length - MAX_ENREGISTREMENTS;
+  const sorties = [];
+  const gardees = [];
+  for (const devis of data) {
+    if (aSortir > 0 && ETATS_TERMINES.has(devis.etat)) {
+      sorties.push(devis);
+      aSortir--;
+    } else {
+      gardees.push(devis);
+    }
+  }
+
+  // Rien d'archivable : le fichier dépasse le plafond, mais tout ce qu'il
+  // contient est encore en cours de traitement. Il repasse sous le plafond
+  // de lui-même dès que ces demandes aboutissent.
+  if (sorties.length === 0) return data;
+
+  const archive = nomArchive();
+  try {
+    ecrireFichier(archive, sorties);
+  } catch (err) {
+    // L'archivage n'est pas le travail demandé : son échec ne doit pas faire
+    // échouer l'enregistrement d'une demande. Le fichier garde tout.
+    console.error(`Archivage impossible (${err.message}) — les ${sorties.length} plus anciennes demandes restent dans ${filePath}.`);
+    return data;
+  }
+
+  const aTraiter = sorties.filter((d) => ETATS_A_TRAITER.has(d.etat)).length;
+  const mention = aTraiter > 0 ? ` — dont ${aTraiter} qui demandent encore une action à la main` : '';
+  console.warn(`${sorties.length} demande(s) archivée(s) dans ${archive}${mention}.`);
+
+  return gardees;
 }
 
 export function saveDevis(devis) {
   const data = lire();
   data.push({ ...devis, etat: devis.etat || ETATS.EN_COURS });
-  ecrire(data);
+  // Seul saveDevis fait grandir le tableau : c'est donc le seul endroit où le
+  // plafond peut être dépassé, et le seul à avoir besoin d'archiver.
+  ecrire(archiver(data));
 }
 
 // Met à jour l'état d'une demande et l'horodate. Sans effet si l'id est
