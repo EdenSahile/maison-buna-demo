@@ -41,7 +41,8 @@
 | `fix/polices-locales` | polices du formulaire servies par l'app, plus par Google | mergée (PR #33) |
 | `docs/playground-backlog` | retrait du playground du backlog (jamais committé) | mergée (PR #34) |
 | `feat/convergence-palette` | convergence des trois palettes sur `theme.js` | mergée (PR #35) |
-| `chore/scan-arbre-ci` | scan de l'arbre complet en CI contre les coordonnées réelles | en cours |
+| `chore/scan-arbre-ci` | scan de l'arbre complet en CI contre les coordonnées réelles | mergée (PR #36) |
+| `fix/tiret-footer-email` | tirets cadratins oubliés dans le corps des deux emails | en cours |
 
 ---
 
@@ -50,6 +51,7 @@
 - [x] Remplacer les tirets cadratins du devis PDF par la ponctuation adaptée (`templates/devis-template.html`)
 - [x] Mettre CLAUDE.md à jour : le formulaire est une app React dans `client/`, plus `public/index.html`
 - [x] Puce `content: '—'` de la liste Conditions gardée : c'est un marqueur de liste, pas de la ponctuation, et le tiret est le marqueur de liste de la typographie française — c'est pourquoi il a survécu au remplacement des tirets cadratins du texte (PR #13). Le vrai défaut était la gouttière : 12 px pour un tiret cadratin large de 10 px à 7,5 pt, soit 2 px entre le tiret et le texte, qui se lisaient « —Ce devis ». Passée à 16 px. Décision du 11/09/2026, prise sur le rendu.
+- [x] Trois tirets cadratins oubliés par la PR #13, repérés dans le corps visible des deux emails (pas les `<title>` ni le préheader caché, invisibles à l'ouverture) : le pied de page légal de l'email client (« Prénom Nom — Entrepreneur individuel »), et deux messages de statut PDF dans l'email admin. Remplacés par une virgule (nom + qualité, comme dans le PDF) et deux-points (statut : conséquence). Décision du 11/09/2026.
 - [x] Ajouter la mention DÉMO au PDF, comme dans les deux emails (`chore/demo-safety`)
 - [x] Retirer les coordonnées réelles du client de `ux-designer.md` et du workflow de review
 - [x] Trancher l'écart de polices : la charte officielle devient **Crimson Pro + Open Sans**, Cormorant Garamond et Jost sont abandonnés (jamais implémentés). Décision du 07/09/2026.
