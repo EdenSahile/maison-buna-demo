@@ -86,7 +86,7 @@ function post(body, headers = { 'content-type': 'application/json' }) {
 
 const devisB2B = {
   societe: 'Café du Coin', prenom: 'Marie', nom: 'Dupont',
-  email: 'marie@cafeducoin.fr', collaborateurs: '12',
+  email: 'marie@example.com', collaborateurs: '12',
   cafes: ['Limmu'], quantiteParCafe: { Limmu: '250 g' },
 };
 
@@ -228,10 +228,22 @@ describe('POST /api/devis — typage des champs texte', () => {
 
 describe('POST /api/devis — bornes sur cafes', () => {
   it('rejette une liste de cafés plus longue que le catalogue', async () => {
-    const res = await post({ ...devisB2B, cafes: Array(2000).fill('Limmu') });
+    const res = await post({ ...devisB2B, cafes: Array.from({ length: 2000 }, (_, i) => `Cafe${i}`) });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('Champ invalide : cafes (3 valeurs maximum)');
     expect(saveDevis).not.toHaveBeenCalled();
+  });
+
+  // Quatre cafés dont un répété annonçaient « 3 valeurs maximum », alors que
+  // la vraie cause est la répétition.
+  it('nomme le doublon plutôt que la longueur quand les deux s appliquent', async () => {
+    const res = await post({
+      ...devisB2B,
+      cafes: ['Limmu', 'Sidamo', 'Yirgacheffe', 'Limmu'],
+      quantiteParCafe: { Limmu: '250 g', Sidamo: '250 g', Yirgacheffe: '250 g' },
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe('Champ invalide : cafes (doublons)');
   });
 
   it('rejette les doublons', async () => {
