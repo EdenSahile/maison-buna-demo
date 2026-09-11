@@ -26,7 +26,7 @@ export default function MentionsLegales() {
 
       <h2>Hébergement</h2>
       <p>
-        Render, Inc. — <a href="https://render.com" target="_blank" rel="noreferrer">render.com</a>
+        Render, Inc. (<a href="https://render.com" target="_blank" rel="noreferrer">render.com</a>)
       </p>
 
       <h2>Propriété intellectuelle</h2>
@@ -39,8 +39,8 @@ export default function MentionsLegales() {
       <h2>Données personnelles</h2>
       <p>
         Le formulaire de demande de devis recueille des données personnelles.
-        Le détail — ce qui est collecté, pour quel usage, combien de temps et
-        comment faire valoir vos droits — est dans notre{' '}
+        Le détail (ce qui est collecté, pour quel usage, combien de temps et
+        comment faire valoir vos droits) est dans notre{' '}
         <a href="/confidentialite">politique de confidentialité</a>.
       </p>
     </LegalPageShell>

@@ -152,7 +152,7 @@ export default function SuccessView({ formData, audience, onReset, surDevis }) {
       </SummaryBox>
 
       <Footer>
-        <Tagline>— Maison Buna, le berceau du café.</Tagline>
+        <Tagline>Maison Buna, le berceau du café.</Tagline>
         <GhostButton type="button" onClick={onReset}>Nouvelle demande</GhostButton>
       </Footer>
 
