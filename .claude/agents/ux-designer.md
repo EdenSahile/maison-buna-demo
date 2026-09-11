@@ -78,7 +78,7 @@ Templates créés :
 - templates/devis-template.html ✅
 - templates/email-client.html ✅
 - templates/email-admin.html ✅
-Prêt pour : Développeur
+Prêt pour : Développeur (étape de construction, pas un audit)
 
 2. Coche les tâches 7, 9, 10 dans CONTEXT.md
 
