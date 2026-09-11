@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['routes/**/*.test.js', 'services/**/*.test.js', 'data/**/*.test.js', 'middleware/**/*.test.js', 'config/**/*.test.js'],
+    include: ['routes/**/*.test.js', 'services/**/*.test.js', 'data/**/*.test.js', 'middleware/**/*.test.js', 'config/**/*.test.js', 'scripts/**/*.test.js'],
     // Puppeteer réel dans pdfService.test.js : le démarrage de Chrome dépasse le défaut de 5 s
     testTimeout: 120000,
     hookTimeout: 120000,
