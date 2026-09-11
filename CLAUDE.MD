@@ -197,7 +197,33 @@ que sur le fichier vif.
 
 ---
 
-## Emails — aucune ressource distante
+## Aucune ressource distante — emails et formulaire
+
+### Le formulaire React
+
+`client/index.html` chargeait Crimson Pro et Open Sans depuis Google Fonts.
+Les deux familles sont désormais servies par l'application elle-même :
+huit fichiers `.woff2` dans `client/src/assets/fonts/`, déclarés par
+`client/src/styles/fonts.css` que `src/main.jsx` importe. Ce sont les mêmes
+fichiers que servait `fonts.gstatic.com` — polices variables, découpées par
+plage Unicode — limités à `latin` et `latin-ext`. Le découpage n'est pas
+décoratif : une page en français ne télécharge que les quatre fichiers `latin`.
+
+Les polices sont sous SIL Open Font License 1.1, qui autorise la
+redistribution à condition que la licence accompagne les fichiers :
+`client/src/assets/fonts/LICENSE-OFL.txt`.
+`client/src/styles/fonts.test.js` vérifie qu'aucun appel distant ne
+réapparaît, et que chaque `@font-face` pointe vers un fichier présent — une
+police manquante ne casse rien de visible, le navigateur retombe en silence
+sur la pile de repli.
+
+**`client/src/playground/index.html` charge encore Google Fonts**, et des
+polices abandonnées par la charte (Cormorant Garamond, Inter). Ce dossier
+n'est référencé ni par `App.jsx`, ni par `main.jsx`, ni par `vite.config.js` :
+il n'est jamais construit ni servi. À traiter à part, en décidant d'abord si
+ce dossier a encore une raison d'être.
+
+### Les emails
 
 Les deux templates d'email ne chargent **aucune police ni feuille de style
 distante**, et les images passent par `cid:`, en pièces jointes en ligne.

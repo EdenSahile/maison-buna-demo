@@ -12,7 +12,7 @@
 | PDF Puppeteer (`npm run pdf:test`) | ✅ OK (2026-09-07) |
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
-| Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
+| Tests client (`npm test`) | ✅ 25/25 (2026-09-11) |
 | Tests serveur (`npm run test:server`) | ✅ 190/190 (2026-09-11) |
 
 ---
@@ -36,7 +36,8 @@
 | `docs/politique-agents` | plus d'audit local sans demande | mergée (PR #26) |
 | `fix/backlog-priorite-3` | lot de petites corrections du backlog | mergée (PR #27) |
 | `fix/storage-plafonds` | archivage du fichier vif, envoi d'emails borné | mergée (PR #31) |
-| `fix/puce-conditions` | gouttière de la puce des Conditions du PDF | en cours |
+| `fix/puce-conditions` | gouttière de la puce des Conditions du PDF | mergée (PR #32) |
+| `fix/polices-locales` | polices du formulaire servies par l'app, plus par Google | en cours |
 
 ---
 
@@ -100,6 +101,9 @@ démonstration, pas avant.
   qui apporte aussi la reprise après échec et l'observabilité. Aujourd'hui,
   refondre le flux central serait disproportionné face au risque réel sur une
   démo dont le trafic tient dans deux créneaux.
+
+- [x] Google Fonts retiré de `client/index.html` : même question RGPD que les emails, mais sur une page qu'on visite. Crimson Pro et Open Sans sont maintenant servies par l'application — huit `.woff2` dans `client/src/assets/fonts/`, déclarés par `client/src/styles/fonts.css`, licence OFL embarquée. Vérifié dans un vrai navigateur : aucune requête hors de l'application, quatre fichiers téléchargés sur huit grâce à `unicode-range`, les quatre faces appliquées. Décision du 11/09/2026.
+- [ ] `client/src/playground/index.html` charge encore Google Fonts, et des polices abandonnées (Cormorant Garamond, Inter). Le dossier n'est référencé nulle part et n'est jamais construit : décider d'abord s'il a encore une raison d'être, puis le supprimer ou le corriger.
 
 ### Priorité 4 — idée de fond, sans urgence
 
