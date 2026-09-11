@@ -132,6 +132,27 @@ describe('sendDevisEmails — annonce de la pièce jointe', () => {
   });
 });
 
+describe('sendViaBrevoREST — message d erreur borné', () => {
+  // Brevo renvoie en écho la charge utile envoyée : nom, email et HTML du
+  // client. Ce message finit dans etat_erreur, en base.
+  it('tronque le corps de la réponse à 300 caractères', async () => {
+    sendMail.mockRejectedValue(new Error('SMTP indisponible'));
+    const echo = 'x'.repeat(5000);
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      text: async () => echo,
+    })));
+
+    const erreur = await sendDevisEmails(devis, null).catch((e) => e);
+
+    expect(erreur.message).toContain('Brevo API 400');
+    expect(erreur.message.length).toBeLessThan(360);
+    expect(erreur.message).not.toContain('x'.repeat(301));
+    vi.unstubAllGlobals();
+  });
+});
+
 describe('sendPdfFailureAlert', () => {
   it('alerte uniquement l admin, sans pièce jointe', async () => {
     await sendPdfFailureAlert(devis);
