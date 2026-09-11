@@ -53,7 +53,7 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
 
 - **Toujours inclure `npm run check:coordonnees`.** Scanne l'arbre entier — pas seulement le diff de la PR — contre les coordonnées réelles de Maison Buna (email hors liste blanche, numéro à 14 chiffres en forme de SIRET, domaine réel de la marque). C'est le complément local du job CI du même nom : couvrir ce qu'une revue de diff ne voit jamais, un défaut déjà présent dans un fichier que la PR ne touche pas.
 
-- **Le lint ne fait pas partie du verrou.** `client/eslint.config.js` existe et `cd client && npm run lint` fonctionne, mais sort **rouge sur 3 erreurs préexistantes**, toutes dans `client/src/components/Reusable-ui/Field.jsx`. L'ajouter au verrou bloquerait toutes les PR dès la première. Nettoyer ces erreurs = une PR dédiée ; ce n'est pas une hypothèse à faire ici.
+- **Le lint ne fait pas partie du verrou.** `client/eslint.config.js` existe et `cd client && npm run lint` fonctionne, et passe à 0 erreur depuis le 11/09/2026 (les 3 erreurs `react-refresh/only-export-components` de `Field.jsx` ont été corrigées en sortant les styled-components dans `Field.styles.js`). Il n'est pas ajouté au verrou pour autant — ce serait une décision séparée, pas une conséquence automatique.
 
 ### Le périmètre
 

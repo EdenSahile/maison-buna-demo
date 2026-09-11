@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import SectionHead from './Reusable-ui/SectionHead'
-import Field, { StyledInput } from './Reusable-ui/Field'
+import Field from './Reusable-ui/Field'
+import { StyledInput } from './Reusable-ui/Field.styles'
 
 const Section = styled.section`
   padding-top: 48px;
