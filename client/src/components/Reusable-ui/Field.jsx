@@ -28,9 +28,13 @@ const Opt = styled.span`
   font-size: 11px;
 `
 
+// Fond d'un champ invalide : une teinte pâle de theme.error, dérivée du
+// thème plutôt qu'une valeur à part sans rôle dans theme.js (repéré en
+// cartographiant les palettes le 11/09/2026). 1A en hexadécimal alpha (7e-8e
+// chiffre du code couleur) vaut environ 10 % d'opacité.
 const baseInputStyles = css`
   width: 100%;
-  background: ${({ $invalid }) => $invalid ? '#FDF5F3' : theme.white};
+  background: ${({ $invalid }) => $invalid ? `${theme.error}1A` : theme.white};
   border: 1px solid ${({ $invalid }) => $invalid ? theme.error : theme.line};
   border-radius: 6px;
   padding: 13px 15px;
@@ -42,7 +46,7 @@ const baseInputStyles = css`
   appearance: none;
   -webkit-appearance: none;
 
-  &::placeholder { color: #8C7460; }
+  &::placeholder { color: ${theme.sandText}; }
   &:hover { border-color: ${theme.sand}; }
   &:focus {
     border-color: ${theme.brown};
@@ -58,7 +62,7 @@ export const StyledInput = styled.input`
 export const StyledSelect = styled.select`
   ${baseInputStyles}
   cursor: pointer;
-  background-color: ${({ $invalid }) => $invalid ? '#FDF5F3' : theme.white};
+  background-color: ${({ $invalid }) => $invalid ? `${theme.error}1A` : theme.white};
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23705540' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
