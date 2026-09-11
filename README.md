@@ -203,6 +203,19 @@ Maintien de l'environnement actif
 
 Cette solution permet de limiter les temps de réveil de l'environnement de démonstration tout en conservant une infrastructure légère et adaptée à un projet de démonstration.
 
+## Conformité RGPD
+
+Le formulaire collecte de vraies données personnelles auprès de vrais visiteurs, même si les devis générés sont fictifs : le projet le traite comme tel, pas comme un détail de démo.
+
+* **Données collectées** : identité, email, téléphone, société ou adresse (selon le profil), et les choix de café, quantité, fréquence et mouture.
+* **Base légale** : l'exécution de mesures précontractuelles à la demande de la personne concernée (RGPD, art. 6.1.b) — traiter cette demande de devis précise, pas de la prospection commerciale.
+* **Destinataires** : Brevo (envoi des emails, prestataire français/UE) et l'hébergeur du serveur (Render). Aucun autre tiers.
+* **Conservation** : 180 jours à compter de la soumission (30 jours de validité du devis, plus une marge pour une relance ou une négociation), avec purge automatique au-delà (`data/storage.js`, `purgerAnciennes`).
+* **Aucune ressource distante** : ni le formulaire ni les emails ne chargent de police ou de script externe (Google Fonts notamment) — rien ne transmet l'adresse IP ou l'identité d'un visiteur à un tiers sans son consentement.
+* **Droits** : accès, rectification, effacement, exercables via l'adresse indiquée dans la politique de confidentialité.
+
+Détail complet dans la politique de confidentialité de l'application (route `/confidentialite`) et dans `CLAUDE.MD` (section « Conformité RGPD »), qui documente le raisonnement complet : ce qui est collecté, pourquoi, et les alternatives écartées.
+
 ## Règles absolues du projet
 
 Ces règles sont documentées dans `CLAUDE.MD` et appliquées aussi bien en développement qu'en review automatique :
