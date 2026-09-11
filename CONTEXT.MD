@@ -12,7 +12,7 @@
 | PDF Puppeteer (`npm run pdf:test`) | ✅ OK (2026-09-07) |
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
-| Tests client (`npm test`) | ✅ 35/35 (2026-09-11) |
+| Tests client (`npm test`) | ✅ 38/38 (2026-09-11) |
 | Tests serveur (`npm run test:server`) | ✅ 208/208 (2026-09-11) |
 
 ---
@@ -22,7 +22,6 @@
 | Branche | Objet | État |
 |---------|-------|------|
 | `main` | branche principale | active |
-| `feat/convergence-palette` | convergence des trois palettes sur `theme.js` | en cours |
 | `chore/reports-local-agents` | convention reports/local/ pour les 4 agents | mergée (PR #15) |
 | `chore/demo-safety` | mention DÉMO sur le PDF, retrait des coordonnées réelles | mergée (PR #16) |
 | `fix/devis-validation` | validation stricte des entrées du devis | mergée (PR #17) |
@@ -42,8 +41,9 @@
 | `docs/playground-backlog` | retrait du playground du backlog (jamais committé) | mergée (PR #34) |
 | `feat/convergence-palette` | convergence des trois palettes sur `theme.js` | mergée (PR #35) |
 | `chore/scan-arbre-ci` | scan de l'arbre complet en CI contre les coordonnées réelles | mergée (PR #36) |
-| `fix/tiret-footer-email` | tirets cadratins oubliés dans le corps des deux emails | en cours (PR #38) |
+| `fix/tiret-footer-email` | tirets cadratins oubliés dans le corps des deux emails | mergée (PR #38) |
 | `feat/rgpd-conformite` | mentions légales, politique de confidentialité, purge de rétention | mergée (PR #37) |
+| `fix/field-couleurs-hors-theme` | deux couleurs hors `theme.js` dans `Field.jsx` | en cours |
 
 ---
 
@@ -115,7 +115,7 @@ démonstration, pas avant.
 ### Priorité 4 — idée de fond, sans urgence
 
 - [x] Scan de l'arbre complet ajouté en complément de la revue de diff : `scripts/check-coordonnees.js` (`npm run check:coordonnees`), lancé par la CI avant même `npm ci`, et bloquant dans le verrou local. Trois motifs : email hors liste blanche, numéro à 14 chiffres en forme de SIRET, domaine réel de la marque — construit en deux morceaux dans le script pour ne pas se signaler lui-même. Vérifié par mutation sur les trois motifs (les trois tombent), et sur le cas historique exact : un mot nu dans une phrase, sans email ni lien, comme la fuite de la PR #16. Fichiers utilisés (`git ls-files --cached --others --exclude-standard`), pas un parcours de dossiers : un run local voit exactement ce que voit la CI, `.env` et `data/devis.json` inclus. Deux petites dérives trouvées et corrigées au passage pour que le scan parte propre sur `main` : le placeholder `SMTP_USER` documenté dans `CLAUDE.md` avait un domaine hors liste blanche, incohérent avec `.env.example` ; deux fixtures de `formUtils.test.js` avaient elles aussi un domaine hors convention. `.claude/skills/open-pr/SKILL.md` et la règle 6 du prompt de review CI corrigés au passage : l'un annonçait encore ~10 erreurs ESLint sur 4 fichiers (3 sur 1 seul, en réalité, depuis la suppression du playground), l'autre les « trois palettes qui coexistent », périmé depuis la convergence de la PR #35. Décision du 11/09/2026.
-- [ ] `client/src/components/Reusable-ui/Field.jsx` a deux couleurs hors `theme.js` (`#FDF5F3` fond de champ invalide, `#8C7460` placeholder), repérées en cartographiant les palettes le 11/09/2026. Dérive interne à l'app elle-même, indépendante de la convergence PDF/emails — hors périmètre de cette tâche-ci, mais réelle.
+- [x] `client/src/components/Reusable-ui/Field.jsx` avait deux couleurs hors `theme.js` (fond de champ invalide, placeholder), repérées en cartographiant les palettes le 11/09/2026 — une dérive interne à l'app, indépendante de la convergence PDF/emails. Le fond invalide dérive désormais de `theme.error` (teinte à 10 % d'opacité, `${theme.error}1A`) plutôt qu'une valeur à part ; le placeholder réutilise `theme.sandText`, comme les autres textes discrets du fichier (`Opt`, `Hint`). `Field.test.js` verrouille le résultat : aucune couleur en dur dans le fichier, seulement des tokens de `theme.js`. 3 tests, vérifiés par mutation. Décision du 11/09/2026.
 - [ ] `scripts/test-mail.js` n'a pas d'option `--dry-run` et ignore silencieusement tout argument inconnu : lancé avec un flag qui n'existe pas, il envoie quand même de vrais emails via Brevo sans le signaler. Repéré le 11/09/2026 en essayant justement `--dry-run` pour visualiser un rendu HTML sans envoi — deux emails sont partis pour rien. Le script devrait refuser un argument qu'il ne reconnaît pas, plutôt que de l'ignorer.
 
 ### Conformité RGPD (`feat/rgpd-conformite`)
