@@ -35,7 +35,8 @@
 | `feat/devis-etat` | champ d'état, arrêt propre et balayage au démarrage | mergée (PR #25) |
 | `docs/politique-agents` | plus d'audit local sans demande | mergée (PR #26) |
 | `fix/backlog-priorite-3` | lot de petites corrections du backlog | mergée (PR #27) |
-| `fix/storage-plafonds` | archivage du fichier vif, envoi d'emails borné | en cours |
+| `fix/storage-plafonds` | archivage du fichier vif, envoi d'emails borné | mergée (PR #31) |
+| `fix/puce-conditions` | gouttière de la puce des Conditions du PDF | en cours |
 
 ---
 
@@ -43,7 +44,7 @@
 
 - [x] Remplacer les tirets cadratins du devis PDF par la ponctuation adaptée (`templates/devis-template.html`)
 - [x] Mettre CLAUDE.md à jour : le formulaire est une app React dans `client/`, plus `public/index.html`
-- [ ] Décider du sort de la puce `content: '—'` de la liste Conditions (`devis-template.html:501`)
+- [x] Puce `content: '—'` de la liste Conditions gardée : c'est un marqueur de liste, pas de la ponctuation, et le tiret est le marqueur de liste de la typographie française — c'est pourquoi il a survécu au remplacement des tirets cadratins du texte (PR #13). Le vrai défaut était la gouttière : 12 px pour un tiret cadratin large de 10 px à 7,5 pt, soit 2 px entre le tiret et le texte, qui se lisaient « —Ce devis ». Passée à 16 px. Décision du 11/09/2026, prise sur le rendu.
 - [x] Ajouter la mention DÉMO au PDF, comme dans les deux emails (`chore/demo-safety`)
 - [x] Retirer les coordonnées réelles du client de `ux-designer.md` et du workflow de review
 - [x] Trancher l'écart de polices : la charte officielle devient **Crimson Pro + Open Sans**, Cormorant Garamond et Jost sont abandonnés (jamais implémentés). Décision du 07/09/2026.
