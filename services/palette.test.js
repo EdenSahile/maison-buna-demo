@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import THEME from '../client/src/theme.js';
 
 // Verrou de la convergence des palettes (décision du 11/09/2026) : le PDF et
 // les deux emails ne doivent plus employer que les couleurs de theme.js, la
@@ -11,18 +12,16 @@ import { dirname, join } from 'path';
 // délibérément ; ce test empêche qu'une future PR laisse une couleur isolée
 // s'y réintroduire sans qu'on le remarque, comme #AB9679 et #C2B5A5 avant
 // elle — un seul usage chacune, aucun rôle, une dérive pure.
+//
+// THEME est importé, pas recopié : une copie figée ne protégerait que contre
+// la dérive des templates, pas contre celle de theme.js lui-même — la vraie
+// source de vérité pourrait changer sans que ce test s'en aperçoive. Ce
+// fichier tourne dans Vitest racine (Node ESM pur) ; theme.js n'a aucune
+// dépendance React ni JSX, un chemin relatif suffit à l'importer depuis là.
 
 const ici = dirname(fileURLToPath(import.meta.url));
 const lire = (chemin) => readFileSync(join(ici, chemin), 'utf8');
 
-// Recopiées de client/src/theme.js plutôt qu'importées : ce fichier tourne
-// dans Vitest racine (Node ESM pur), theme.js dans le module client/.
-const THEME = {
-  brown: '#4F3422', dark: '#2C1A0E', cream: '#E8DDCC', creamSoft: '#F5EFE6',
-  sand: '#9B8266', sandText: '#705540', sandDark: '#6F5A41',
-  white: '#FAF7F2', formBg: '#FFFFFF', line: '#E5DCCD',
-  accent: '#C8753A', accentText: '#935020', error: '#B0432E', ok: '#5C7A4F',
-};
 const PALETTE_THEME = new Set(Object.values(THEME).map((h) => h.toUpperCase()));
 
 // Le bandeau DÉMO est volontairement hors charte : il vient du même endroit
