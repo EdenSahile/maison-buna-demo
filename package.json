@@ -10,6 +10,7 @@
     "pdf:test": "node scripts/test-pdf.js",
     "mail:test": "node scripts/test-mail.js",
     "check:syntax": "node scripts/check-syntax.js",
+    "check:coordonnees": "node scripts/check-coordonnees.js",
     "docs:generate": "node scripts/generate-docs.js",
     "test": "cd client && npm test",
     "postinstall": "npx puppeteer browsers install chrome",

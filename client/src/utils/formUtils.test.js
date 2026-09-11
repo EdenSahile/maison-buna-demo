@@ -4,14 +4,14 @@ import { validate, computeStepProgress, buildPayload } from './formUtils'
 const baseEnt = {
   societe: 'Acme', secteur: 'Tech / Startup', collaborateurs: '11 – 25',
   adresse: '', codepostal: '', ville: 'Paris',
-  prenom: 'Jean', nom: 'Dupont', email: 'jean@acme.fr', telephone: '',
+  prenom: 'Jean', nom: 'Dupont', email: 'jean@example.fr', telephone: '',
   cafes: ['Limmu'], quantiteParCafe: { Limmu: '1 – 3 kg' }, frequence: '', moutures: [], message: '',
 }
 
 const basePart = {
   societe: '', secteur: '', collaborateurs: '',
   adresse: '12 rue de la Paix', codepostal: '75001', ville: 'Paris',
-  prenom: 'Marie', nom: 'Martin', email: 'marie@email.fr', telephone: '',
+  prenom: 'Marie', nom: 'Martin', email: 'marie@example.fr', telephone: '',
   cafes: ['Sidamo'], quantiteParCafe: { Sidamo: '500 g — 1 personne' }, frequence: '', moutures: [], message: '',
 }
 

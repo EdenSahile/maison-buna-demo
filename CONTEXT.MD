@@ -38,7 +38,10 @@
 | `fix/backlog-priorite-3` | lot de petites corrections du backlog | mergée (PR #27) |
 | `fix/storage-plafonds` | archivage du fichier vif, envoi d'emails borné | mergée (PR #31) |
 | `fix/puce-conditions` | gouttière de la puce des Conditions du PDF | mergée (PR #32) |
-| `fix/polices-locales` | polices du formulaire servies par l'app, plus par Google | en cours |
+| `fix/polices-locales` | polices du formulaire servies par l'app, plus par Google | mergée (PR #33) |
+| `docs/playground-backlog` | retrait du playground du backlog (jamais committé) | mergée (PR #34) |
+| `feat/convergence-palette` | convergence des trois palettes sur `theme.js` | mergée (PR #35) |
+| `chore/scan-arbre-ci` | scan de l'arbre complet en CI contre les coordonnées réelles | en cours |
 
 ---
 
@@ -108,6 +111,6 @@ démonstration, pas avant.
 
 ### Priorité 4 — idée de fond, sans urgence
 
-- [ ] La revue de CI n'analyse que le diff, donc elle ne verra jamais un défaut déjà présent dans un fichier que personne ne modifie. C'est ce qui a permis à une adresse réelle de survivre plusieurs PR. Ajouter un scan de l'arbre complet en complément.
+- [x] Scan de l'arbre complet ajouté en complément de la revue de diff : `scripts/check-coordonnees.js` (`npm run check:coordonnees`), lancé par la CI avant même `npm ci`, et bloquant dans le verrou local. Trois motifs : email hors liste blanche, numéro à 14 chiffres en forme de SIRET, domaine réel de la marque — construit en deux morceaux dans le script pour ne pas se signaler lui-même. Vérifié par mutation sur les trois motifs (les trois tombent), et sur le cas historique exact : un mot nu dans une phrase, sans email ni lien, comme la fuite de la PR #16. Fichiers utilisés (`git ls-files --cached --others --exclude-standard`), pas un parcours de dossiers : un run local voit exactement ce que voit la CI, `.env` et `data/devis.json` inclus. Deux petites dérives trouvées et corrigées au passage pour que le scan parte propre sur `main` : le placeholder `SMTP_USER` documenté dans `CLAUDE.md` avait un domaine hors liste blanche, incohérent avec `.env.example` ; deux fixtures de `formUtils.test.js` avaient elles aussi un domaine hors convention. `.claude/skills/open-pr/SKILL.md` et la règle 6 du prompt de review CI corrigés au passage : l'un annonçait encore ~10 erreurs ESLint sur 4 fichiers (3 sur 1 seul, en réalité, depuis la suppression du playground), l'autre les « trois palettes qui coexistent », périmé depuis la convergence de la PR #35. Décision du 11/09/2026.
 - [ ] `client/src/components/Reusable-ui/Field.jsx` a deux couleurs hors `theme.js` (`#FDF5F3` fond de champ invalide, `#8C7460` placeholder), repérées en cartographiant les palettes le 11/09/2026. Dérive interne à l'app elle-même, indépendante de la convergence PDF/emails — hors périmètre de cette tâche-ci, mais réelle.
 - [ ] `scripts/test-mail.js` n'a pas d'option `--dry-run` et ignore silencieusement tout argument inconnu : lancé avec un flag qui n'existe pas, il envoie quand même de vrais emails via Brevo sans le signaler. Repéré le 11/09/2026 en essayant justement `--dry-run` pour visualiser un rendu HTML sans envoi — deux emails sont partis pour rien. Le script devrait refuser un argument qu'il ne reconnaît pas, plutôt que de l'ignorer.
