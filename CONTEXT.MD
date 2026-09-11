@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 131/131 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 169/169 (2026-09-10) |
 
 ---
 
@@ -26,11 +26,13 @@
 | `chore/demo-safety` | mention DÉMO sur le PDF, retrait des coordonnées réelles | mergée (PR #16) |
 | `fix/devis-validation` | validation stricte des entrées du devis | mergée (PR #17) |
 | `docs/context-backlog` | remise à jour de CONTEXT.MD et backlog | mergée (PR #18) |
-| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | PR #19 ouverte |
-| `docs/pipeline-testeur` | suppression de l'étape Testeur | PR #20 ouverte |
+| `fix/server-hardening` | statut d'erreur relayé, concurrence PDF bornée | mergée (PR #19) |
+| `docs/pipeline-testeur` | suppression de l'étape Testeur | mergée (PR #20) |
 | `fix/file-attente-plafond` | saturation convertie en attente, plus en échec | mergée (PR #21) |
 | `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | mergée (PR #22) |
-| `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | en cours |
+| `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | mergée (PR #23) |
+| `docs/claude-md` | CLAUDE.MD remis au niveau du code | mergée (PR #24) |
+| `feat/devis-etat` | champ d'état, arrêt propre et balayage au démarrage | en cours |
 
 ---
 
@@ -53,9 +55,9 @@
 - [x] `services/pdfService.js` : concurrence bornée à 2, file d'attente de 10, timeout de 45 s par génération, refus immédiat au-delà de la file. Limite choisie sur mesure : ~100 Mo par instance Chromium concurrente, ~500 ms par génération. Audité le 09/09/2026.
 - [x] `routes/devis.js` traitait `FileSatureeError` comme une panne ordinaire. La saturation est convertie en attente : plafond de 300 s en file, rejet seulement au-delà. Décision du 10/09/2026.
 - [x] Règle absolue n°4 tenue sur le chemin d'abandon : le client reçoit son email même sans PDF, et les templates annoncent la pièce jointe d'après sa présence réelle et non d'après `sur_devis`.
-- [ ] Aucun champ d'état dans `data/devis.json` : un redémarrage pendant l'attente en file perd le PDF et les emails de jusqu'à 52 devis, sans moyen de les retrouver. Relevé par l'audit du 10/09/2026 ; l'absence de gestion de SIGTERM allonge cette fenêtre à 300 s.
+- [x] Champ `etat` dans `data/devis.json`, cinq valeurs définies dans `ETATS`, plus `etat_maj` et `etat_erreur`. SIGTERM et SIGINT marquent « interrompu » tout ce qui était en cours avant de fermer le serveur. Les demandes à relancer à la main sont désormais retrouvables.
 - [x] `trust proxy` est réglable par `TRUST_PROXY`, valeur par défaut 1, via le lecteur d'environnement extrait dans `config/env.js`.
-- [ ] `data/storage.js:8-17` relit et réécrit `data/devis.json` en synchrone à chaque demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
+- [ ] `data/storage.js` relit et réécrit `data/devis.json` en entier à chaque appel, désormais deux fois par demande, et l'envoi des deux emails n'a aucun plafond global. La génération de PDF est bornée, le stockage et l'envoi ne le sont pas.
 
 ### Priorité 2 — documentation périmée (`docs/claude-md`)
 
@@ -65,6 +67,9 @@
 - [x] La section « Commandes utiles » liste les treize scripts, avec l'avertissement sur `mail:test` qui envoie de vrais emails, et le rappel que `npm run dev` ne sert pas le formulaire. Les variables d'environnement et l'arborescence sont également remises à jour.
 
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
+
+- [ ] `data/storage.js` fait deux cycles lecture/écriture complets par demande, synchrones donc bloquants (~6 ms à 685 ko, linéaire avec la taille), et rien ne plafonne le nombre d'enregistrements. Relevé par l'audit du 10/09/2026.
+- [ ] Un état intermédiaire `envoi_en_cours` lèverait l'ambiguïté d'`interrompu` : aujourd'hui, un signal reçu entre l'acceptation SMTP et l'enregistrement marque « interrompu » une demande dont les emails sont partis.
 
 - [ ] Les deux emails chargent leurs polices depuis `fonts.googleapis.com` par `@import` : à l'ouverture, l'adresse IP du destinataire, son User-Agent et l'horodatage partent chez Google, sans son consentement. Dette antérieure à la PR #23, qui ne fait qu'en changer les noms de familles. Le tribunal régional de Munich I a jugé ce point contraire au RGPD le 20/01/2022 (3 O 17493/20). Correction : intégrer les polices en base64 dans les templates d'email, comme le fait déjà `templates/devis-template.html`.
 

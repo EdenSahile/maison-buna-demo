@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import crypto from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, renameSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { saveDevis } from '../data/storage.js';
+import { saveDevis, majEtat, ETATS } from '../data/storage.js';
 import { generatePDF, BUDGET_PDF_MS } from '../services/pdfService.js';
 import { sendDevisEmails, sendPdfFailureAlert } from '../services/mailService.js';
 
@@ -22,7 +22,11 @@ function nextDevisNumero(isParticulier) {
   }
   _counter++;
   try {
-    writeFileSync(counterPath, JSON.stringify({ counter: _counter }));
+    // Même précaution que pour data/devis.json : un compteur tronqué repart à
+    // zéro par le catch de la lecture, donc deux devis au même numéro.
+    const temporaire = `${counterPath}.tmp`;
+    writeFileSync(temporaire, JSON.stringify({ counter: _counter }));
+    renameSync(temporaire, counterPath);
   } catch (err) {
     console.error(`Compteur non persisté (${err.message}) — dérive possible entre mémoire et disque.`);
   }
@@ -145,6 +149,22 @@ function buildQuantiteResume(quantiteParCafe, cafes) {
   }).join(' · ');
 }
 
+// L'enregistrement de l'état ne doit jamais faire tomber le traitement de
+// fond : sur un disque plein, majEtat levait dans le try, le catch le rappelait,
+// et le rejet sortait du setImmediate sans personne pour le rattraper — le
+// processus s'arrêtait, et toutes les demandes en vol restaient « en cours ».
+function noterEtat(id, etat, details = {}) {
+  try {
+    // majEtat rend false sur un id introuvable : sans ce test, la demande
+    // gardait un état périmé et rien ne le signalait.
+    if (!majEtat(id, etat, details)) {
+      console.error(`État non enregistré id:${id} (${etat}) : demande introuvable en base.`);
+    }
+  } catch (err) {
+    console.error(`État non enregistré id:${id} (${etat}) : ${err.message}`);
+  }
+}
+
 router.post('/devis', async (req, res) => {
   try {
     if (!req.is('application/json')) return res.status(415).json({ error: 'Content-Type application/json requis' });
@@ -251,6 +271,9 @@ router.post('/devis', async (req, res) => {
 
     setImmediate(async () => {
       let pdfBuffer = null;
+      // Distinct de « pdfBuffer est nul » : une demande sur mesure n'attend
+      // aucun PDF, elle n'a donc rien à relancer à la main.
+      let pdfEchoue = false;
       if (!devis.sur_devis) {
         const retryDelays = [0, 5000, 10000];
         // Chaque tentative peut repartir pour un tour complet de file. Sans
@@ -283,6 +306,7 @@ router.post('/devis', async (req, res) => {
           }
         }
         if (!success) {
+          pdfEchoue = true;
           // Règle absolue n°4 : deux emails, quoi qu'il arrive. La demande est
           // enregistrée et le client a vu un écran de confirmation — ne rien
           // lui envoyer serait le pire des cas. Il reçoit donc son email sans
@@ -295,8 +319,13 @@ router.post('/devis', async (req, res) => {
       }
       try {
         await sendDevisEmails(devis, pdfBuffer);
+        noterEtat(devis.id, pdfEchoue ? ETATS.ENVOYE_SANS_PDF : ETATS.ENVOYE);
       } catch (err) {
-        console.error(`Erreur email id:${devis.id} :`, err.message);
+        console.error(`Erreur email id:${devis.id} : ${err.message}`);
+        // Second garde-fou : ce champ est le seul de l'enregistrement dont le
+        // contenu ne vient pas du formulaire, donc le seul non plafonné par
+        // MAX_LENGTHS.
+        noterEtat(devis.id, ETATS.ECHEC_ENVOI, { etat_erreur: String(err.message).slice(0, 300) });
       }
     });
   } catch (err) {
