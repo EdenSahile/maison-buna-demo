@@ -217,12 +217,6 @@ réapparaît, et que chaque `@font-face` pointe vers un fichier présent — une
 police manquante ne casse rien de visible, le navigateur retombe en silence
 sur la pile de repli.
 
-**`client/src/playground/index.html` charge encore Google Fonts**, et des
-polices abandonnées par la charte (Cormorant Garamond, Inter). Ce dossier
-n'est référencé ni par `App.jsx`, ni par `main.jsx`, ni par `vite.config.js` :
-il n'est jamais construit ni servi. À traiter à part, en décidant d'abord si
-ce dossier a encore une raison d'être.
-
 ### Les emails
 
 Les deux templates d'email ne chargent **aucune police ni feuille de style
