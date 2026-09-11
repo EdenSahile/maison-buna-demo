@@ -21,16 +21,16 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background-color: #ECE7DE;
+      background-color: #F5EFE6;
       font-family: 'Open Sans', Verdana, system-ui, sans-serif;
-      color: #2E2016;
+      color: #2C1A0E;
       padding: 40px 16px 80px;
       -webkit-font-smoothing: antialiased;
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
     }
 
-    a { color: #6B5040; text-decoration: none; }
+    a { color: #6F5A41; text-decoration: none; }
 
     .email-wrapper {
       max-width: 640px;
@@ -51,7 +51,7 @@
       font-size: 14px;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: #2E2016;
+      color: #2C1A0E;
       margin-bottom: 8px;
     }
 
@@ -62,13 +62,13 @@
       font-size: 14px;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: #2E2016;
+      color: #2C1A0E;
     }
 
     .brand-name small {
       display: block;
       font-size: 11px;
-      color: #9C7E60;
+      color: #705540;
       letter-spacing: 0.5px;
       margin-top: 1px;
     }
@@ -78,31 +78,31 @@
       font-weight: 600;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #9C7E60;
-      border: 1px solid #DDD5C8;
+      color: #705540;
+      border: 1px solid #E5DCCD;
       padding: 5px 10px;
       border-radius: 3px;
-      background-color: #F5F1EB;
+      background-color: #FAF7F2;
     }
 
     /* ── Card ── */
     .email-card {
-      background-color: #F5F1EB;
-      border: 1px solid #DDD5C8;
+      background-color: #FAF7F2;
+      border: 1px solid #E5DCCD;
       border-radius: 4px;
       overflow: hidden;
     }
 
     /* ── Banner ── */
     .notification-banner {
-      background-color: #EAE4DB;
-      border-bottom: 1px solid #DDD5C8;
+      background-color: #F5EFE6;
+      border-bottom: 1px solid #E5DCCD;
     }
 
     .banner-title {
       font-family: 'Crimson Pro', Georgia, serif;
       font-size: 20px;
-      color: #2E2016;
+      color: #2C1A0E;
       letter-spacing: 0.2px;
     }
 
@@ -113,13 +113,13 @@
 
     .banner-date {
       font-size: 12px;
-      color: #4A3828;
+      color: #4F3422;
       display: block;
     }
 
     .banner-ref {
       font-size: 10px;
-      color: #9C7E60;
+      color: #705540;
       letter-spacing: 0.5px;
       display: block;
       margin-top: 2px;
@@ -136,10 +136,10 @@
       font-weight: 600;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: #9C7E60;
+      color: #705540;
       margin-bottom: 14px;
       padding: 8px 12px;
-      background-color: #EAE4DB;
+      background-color: #F5EFE6;
       border-radius: 3px;
     }
 
@@ -157,7 +157,7 @@
       grid-template-columns: 160px 1fr;
       gap: 16px;
       padding: 14px 0;
-      border-bottom: 1px solid #E8E2D9;
+      border-bottom: 1px solid #E5DCCD;
       align-items: baseline;
     }
 
@@ -170,14 +170,14 @@
       font-weight: 600;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #9C7E60;
+      color: #705540;
       padding-top: 2px;
     }
 
     .recap-value {
       font-size: 15px;
       font-weight: 400;
-      color: #2E2016;
+      color: #2C1A0E;
     }
 
     .recap-value.large {
@@ -187,26 +187,26 @@
 
     .recap-value.muted {
       font-size: 13px;
-      color: #6B5040;
+      color: #6F5A41;
     }
 
     /* Le span.empty est imbriqué dans .recap-value, il n'en porte pas la
        classe : .recap-value.empty ne visait donc rien. */
     .recap-value .empty {
       font-size: 13px;
-      color: #C2B5A5;
+      color: #9B8266;
       font-style: italic;
     }
 
     .recap-value a {
-      color: #4A3828;
+      color: #4F3422;
       text-decoration: underline;
     }
 
     .mouture-tag {
       display: inline-block;
-      background-color: #E6DDD3;
-      color: #6B5040;
+      background-color: #E8DDCC;
+      color: #6F5A41;
       font-size: 12px;
       font-weight: 500;
       padding: 4px 10px;
@@ -219,13 +219,15 @@
     /* ── Message libre ── */
     .message-block {
       padding: 18px 22px;
-      background-color: #EAE4DB;
-      border-left: 2px solid #3A2314;
+      background-color: #F5EFE6;
+      /* Seul accent de la palette dans les emails : la barre du message libre
+         du client. theme.accent (#C8753A), pas une nuance de brun. */
+      border-left: 2px solid #C8753A;
     }
 
     .message-block p {
       font-size: 14px;
-      color: #2E2016;
+      color: #2C1A0E;
       line-height: 1.75;
       font-style: italic;
     }
@@ -233,22 +235,22 @@
     /* ── Statut PDF ── */
     .pdf-status {
       padding: 14px 20px;
-      background-color: #EAE4DB;
-      border: 1px solid #DDD5C8;
+      background-color: #F5EFE6;
+      border: 1px solid #E5DCCD;
       border-radius: 3px;
     }
 
     .pdf-status p {
       font-size: 12px;
-      color: #4A3828;
+      color: #4F3422;
       line-height: 1.6;
     }
 
     /* ── Footer ── */
     .email-footer {
       padding: 22px 48px;
-      background-color: #EAE4DB;
-      border-top: 1px solid #DDD5C8;
+      background-color: #F5EFE6;
+      border-top: 1px solid #E5DCCD;
       text-align: center;
     }
 
@@ -257,18 +259,18 @@
       font-weight: 700;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: #2E2016;
+      color: #2C1A0E;
       margin-bottom: 4px;
     }
 
     .footer-sub {
       font-size: 10px;
-      color: #9C7E60;
+      color: #705540;
       letter-spacing: 0.5px;
     }
 
     .footer-sub a {
-      color: #9C7E60;
+      color: #705540;
       text-decoration: none;
     }
   </style>
