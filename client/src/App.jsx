@@ -1,4 +1,14 @@
 import DevisForm from './components/DevisForm'
+import MentionsLegales from './pages/MentionsLegales'
+import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite'
+
+// Pas de bibliothèque de routage pour deux pages statiques : la catch-all de
+// server.js et le comportement SPA par défaut de Vite servent déjà index.html
+// pour n'importe quel chemin, il suffit de lire window.location.pathname.
+const PAGES = {
+  '/mentions-legales': MentionsLegales,
+  '/confidentialite': PolitiqueConfidentialite,
+}
 
 const demoBanner = {
   position: 'sticky',
@@ -14,6 +24,9 @@ const demoBanner = {
 }
 
 export default function App() {
+  const Page = PAGES[window.location.pathname]
+  if (Page) return <Page />
+
   return (
     <>
       <div style={demoBanner}>

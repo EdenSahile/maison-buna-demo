@@ -12,8 +12,8 @@
 | PDF Puppeteer (`npm run pdf:test`) | ✅ OK (2026-09-07) |
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
-| Tests client (`npm test`) | ✅ 25/25 (2026-09-11) |
-| Tests serveur (`npm run test:server`) | ✅ 194/194 (2026-09-11) |
+| Tests client (`npm test`) | ✅ 34/34 (2026-09-11) |
+| Tests serveur (`npm run test:server`) | ✅ 208/208 (2026-09-11) |
 
 ---
 
@@ -41,7 +41,9 @@
 | `fix/polices-locales` | polices du formulaire servies par l'app, plus par Google | mergée (PR #33) |
 | `docs/playground-backlog` | retrait du playground du backlog (jamais committé) | mergée (PR #34) |
 | `feat/convergence-palette` | convergence des trois palettes sur `theme.js` | mergée (PR #35) |
-| `chore/scan-arbre-ci` | scan de l'arbre complet en CI contre les coordonnées réelles | en cours |
+| `chore/scan-arbre-ci` | scan de l'arbre complet en CI contre les coordonnées réelles | mergée (PR #36) |
+| `fix/tiret-footer-email` | tirets cadratins oubliés dans le corps des emails | à pousser |
+| `feat/rgpd-conformite` | mentions légales, politique de confidentialité, purge de rétention | en cours |
 
 ---
 
@@ -114,3 +116,13 @@ démonstration, pas avant.
 - [x] Scan de l'arbre complet ajouté en complément de la revue de diff : `scripts/check-coordonnees.js` (`npm run check:coordonnees`), lancé par la CI avant même `npm ci`, et bloquant dans le verrou local. Trois motifs : email hors liste blanche, numéro à 14 chiffres en forme de SIRET, domaine réel de la marque — construit en deux morceaux dans le script pour ne pas se signaler lui-même. Vérifié par mutation sur les trois motifs (les trois tombent), et sur le cas historique exact : un mot nu dans une phrase, sans email ni lien, comme la fuite de la PR #16. Fichiers utilisés (`git ls-files --cached --others --exclude-standard`), pas un parcours de dossiers : un run local voit exactement ce que voit la CI, `.env` et `data/devis.json` inclus. Deux petites dérives trouvées et corrigées au passage pour que le scan parte propre sur `main` : le placeholder `SMTP_USER` documenté dans `CLAUDE.md` avait un domaine hors liste blanche, incohérent avec `.env.example` ; deux fixtures de `formUtils.test.js` avaient elles aussi un domaine hors convention. `.claude/skills/open-pr/SKILL.md` et la règle 6 du prompt de review CI corrigés au passage : l'un annonçait encore ~10 erreurs ESLint sur 4 fichiers (3 sur 1 seul, en réalité, depuis la suppression du playground), l'autre les « trois palettes qui coexistent », périmé depuis la convergence de la PR #35. Décision du 11/09/2026.
 - [ ] `client/src/components/Reusable-ui/Field.jsx` a deux couleurs hors `theme.js` (`#FDF5F3` fond de champ invalide, `#8C7460` placeholder), repérées en cartographiant les palettes le 11/09/2026. Dérive interne à l'app elle-même, indépendante de la convergence PDF/emails — hors périmètre de cette tâche-ci, mais réelle.
 - [ ] `scripts/test-mail.js` n'a pas d'option `--dry-run` et ignore silencieusement tout argument inconnu : lancé avec un flag qui n'existe pas, il envoie quand même de vrais emails via Brevo sans le signaler. Repéré le 11/09/2026 en essayant justement `--dry-run` pour visualiser un rendu HTML sans envoi — deux emails sont partis pour rien. Le script devrait refuser un argument qu'il ne reconnaît pas, plutôt que de l'ignorer.
+
+### Conformité RGPD (`feat/rgpd-conformite`)
+
+- [x] Le formulaire recueille de vraies données personnelles (même si les devis générés sont fictifs) : analyse complète faite le 11/09/2026 avant tout code — ce qui est collecté, base légale, destinataires, durée. Voir `CLAUDE.md`, « Conformité RGPD », pour le détail motivé.
+- [x] Durée de conservation tranchée avec l'utilisateur : 180 jours à compter de la soumission (30 jours de validité du devis + marge pour une relance), pas les 3 ans habituels de la prospection commerciale — ce n'en est pas, la finalité est de traiter cette demande précise, pas de garder un fichier de prospects.
+- [x] `data/storage.js` (`purgerAnciennes`) : supprime les demandes de plus de `DEVIS_RETENTION_JOURS` jours (180 par défaut), fichier vif et archives compris, sans exception d'état — passé le délai, même une demande restée bloquée `en_cours` n'a plus de raison de garder ses données. Un timestamp illisible est gardé, jamais supprimé par erreur. Appelée au démarrage puis une fois par jour (`server.js`). 14 tests, vérifiés par mutation.
+- [x] `client/src/pages/PolitiqueConfidentialite.jsx` et `MentionsLegales.jsx`, aux routes `/confidentialite` et `/mentions-legales` — pas de bibliothèque de routage, `App.jsx` lit `window.location.pathname` (la catch-all de `server.js` et le comportement SPA par défaut de Vite couvrent les deux en dev comme en prod). Identité reprise telle quelle du PDF et des emails, aucune nouvelle coordonnée inventée.
+- [x] Liens visibles depuis le formulaire (pied de page, après le bouton d'envoi) et l'écran de confirmation, dans un nouvel onglet pour ne pas perdre la saisie en cours. Une phrase de renvoi vers la politique juste avant le bouton d'envoi.
+- [x] 9 tests de contenu (`client/src/pages/legal.test.js`) : durée affichée, destinataires réels et non un tiers publicitaire, contact présent, base légale énoncée, routes câblées des deux côtés. Vérifiés par mutation.
+- [x] `.env.example` et `CLAUDE.md` documentent `DEVIS_RETENTION_JOURS`.

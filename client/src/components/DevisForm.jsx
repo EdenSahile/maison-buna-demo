@@ -8,6 +8,7 @@ import SectionContact from "./SectionContact";
 import SectionCommande from "./SectionCommande";
 import SectionPrecisions from "./SectionPrecisions";
 import SuccessView from "./SuccessView";
+import LegalLinks from "./LegalLinks";
 import { PrimaryButton } from "./Reusable-ui/Button";
 import {
   validate,
@@ -99,6 +100,19 @@ const SubmitNote = styled.p`
   strong {
     color: ${theme.brown};
     font-weight: 600;
+  }
+`;
+
+const ConsentNote = styled.p`
+  font-family: "Open Sans", system-ui, sans-serif;
+  font-size: 12px;
+  color: ${theme.sandText};
+  margin-top: 12px;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 `;
 
@@ -232,11 +246,17 @@ export default function DevisForm() {
           />
 
           <SubmitArea>
-            <SubmitNote>
-              <strong>Réponse rapide, adaptée à vos besoins</strong>
-              <br />
-              Devis immédiat ou accompagnement personnalisé sous 48 h pour toute demande sur mesure.
-            </SubmitNote>
+            <div style={{ maxWidth: 400 }}>
+              <SubmitNote>
+                <strong>Réponse rapide, adaptée à vos besoins</strong>
+                <br />
+                Devis immédiat ou accompagnement personnalisé sous 48 h pour toute demande sur mesure.
+              </SubmitNote>
+              <ConsentNote>
+                En envoyant ce formulaire, vous acceptez notre{" "}
+                <a href="/confidentialite" target="_blank" rel="noreferrer">politique de confidentialité</a>.
+              </ConsentNote>
+            </div>
             <PrimaryButton type="submit" disabled={loading}>
               <span>{loading ? "Envoi en cours…" : "Demander mon devis"}</span>
               {!loading && (
@@ -253,6 +273,8 @@ export default function DevisForm() {
             </PrimaryButton>
           </SubmitArea>
         </form>
+
+        <LegalLinks />
       </FormArea>
     </Shell>
   );
