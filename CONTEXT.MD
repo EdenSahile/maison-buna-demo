@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 169/169 (2026-09-10) |
+| Tests serveur (`npm run test:server`) | ✅ 170/170 (2026-09-11) |
 
 ---
 
@@ -32,7 +32,9 @@
 | `chore/ci-config` | contrôle de syntaxe unifié, trust proxy configurable | mergée (PR #22) |
 | `docs/charte-polices` | charte alignée sur Crimson Pro + Open Sans | mergée (PR #23) |
 | `docs/claude-md` | CLAUDE.MD remis au niveau du code | mergée (PR #24) |
-| `feat/devis-etat` | champ d'état, arrêt propre et balayage au démarrage | en cours |
+| `feat/devis-etat` | champ d'état, arrêt propre et balayage au démarrage | mergée (PR #25) |
+| `docs/politique-agents` | plus d'audit local sans demande | mergée (PR #26) |
+| `fix/backlog-priorite-3` | lot de petites corrections du backlog | en cours |
 
 ---
 
@@ -73,14 +75,14 @@
 
 - [x] Plus aucune ressource distante dans les emails : l'`@import` vers Google Fonts est retiré, les piles de repli suffisent. L'intégration en base64 envisagée au départ était impraticable — les blocs du PDF pèsent 1410 Ko pour une limite Gmail de 102 Ko, et les clients de messagerie ignorent `@font-face`. Un test vérifie qu'aucune ressource distante ne réapparaît.
 
-- [ ] `.env.example:4,8` utilise `email.com` et les scripts de test `gmail.com` : deux domaines réels, là où la règle 8 demande `example.com`. Relevé par l'audit du 10/09/2026.
+- [x] Tous les domaines d'exemple passent à `example.com`, seul domaine réservé par la RFC 2606 parmi ceux employés : `.env.example`, les fixtures de test et les scripts PDF.
 
-- [ ] Tirets cadratins restants dans `email-client.html:268` et `email-admin.html:288`, à aligner sur la ponctuation du PDF (PR #13)
-- [ ] `README.md:211` mentionne encore `public/index.html`, troisième endroit désynchronisé après `ux-designer.md` et le workflow
-- [ ] Migrer les adresses `fictif.com` des fixtures vers `example.com` : seuls `example.com`, `.org` et `.net` sont réservés par la RFC 2606, `fictif.com` est enregistrable par un tiers. Concernés : `marie@cafeducoin.fr` dans deux fichiers de test, `sophie.martin@gmail.com` et `marie.dupont@gmail.com` dans les scripts de test PDF. Le seul cas qui envoyait vraiment, `scripts/test-mail.js:11`, est déjà corrigé.
-- [ ] `templates/email-admin.html:192` : le sélecteur `.recap-value.empty` ne vise pas les `<span class="empty">` imbriqués, donc « Non renseigné » n'est ni italique ni gris. Sans rapport avec les polices, relevé par la revue du 10/09/2026.
-- [ ] Message d'erreur trompeur : `['Limmu','Sidamo','Yirgacheffe','Limmu']` renvoie « 3 valeurs maximum » alors que la vraie cause est le doublon
-- [ ] `.claude/skills/open-pr/SKILL.md:66` expose une arborescence locale (`.../Documents/Claude/maison-buna-demo/…`) dans un dépôt public. Chemin tronqué, sans `/Users/<nom>`, donc pas de nom d'utilisateur exposé — la ligne 67 voisine en contient un second pour le dépôt prod.
+- [x] Tirets cadratins des deux bandeaux DÉMO alignés sur la ponctuation du PDF.
+- [x] `README.md` ne mentionne plus `public/index.html` : c'était le dernier endroit désynchronisé.
+- [x] Fixtures migrées vers `example.com`. Les `fictif.com` des templates et du PDF restent : ce sont les coordonnées affichées de la démo, pas des valeurs de test.
+- [x] Sélecteur `.recap-value .empty` corrigé : « Non renseigné » est de nouveau italique et gris.
+- [x] Les doublons sont testés avant la longueur : le message nomme la vraie cause.
+- [x] Chemins locaux retirés de la skill `open-pr`, et le nom du dépôt démo corrigé au passage : la table annonçait `maison-buna`, le remote est `maison-buna-demo`.
 - [ ] Avant de corriger les 8 couleurs hors charte du CSS du PDF, auditer les couleurs réellement utilisées dans chaque artefact. Même piège que pour les polices : si la charte couleur documentée est périmée, « corriger » alignerait du code correct sur une référence fictive.
 
 ### Solution cible — le jour où ce code servira en production réelle

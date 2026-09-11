@@ -197,11 +197,13 @@ router.post('/devis', async (req, res) => {
     if (!nom?.trim())    return res.status(400).json({ error: 'Champ manquant : nom' });
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Email invalide' });
     if (!Array.isArray(cafes) || cafes.length === 0) return res.status(400).json({ error: 'Champ manquant : cafes' });
-    if (cafes.length > MAX_CAFES) {
-      return res.status(400).json({ error: `Champ invalide : cafes (${MAX_CAFES} valeurs maximum)` });
-    }
+    // Doublons d'abord : quatre cafés dont un répété annonçait « 3 valeurs
+    // maximum », alors que la vraie cause est la répétition.
     if (new Set(cafes).size !== cafes.length) {
       return res.status(400).json({ error: 'Champ invalide : cafes (doublons)' });
+    }
+    if (cafes.length > MAX_CAFES) {
+      return res.status(400).json({ error: `Champ invalide : cafes (${MAX_CAFES} valeurs maximum)` });
     }
     if (!quantiteParCafe || typeof quantiteParCafe !== 'object' || Array.isArray(quantiteParCafe)) {
       return res.status(400).json({ error: 'Champ manquant : quantiteParCafe' });
