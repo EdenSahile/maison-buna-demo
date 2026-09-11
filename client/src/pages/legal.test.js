@@ -11,12 +11,18 @@ const mentions = lire('./MentionsLegales.jsx');
 const app = lire('../App.jsx');
 const legalLinks = lire('../components/LegalLinks.jsx');
 const devisForm = lire('../components/DevisForm.jsx');
+const scanCoordonnees = lire('../../../scripts/check-coordonnees.js');
 
 // La durée est aussi le défaut de DEVIS_RETENTION_JOURS (data/storage.js,
 // .env.example) : rien ne les lie automatiquement, un changement de l'un
 // doit se répercuter dans l'autre à la main. Voir CLAUDE.md,
 // « Conformité RGPD ».
 const JOURS_RETENTION_ATTENDUS = '180';
+
+// La seule vraie adresse du site, publiée volontairement pour ce seul usage
+// (décision du 11/09/2026) : pas le contact fictif de la démo, utilisé
+// partout ailleurs (PDF, emails, mentions légales).
+const CONTACT_RGPD = 'edensahile12@gmail.com';
 
 describe('Politique de confidentialité — contenu', () => {
   it('donne la durée de conservation réelle', () => {
@@ -28,8 +34,21 @@ describe('Politique de confidentialité — contenu', () => {
     expect(confidentialite).not.toMatch(/google analytics|facebook|pixel/i);
   });
 
-  it('donne un moyen de contact pour les droits, sur la liste blanche', () => {
-    expect(confidentialite).toContain('contact@fictif.com');
+  it('donne un vrai moyen de contact pour les droits, pas l adresse fictive de la démo', () => {
+    // contact@fictif.com ne va nulle part : une vraie demande de suppression
+    // envoyée là n'arriverait à personne. Voir CLAUDE.md, « Conformité RGPD ».
+    expect(confidentialite).toContain(CONTACT_RGPD);
+    expect(confidentialite).not.toContain('contact@fictif.com');
+  });
+
+  it('la vraie adresse est déclarée dans le scan de coordonnées, pas juste tolérée par accident', () => {
+    // Sans ça, npm run check:coordonnees casserait sur sa propre adresse de
+    // contact RGPD à chaque exécution. Vise précisément le bloc
+    // EMAILS_AUTORISES : l'adresse apparaît aussi dans un commentaire au-dessus,
+    // qui seul ne suffirait pas à l'autoriser.
+    const bloc = scanCoordonnees.match(/EMAILS_AUTORISES = new Set\(\[([\s\S]*?)\]\)/)?.[1];
+    expect(bloc, 'bloc EMAILS_AUTORISES introuvable dans check-coordonnees.js').toBeDefined();
+    expect(bloc).toContain(CONTACT_RGPD);
   });
 
   it('énonce la base légale, pas juste "on garde vos données"', () => {
