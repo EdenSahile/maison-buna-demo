@@ -49,24 +49,30 @@ error: '#B0432E'      ok: '#5C7A4F'
 `sandText`, et `accentText` plutôt que `accent` sur petit texte : c'est ce qui
 tient les ratios d'accessibilité.
 
-### Trois palettes coexistent, c'est un état de fait à ne pas « corriger »
+### Les trois palettes ont convergé sur `theme.js`
 
-| Artefact | Couleurs distinctes | Dominantes |
-|---|---|---|
-| `client/src/` | 14, dans `theme.js` | `#4F3422`, `#2C1A0E`, `#9B8266`, `#FAF7F2` |
-| `templates/devis-template.html` | 12 | `#9B8266`, `#E5DCCD`, `#4F3422`, `#2C1A0E` |
-| Les deux emails | 13 et 14 | `#9C7E60`, `#2E2016`, `#DDD5C8`, `#EAE4DB` |
+Jusqu'au 11/09/2026, le PDF et les deux emails avaient chacun leur propre jeu
+de bruns et de beiges — l'app et le PDF étaient déjà proches, les emails
+avaient un jeu à part, plus froid, sans accent. Trois bruns foncés
+quasi identiques coexistaient : `#2C1A0E` (PDF, app), `#2E2016` (emails),
+`#2E2010` (bandeau DÉMO). C'était de la dérive, pas une intention, documentée
+ici comme un fait à ne pas corriger au détour d'une autre tâche.
 
-Le PDF est proche de `theme.js`, les emails ont leur propre jeu. Trois bruns
-foncés quasi identiques coexistent : `#2C1A0E` dans le PDF et l'app, `#2E2016`
-dans les emails, `#2E2010` dans l'ancienne charte. C'est de la dérive, pas une
-intention.
+C'est fait, délibérément, pas au détour d'une correction : le PDF et les deux
+emails n'emploient plus que les couleurs de `theme.js`. Deux valeurs isolées,
+sans rôle, disparaissent au passage : `#AB9679` (PDF, un seul usage) et
+`#C2B5A5` (email admin, un seul usage). Les emails reçoivent leur premier
+accent (`#C8753A`) : la barre des blocs de mise en avant (message libre,
+notice « sur mesure »), auparavant dans la même nuance que les labels.
 
-Faire converger les trois est un travail visuel à part entière, qui change
-l'apparence des documents envoyés au client : à décider séparément, pas au
-détour d'une correction. **En attendant, ne pas aligner un artefact sur un
-autre au nom de la charte** — la référence à respecter est celle de l'artefact
-qu'on modifie.
+`services/palette.test.js` verrouille cette convergence : toute couleur
+ajoutée au PDF ou aux emails qui n'est pas dans `theme.js` fait échouer le
+test — plus de dérive silencieuse comme `#AB9679`.
+
+Un seul jeu reste volontairement hors charte : **le bandeau DÉMO**
+(`#2e2010` / `#D3C2AC`), identique dans les trois artefacts depuis la PR #16.
+C'est un dispositif de démonstration, pas une couleur de marque — ne pas le
+faire pointer vers `theme.js`.
 
 Polices : Crimson Pro (serif) + Open Sans (sans-serif).
 
