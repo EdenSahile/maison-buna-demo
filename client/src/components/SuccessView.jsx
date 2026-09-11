@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import theme from '../theme'
 import { GhostButton } from './Reusable-ui/Button'
+import LegalLinks from './LegalLinks'
 
 const Wrap = styled.div`
   animation: fadeUp 0.6s cubic-bezier(.4,0,.2,1);
@@ -151,9 +152,11 @@ export default function SuccessView({ formData, audience, onReset, surDevis }) {
       </SummaryBox>
 
       <Footer>
-        <Tagline>— Maison Buna, le berceau du café.</Tagline>
+        <Tagline>Maison Buna, le berceau du café.</Tagline>
         <GhostButton type="button" onClick={onReset}>Nouvelle demande</GhostButton>
       </Footer>
+
+      <LegalLinks />
     </Wrap>
   )
 }

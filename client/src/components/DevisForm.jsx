@@ -8,6 +8,7 @@ import SectionContact from "./SectionContact";
 import SectionCommande from "./SectionCommande";
 import SectionPrecisions from "./SectionPrecisions";
 import SuccessView from "./SuccessView";
+import LegalLinks from "./LegalLinks";
 import { PrimaryButton } from "./Reusable-ui/Button";
 import {
   validate,
@@ -99,6 +100,27 @@ const SubmitNote = styled.p`
   strong {
     color: ${theme.brown};
     font-weight: 600;
+  }
+`;
+
+// Bloc légal séparé de SubmitArea : la phrase de consentement fait des
+// dizaines de caractères de plus que "Réponse rapide…" au-dessus, et
+// partager sa colonne de 400px lui faisait couper "politique de
+// confidentialité" sur deux lignes, un mot orphelin isolé. Pleine largeur,
+// elle tient sur une ligne à toutes les tailles d'écran usuelles.
+const LegalFooter = styled.div`
+  margin-top: 20px;
+`;
+
+const ConsentNote = styled.p`
+  font-family: "Open Sans", system-ui, sans-serif;
+  font-size: 12px;
+  color: ${theme.sandText};
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 `;
 
@@ -253,6 +275,14 @@ export default function DevisForm() {
             </PrimaryButton>
           </SubmitArea>
         </form>
+
+        <LegalFooter>
+          <ConsentNote>
+            En envoyant ce formulaire, vous acceptez notre{" "}
+            <a href="/confidentialite" target="_blank" rel="noreferrer">politique de confidentialité</a>.
+          </ConsentNote>
+          <LegalLinks omitConfidentialite marginTop={6} />
+        </LegalFooter>
       </FormArea>
     </Shell>
   );

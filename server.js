@@ -7,8 +7,13 @@ import { dirname, join } from 'path';
 import devisRouter from './routes/devis.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { entier } from './config/env.js';
-import { marquerInterrompus } from './data/storage.js';
+import { marquerInterrompus, purgerAnciennes } from './data/storage.js';
 import { installerArretPropre, balayerAuDemarrage } from './services/arretPropre.js';
+
+// Une fois par jour suffit : la donnée la plus urgente à purger a au moins
+// DEVIS_RETENTION_JOURS (180 par défaut), une vérification quotidienne ne
+// la laisse jamais traîner plus d'un jour au-delà de son délai.
+const PURGE_INTERVALLE_MS = 24 * 60 * 60 * 1000;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -60,6 +65,13 @@ const serveur = app.listen(PORT, () => {
   // (mesuré : 3 ms à 0,65 Mo, 126 ms à 33 Mo) et n'a pas à retarder le
   // démarrage. La garantie est la même, rien ne peut être en cours avant.
   balayerAuDemarrage(marquerInterrompus);
+
+  // Après le balayage : une demande interrompue redevient repérable avant
+  // d'être, le cas échéant, purgée si elle a aussi dépassé la conservation.
+  purgerAnciennes();
+  // unref() : ce minuteur ne doit pas empêcher le process de s'arrêter tout
+  // seul (tests, scripts) ni retarder l'arrêt propre, qui ne l'attend pas.
+  setInterval(purgerAnciennes, PURGE_INTERVALLE_MS).unref?.();
 });
 
 installerArretPropre({ serveur, marquerInterrompus });

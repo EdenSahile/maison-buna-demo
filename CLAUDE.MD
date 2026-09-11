@@ -271,6 +271,59 @@ verrou qualité local (voir « Commandes utiles » et « Pipeline multi-agents �
 
 ---
 
+## Conformité RGPD
+
+Le formulaire recueille de vraies données personnelles — même si les devis
+générés sont fictifs, la démo reste un vrai formulaire, rempli par de vrais
+visiteurs. Décision du 11/09/2026 : le traiter comme tel.
+
+**Ce qui est collecté** : prénom, nom, email, téléphone, société, secteur,
+nombre de collaborateurs, adresse/code postal/ville (particuliers), message
+libre, et les choix de café/quantité/fréquence/mouture (`routes/devis.js`,
+`MAX_LENGTHS`). L'adresse IP est utilisée par le limiteur de débit, en
+mémoire, jamais écrite sur disque.
+
+**Base légale** : exécution de mesures précontractuelles à la demande de la
+personne concernée (RGPD, art. 6.1.b) — traiter cette demande de devis
+précise, la répondre, éventuellement la négocier. Ce n'est **pas** de la
+prospection commerciale : rien ne revend, ne partage à des fins marketing, ni
+ne garde le droit de recontacter quelqu'un pour autre chose que ce devis.
+
+**Destinataires** : Brevo (envoi des deux emails, prestataire tiers
+français/UE) et l'hébergeur du serveur (Render). Aucun autre tiers — voir
+« Aucune ressource distante » ci-dessus : aucun script, cookie ni police
+distante ne fait fuir de données vers Google ou ailleurs.
+
+**Conservation** : `DEVIS_RETENTION_JOURS` (180 par défaut) à compter de la
+soumission — 30 jours de validité du devis, plus une marge pour une relance
+ou une négociation qui traîne. Passé ce délai, `data/storage.js`
+(`purgerAnciennes`) supprime la demande, fichier vif et archives compris,
+qu'elle soit terminée ou restée bloquée : la finalité qui la justifiait
+n'existe plus. Appelée au démarrage du serveur et une fois par jour ensuite
+(`server.js`). Un timestamp illisible ne fait jamais supprimer une demande
+par erreur — elle est gardée, pas purgée sur une donnée qu'on ne sait pas
+dater.
+
+**Droits** : accès, rectification, effacement. `contact@fictif.com` ne va
+nulle part — une vraie demande de suppression y resterait sans réponse. La
+politique de confidentialité donne donc une vraie adresse, différente du
+contact affiché ailleurs sur le site, pour ce seul usage (décision du
+11/09/2026). `scripts/check-coordonnees.js` la connaît explicitement
+(`EMAILS_AUTORISES`, exception à l'adresse près, pas au domaine) : sans ça,
+le scan la flaguerait à chaque exécution. Geste manuel pour traiter une
+demande (chercher par email dans `data/devis.json`, supprimer) — pas
+d'outil dédié, la démo n'a pas le volume qui le justifierait.
+
+**Où c'est expliqué aux visiteurs** : `client/src/pages/PolitiqueConfidentialite.jsx`
+et `client/src/pages/MentionsLegales.jsx`, aux routes `/confidentialite` et
+`/mentions-legales` — pas de bibliothèque de routage, `App.jsx` lit
+`window.location.pathname` directement, la catch-all de `server.js` et le
+comportement SPA par défaut de Vite couvrent les deux. Liées depuis le pied
+du formulaire et depuis l'écran de confirmation, dans un nouvel onglet pour
+ne pas perdre la saisie en cours.
+
+---
+
 ## Variables d'environnement
 
 ```
@@ -310,6 +363,7 @@ DEVIS_MAX=1000                # enregistrements gardés dans data/devis.json (10
 MAIL_MAX_CONCURRENT=4         # envois simultanés (4)
 MAIL_ATTENTE_MAX_MS=120000    # attente maximale en file d'envoi (120 s)
 MAIL_MAX_FILE=500             # longueur maximale de la file d'envoi (500)
+DEVIS_RETENTION_JOURS=180     # conservation avant suppression, en jours (180)
 ```
 
 ---

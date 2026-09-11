@@ -1,6 +1,6 @@
-import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, renameSync, existsSync, readdirSync, unlinkSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, basename } from 'path';
 import { entier } from '../config/env.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -65,6 +65,15 @@ const ETATS_A_TRAITER = new Set([
   ETATS.INTERROMPU,
   ETATS.INTERROMPU_PENDANT_ENVOI,
 ]);
+
+// Durée de conservation des demandes, en jours. Un devis est valable 30
+// jours ; 180 laisse une vraie marge pour une relance ou une négociation qui
+// traîne, sans devenir une prospection commerciale — voir la politique de
+// confidentialité. Passé ce délai, la finalité (traiter cette demande
+// précise) n'existe plus : les données n'ont plus de raison d'être gardées,
+// qu'elles soient dans le fichier vif ou en archive.
+const JOURS_RETENTION = entier('DEVIS_RETENTION_JOURS', 180, 1);
+const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 
 function mettreDeCote(raison) {
   // Repartir de [] en silence effacerait la base à l'écriture suivante. Le
@@ -219,4 +228,72 @@ export function marquerInterrompus() {
 
   ecrire(data);
   return { total: inacheves.length, avantEnvoi, pendantEnvoi };
+}
+
+// Une demande est ancienne si son timestamp dépasse le seuil. Un timestamp
+// illisible ne doit pas mettre la demande en danger : par prudence, elle est
+// gardée plutôt que supprimée sur une donnée qu'on ne sait pas dater.
+function estAncienne(devis, seuil) {
+  const t = Date.parse(devis.timestamp);
+  return Number.isFinite(t) && t < seuil;
+}
+
+// Les fichiers d'archive de saveDevis, ceux que purgerAnciennes doit aussi
+// couvrir : la purge ne sert à rien si elle ne s'applique qu'au fichier vif
+// et laisse les données les plus anciennes justement là où l'archivage les a
+// mises.
+function fichiersArchive() {
+  const dossier = dirname(filePath);
+  const prefixe = `${basename(filePath)}.archive-`;
+  if (!existsSync(dossier)) return [];
+  return readdirSync(dossier)
+    .filter((nom) => nom.startsWith(prefixe) && !nom.endsWith('.tmp'))
+    .map((nom) => join(dossier, nom));
+}
+
+// Supprime les demandes de plus de `joursRetention` jours, fichier vif et
+// archives compris. Sans etat pris en compte : passé le délai, même une
+// demande restée bloquée en_cours n'a plus de raison de garder ses données,
+// la finalité qui les justifiait (traiter cette demande précise) n'existe
+// plus. Voir la politique de confidentialité pour la durée et son motif.
+export function purgerAnciennes(joursRetention = JOURS_RETENTION) {
+  const seuil = Date.now() - joursRetention * MS_PAR_JOUR;
+  let total = 0;
+
+  const data = lire();
+  const gardees = data.filter((d) => !estAncienne(d, seuil));
+  if (gardees.length !== data.length) {
+    total += data.length - gardees.length;
+    ecrire(gardees);
+  }
+
+  // Chaque archive est indépendante : un fichier illisible ne doit pas
+  // empêcher de purger les autres.
+  for (const chemin of fichiersArchive()) {
+    let contenu;
+    try {
+      contenu = JSON.parse(readFileSync(chemin, 'utf8'));
+    } catch (err) {
+      console.error(`Purge : ${chemin} illisible (${err.message}), ignoré.`);
+      continue;
+    }
+    if (!Array.isArray(contenu)) continue;
+
+    const restantes = contenu.filter((d) => !estAncienne(d, seuil));
+    if (restantes.length === contenu.length) continue;
+
+    total += contenu.length - restantes.length;
+    if (restantes.length === 0) {
+      // Rien à garder : le fichier disparaît, pas seulement son contenu —
+      // sans quoi une archive purgée à vide traînerait indéfiniment.
+      unlinkSync(chemin);
+    } else {
+      ecrireFichier(chemin, restantes);
+    }
+  }
+
+  if (total > 0) {
+    console.warn(`${total} demande(s) de plus de ${joursRetention} jours supprimée(s) (conservation limitée à la finalité, RGPD art. 5.1.e).`);
+  }
+  return { total };
 }
