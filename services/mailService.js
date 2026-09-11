@@ -3,9 +3,36 @@ import Handlebars from 'handlebars';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { creerLimiteur } from './limiteConcurrence.js';
+import { entier } from '../config/env.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BREVO_API = 'https://api.brevo.com/v3/smtp/email';
+
+// Concurrence bornée des envois. sendViaSMTP crée un transport par email :
+// un email = une connexion SMTP ouverte vers Brevo. Rien ne bornait ce
+// nombre, alors que la génération de PDF l'est depuis la PR #19 — dix
+// demandes simultanées ouvraient vingt connexions, que Brevo refuse au-delà
+// de sa propre limite.
+//
+// L'unité bornée est l'email, pas le devis : c'est l'email qui consomme une
+// connexion, et un devis en vaut deux.
+const MAX_EMAILS_SIMULTANES = entier('MAIL_MAX_CONCURRENT', 4, 1);
+
+// Le limiteur doit faire patienter, pas refuser : la règle absolue n°4 veut
+// deux emails par devis, quoi qu'il arrive. Un rejet ici ferait perdre au
+// client son email de confirmation alors qu'il a déjà vu l'écran de
+// confirmation. D'où une attente large et une file longue — le limiteur de
+// débit d'Express (5 demandes par quart d'heure et par IP) borne déjà en
+// amont ce qui peut arriver.
+const ATTENTE_MAX_MS = entier('MAIL_ATTENTE_MAX_MS', 120000, 1);
+const MAX_FILE = entier('MAIL_MAX_FILE', 500, 0);
+
+const limiteur = creerLimiteur({
+  max: MAX_EMAILS_SIMULTANES,
+  fileMax: MAX_FILE,
+  attenteMax: ATTENTE_MAX_MS,
+});
 
 // Les templates d'email passent par Handlebars, qui échappe {{ }} tout seul.
 // L'alerte PDF, elle, est assemblée en template literal : sans échappement, un
@@ -87,6 +114,23 @@ async function sendViaBrevoREST({ from, to, subject, html, attachments }) {
   }
 }
 
+// Pour les tests : état de la file d'envoi.
+export const etatFileEmails = () => limiteur.etat();
+
+// Un envoi, SMTP puis bascule REST en cas d'échec, le tout dans un créneau du
+// limiteur. Le créneau est gardé pendant la bascule : elle fait partie du même
+// envoi, et la relâcher avant laisserait démarrer un envoi de plus.
+function envoiBorne({ from, to, subject, html, htmlREST, attachments, inlineImages }) {
+  return limiteur.executer(async () => {
+    try {
+      await sendViaSMTP({ from, to, subject, html, attachments, inlineImages });
+    } catch (err) {
+      console.warn(`SMTP échoué (${err.message}) — bascule sur Brevo REST`);
+      await sendViaBrevoREST({ from, to, subject, html: htmlREST ?? html, attachments });
+    }
+  });
+}
+
 export async function sendPdfFailureAlert(devis) {
   const from = { name: 'Maison Buna', email: process.env.SMTP_USER };
   const subject = `[ALERTE] PDF non généré — ${devis.devis_numero}`;
@@ -102,11 +146,7 @@ export async function sendPdfFailureAlert(devis) {
     d'incident : il attend son devis. Veuillez générer et transmettre le PDF
     manuellement.</p>
   `;
-  try {
-    await sendViaSMTP({ from, to: process.env.ADMIN_EMAIL, subject, html, attachments: [], inlineImages: [] });
-  } catch {
-    await sendViaBrevoREST({ from, to: process.env.ADMIN_EMAIL, subject, html, attachments: [] });
-  }
+  await envoiBorne({ from, to: process.env.ADMIN_EMAIL, subject, html, attachments: [], inlineImages: [] });
 }
 
 export async function sendDevisEmails(devis, pdfBuffer) {
@@ -137,13 +177,13 @@ export async function sendDevisEmails(devis, pdfBuffer) {
     ? `[Maison Buna] Demande sur mesure — ${devis.societe || devis.prenom}`
     : `[Maison Buna] Nouvelle demande de devis — ${devis.societe || devis.prenom}`;
 
-  async function send({ to, subject, html, inlineImages }) {
-    try {
-      await sendViaSMTP({ from, to, subject, html, attachments: pdfAttachments, inlineImages });
-    } catch (err) {
-      console.warn(`SMTP échoué (${err.message}) — bascule sur Brevo REST`);
-      await sendViaBrevoREST({ from, to, subject, html: resolveImagesForREST(html), attachments: pdfAttachments });
-    }
+  function send({ to, subject, html, inlineImages }) {
+    return envoiBorne({
+      from, to, subject, html,
+      htmlREST: resolveImagesForREST(html),
+      attachments: pdfAttachments,
+      inlineImages,
+    });
   }
 
   await send({ to: devis.email,             subject: clientSubject, html: clientHtml, inlineImages: clientImages });
