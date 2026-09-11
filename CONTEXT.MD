@@ -103,7 +103,7 @@ démonstration, pas avant.
   démo dont le trafic tient dans deux créneaux.
 
 - [x] Google Fonts retiré de `client/index.html` : même question RGPD que les emails, mais sur une page qu'on visite. Crimson Pro et Open Sans sont maintenant servies par l'application — huit `.woff2` dans `client/src/assets/fonts/`, déclarés par `client/src/styles/fonts.css`, licence OFL embarquée. Vérifié dans un vrai navigateur : aucune requête hors de l'application, quatre fichiers téléchargés sur huit grâce à `unicode-range`, les quatre faces appliquées. Décision du 11/09/2026.
-- [ ] `client/src/playground/index.html` charge encore Google Fonts, et des polices abandonnées (Cormorant Garamond, Inter). Le dossier n'est référencé nulle part et n'est jamais construit : décider d'abord s'il a encore une raison d'être, puis le supprimer ou le corriger.
+- [x] `client/src/playground/` supprimé. Il était listé dans `client/.gitignore` (`src/playground/`), donc jamais committé et sans impact sur l'app livrée : Google Fonts et des polices abandonnées (Cormorant Garamond, Inter) y restaient, mais ne sortaient jamais du poste local. Décision du 11/09/2026.
 
 ### Priorité 4 — idée de fond, sans urgence
 
