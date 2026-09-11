@@ -102,7 +102,7 @@ export default function EditorialPanel() {
     <Panel aria-hidden="true">
       <Quote>
         <em>Buna</em>
-        {" — le mot amharique pour « café »."}
+        {", le mot amharique pour « café »."}
       </Quote>
       <Pronunciation>
         se prononce « <span style={{ color: theme.accent }}>bouna</span>
