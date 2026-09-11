@@ -493,10 +493,16 @@ tbody td.right { text-align: right; font-weight: 400; }
   font-weight: 400;
   color: #4F3422;
   line-height: 1.5;
-  padding-left: 12px;
+  /* 16px, et non 12 : la puce est un tiret cadratin, large d'un cadratin,
+     soit 10px à 7.5pt. Une gouttière de 12px ne laissait que 2px entre le
+     tiret et le texte, qui se lisaient « —Ce devis ». */
+  padding-left: 16px;
   position: relative;
 }
 
+/* Marqueur de liste, pas ponctuation : c'est pour cela que le tiret cadratin
+   reste ici alors qu'il a été retiré du texte du devis. Le tiret est le
+   marqueur de liste de la typographie française. */
 .conditions-list li::before {
   content: '—';
   position: absolute;
