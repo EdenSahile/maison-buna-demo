@@ -214,9 +214,33 @@ Ils ne savent que ce qui est dans leur prompt.
 Les hooks PostToolUse ne se déclenchent PAS dans les sous-agents.
 Ne pas compter sur eux pour la validation — l'inclure dans le prompt.
 
-## Pipeline multi-agents — ordre obligatoire
+## Agents locaux — ne pas en lancer par défaut
 
-Quand on construit une feature, toujours respecter cet ordre :
+Un audit local coûte 80 000 à 120 000 tokens. Les trois passes de revue de la
+PR #25 en ont consommé près de 300 000 à elles seules, et les PR de
+documentation #18 et #24 n'en ont eu aucun sans que ça pose problème.
+
+**La règle : aucun agent local sans demande explicite de l'utilisateur.**
+À la place, deux contrôles qui ne coûtent presque rien :
+
+1. **Vérification par mutation, à faire soi-même sur chaque correctif.**
+   Désactiver la ligne corrigée, relancer les tests, vérifier qu'un test
+   tombe, restaurer. C'est ce qui a réellement attrapé les défauts de cette
+   session, pas le nombre de passes : un test qui passe avec et sans la
+   correction ne teste rien.
+2. **La review de CI**, qui tourne déjà sur chaque pull request. C'est elle
+   qui a repéré la phrase devenue fausse dans l'alerte admin.
+
+Quand un audit semble justifié — persistance des données, secrets,
+workflow de CI —, le **proposer** en disant pourquoi, et attendre la réponse.
+Ne jamais le lancer de sa propre initiative.
+
+---
+
+## Pipeline multi-agents — sur demande seulement
+
+L'ordre ci-dessous s'applique **quand l'utilisateur demande un audit**, pas
+automatiquement après chaque feature :
 
 1. UX Designer    -> crée les templates (reports/local/dev-report.md : "UX Designer — DONE")
 2. Développeur    -> construit le serveur et ses tests (reports/local/dev-report.md : "Développeur — DONE")
