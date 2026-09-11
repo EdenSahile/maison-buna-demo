@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 25/25 (2026-09-11) |
-| Tests serveur (`npm run test:server`) | ✅ 190/190 (2026-09-11) |
+| Tests serveur (`npm run test:server`) | ✅ 194/194 (2026-09-11) |
 
 ---
 
@@ -22,6 +22,7 @@
 | Branche | Objet | État |
 |---------|-------|------|
 | `main` | branche principale | active |
+| `feat/convergence-palette` | convergence des trois palettes sur `theme.js` | en cours |
 | `chore/reports-local-agents` | convention reports/local/ pour les 4 agents | mergée (PR #15) |
 | `chore/demo-safety` | mention DÉMO sur le PDF, retrait des coordonnées réelles | mergée (PR #16) |
 | `fix/devis-validation` | validation stricte des entrées du devis | mergée (PR #17) |
@@ -86,7 +87,7 @@
 - [x] Les doublons sont testés avant la longueur : le message nomme la vraie cause.
 - [x] Chemins locaux retirés de la skill `open-pr`, et le nom du dépôt démo corrigé au passage : la table annonçait `maison-buna`, le remote est `maison-buna-demo`.
 - [x] Audit des couleurs fait le 11/09/2026, et le piège était réel : `#FAF7F3` n'apparaît nulle part, `#AB9679` une seule fois. `client/src/theme.js` devient la source de vérité — 14 rôles nommés avec contrastes vérifiés. Trois palettes coexistent (app, PDF, emails), documentées comme telles.
-- [ ] Décider si les trois palettes doivent converger. C'est un travail visuel qui change l'apparence des documents envoyés au client, pas un nettoyage : trois bruns foncés quasi identiques coexistent (`#2C1A0E` app et PDF, `#2E2016` emails, `#2E2010` ancienne charte), et les emails ont un jeu entier qui leur est propre.
+- [x] Convergence des trois palettes sur `theme.js`, décidée avec l'utilisateur le 11/09/2026 (unifier, avec accent dans les emails). Le PDF n'avait que 2 valeurs à corriger (`#F0E8DB`→`creamSoft`, `#AB9679`→`sand`, cette dernière une dérive isolée). Les emails ont demandé une table de correspondance par rôle (11 couleurs remplacées) et un premier accent — la barre des blocs de mise en avant, `#C8753A`, là où ils retombaient auparavant sur le ton des labels. `#C2B5A5` (email admin, un seul usage) disparaît avec la même dérive. Le bandeau DÉMO (`#2e2010`/`#D3C2AC`) reste hors charte, volontairement. `services/palette.test.js` verrouille le résultat : 4 tests, vérifiés par mutation. Vérifié visuellement sur les trois documents rendus avant/après.
 
 ### Solution cible — le jour où ce code servira en production réelle
 
@@ -108,3 +109,5 @@ démonstration, pas avant.
 ### Priorité 4 — idée de fond, sans urgence
 
 - [ ] La revue de CI n'analyse que le diff, donc elle ne verra jamais un défaut déjà présent dans un fichier que personne ne modifie. C'est ce qui a permis à une adresse réelle de survivre plusieurs PR. Ajouter un scan de l'arbre complet en complément.
+- [ ] `client/src/components/Reusable-ui/Field.jsx` a deux couleurs hors `theme.js` (`#FDF5F3` fond de champ invalide, `#8C7460` placeholder), repérées en cartographiant les palettes le 11/09/2026. Dérive interne à l'app elle-même, indépendante de la convergence PDF/emails — hors périmètre de cette tâche-ci, mais réelle.
+- [ ] `scripts/test-mail.js` n'a pas d'option `--dry-run` et ignore silencieusement tout argument inconnu : lancé avec un flag qui n'existe pas, il envoie quand même de vrais emails via Brevo sans le signaler. Repéré le 11/09/2026 en essayant justement `--dry-run` pour visualiser un rendu HTML sans envoi — deux emails sont partis pour rien. Le script devrait refuser un argument qu'il ne reconnaît pas, plutôt que de l'ignorer.
