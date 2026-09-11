@@ -21,16 +21,16 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background-color: #ECE7DE;
+      background-color: #F5EFE6;
       font-family: 'Open Sans', Verdana, system-ui, sans-serif;
-      color: #2E2016;
+      color: #2C1A0E;
       padding: 40px 16px 80px;
       -webkit-font-smoothing: antialiased;
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
     }
 
-    a { color: #6B5040; text-decoration: none; }
+    a { color: #6F5A41; text-decoration: none; }
 
     .email-wrapper {
       max-width: 620px;
@@ -51,7 +51,7 @@
       font-size: 14px;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: #2E2016;
+      color: #2C1A0E;
     }
 
     .brand-name strong {
@@ -61,21 +61,21 @@
       font-size: 14px;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: #2E2016;
+      color: #2C1A0E;
     }
 
     .brand-name small {
       display: block;
       font-size: 11px;
-      color: #9C7E60;
+      color: #705540;
       letter-spacing: 0.5px;
       margin-top: 1px;
     }
 
     /* ── Card ── */
     .email-card {
-      background-color: #F5F1EB;
-      border: 1px solid #DDD5C8;
+      background-color: #FAF7F2;
+      border: 1px solid #E5DCCD;
       border-radius: 4px;
       overflow: hidden;
     }
@@ -87,7 +87,7 @@
 
     .greeting {
       font-size: 15px;
-      color: #2E2016;
+      color: #2C1A0E;
       margin-bottom: 20px;
       line-height: 1.6;
     }
@@ -98,7 +98,7 @@
 
     .intro-text {
       font-size: 15px;
-      color: #4A3828;
+      color: #4F3422;
       line-height: 1.7;
       margin-bottom: 8px;
     }
@@ -113,14 +113,14 @@
       font-weight: 600;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: #9C7E60;
+      color: #705540;
       margin-top:20px;
       margin-bottom: 12px;
     }
 
     /* ── Récapitulatif ── */
     .recap-block {
-      border-top: 1px solid #DDD5C8;
+      border-top: 1px solid #E5DCCD;
     }
 
     .recap-row {
@@ -128,7 +128,7 @@
       grid-template-columns: 160px 1fr;
       gap: 16px;
       padding: 16px 0;
-      border-bottom: 1px solid #E8E2D9;
+      border-bottom: 1px solid #E5DCCD;
       align-items: baseline;
     }
 
@@ -141,25 +141,25 @@
       font-weight: 600;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #9C7E60;
+      color: #705540;
       padding-top: 2px;
     }
 
     .recap-value {
       font-size: 16px;
       font-weight: 400;
-      color: #2E2016;
+      color: #2C1A0E;
     }
 
     .recap-value.ref {
       font-size: 14px;
-      color: #6B5040;
+      color: #6F5A41;
     }
 
     .mouture-tag {
       display: inline-block;
-      background-color: #E6DDD3;
-      color: #6B5040;
+      background-color: #E8DDCC;
+      color: #6F5A41;
       font-size: 12px;
       font-weight: 500;
       padding: 4px 10px;
@@ -173,13 +173,15 @@
     .sur-devis-notice {
       margin-top: 24px;
       padding: 18px 22px;
-      background-color: #EAE4DB;
-      border-left: 2px solid #3A2314;
+      background-color: #F5EFE6;
+      /* Seul accent de la palette dans les emails : la barre qui signale le
+         bloc « sur mesure ». theme.accent (#C8753A), pas une nuance de brun. */
+      border-left: 2px solid #C8753A;
     }
 
     .sur-devis-notice p {
       font-size: 13px;
-      color: #2E2016;
+      color: #2C1A0E;
       line-height: 1.7;
     }
 
@@ -191,7 +193,7 @@
 
     .signoff-text {
       font-size: 13px;
-      color: #9C7E60;
+      color: #705540;
       margin-bottom: 6px;
       font-style: italic;
     }
@@ -199,15 +201,15 @@
     .signoff-name {
       font-family: 'Crimson Pro', Georgia, serif;
       font-size: 22px;
-      color: #3A2314;
+      color: #4F3422;
       letter-spacing: 0.3px;
     }
 
     /* ── Footer ── */
     .email-footer {
       padding: 22px 48px;
-      background-color: #EAE4DB;
-      border-top: 1px solid #DDD5C8;
+      background-color: #F5EFE6;
+      border-top: 1px solid #E5DCCD;
       text-align: center;
     }
 
@@ -216,19 +218,19 @@
       font-weight: 700;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: #2E2016;
+      color: #2C1A0E;
       margin-bottom: 6px;
     }
 
     .footer-links {
       font-size: 11.5px;
-      color: #9C7E60;
+      color: #705540;
       text-align: center;
       margin-top: 5px;
     }
 
     .footer-links a {
-      color: #9C7E60;
+      color: #705540;
       text-decoration: none;
     }
 
@@ -240,14 +242,14 @@
 
     .sub-footer p {
       font-size: 9px;
-      color: #9C7E60;
+      color: #705540;
       line-height: 1.7;
       letter-spacing: 0.04em;
       margin-bottom: 3px;
     }
 
     .sub-footer a {
-      color: #9C7E60;
+      color: #705540;
       text-decoration: underline;
     }
   </style>
