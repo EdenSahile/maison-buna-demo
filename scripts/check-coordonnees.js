@@ -49,6 +49,19 @@ const DOMAINES_EMAIL_AUTORISES = new Set([
   'smtp-brevo.com',
 ]);
 
+// Adresses exactes autorisées, en plus des domaines ci-dessus : une vraie
+// adresse, publiée volontairement pour un usage précis, pas une dérive. Le
+// domaine (gmail.com) n'est pas mis sur liste blanche en entier — ça
+// laisserait passer n'importe quelle autre adresse du même domaine sans
+// avertir. Seule l'adresse exacte l'est.
+//
+// edensahile12@gmail.com : contact RGPD (accès, rectification, effacement)
+// dans la politique de confidentialité — décision du 11/09/2026. Le reste du
+// site garde contact@fictif.com, la coordonnée fictive de la démo.
+const EMAILS_AUTORISES = new Set([
+  'edensahile12@gmail.com',
+]);
+
 const RE_EMAIL = /[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
 
 // Un SIRET a 14 chiffres. Le placeholder du dépôt les remplace par des X
@@ -78,8 +91,9 @@ for (const cheminRelatif of fichiersSuivis().sort()) {
   }
 
   for (const match of contenu.matchAll(RE_EMAIL)) {
+    const email = match[0].toLowerCase();
     const domaine = match[1].toLowerCase();
-    if (!DOMAINES_EMAIL_AUTORISES.has(domaine)) {
+    if (!DOMAINES_EMAIL_AUTORISES.has(domaine) && !EMAILS_AUTORISES.has(email)) {
       echecs.push(`${cheminRelatif} : email hors liste blanche — ${match[0]}`);
     }
   }
