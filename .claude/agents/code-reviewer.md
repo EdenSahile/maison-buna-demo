@@ -79,7 +79,7 @@ Quand la review est terminée :
 | ... | ... | ... | ... | HAUTE/MOYENNE/FAIBLE |
 
 ### Verdict
-✅ APPROUVÉ — Prêt pour : Agent Sécurité
+✅ APPROUVÉ — Prêt pour : audit de sécurité, si l'utilisateur le demande
 ⚠️ À CORRIGER — Retour au : Développeur (corrections mineures)
 ❌ BLOQUANT — Retour au : Développeur (corrections majeures)
 

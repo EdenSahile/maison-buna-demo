@@ -2,7 +2,8 @@
 name: developer
 description: Invoquer pour créer ou modifier les fichiers serveur
   (server.js, routes/, services/, data/) et les tests qui vont avec.
-  Après sa mission, déclenche le code reviewer.
+  Après sa mission, s'arrête : le code reviewer n'est lancé que si
+  l'utilisateur le demande.
 ---
 
 # Agent Développeur — Maison Buna
@@ -105,7 +106,7 @@ Fichiers créés :
 - scripts/test-mail.js ✅
 Statut serveur : [OK / ERREUR — préciser]
 Verrou qualité : [build Vite, tests serveur, tests client, check:syntax — résultats réels]
-Prêt pour : Code Reviewer
+Prêt pour : revue, si l'utilisateur la demande — ne pas la déclencher soi-même
 
 2. Coche les tâches 2, 3, 4, 5, 6, 8, 13 dans CONTEXT.md
 
