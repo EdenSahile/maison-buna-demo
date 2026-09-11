@@ -13,7 +13,7 @@ const devis = {
   id: 'test-id-1234',
   devis_numero: 'MBE-20260903-00042',
   prenom: 'Marie', nom: 'Dupont', societe: 'Café du Coin',
-  email: 'marie@cafeducoin.fr',
+  email: 'marie@example.com',
   date_emission: '3 septembre 2026', date_validite: '3 octobre 2026',
   cafes: ['Limmu'], quantite_resume: 'Limmu : 250 g',
   pricing_rows: [], grand_total_fmt: '14,99 €', sur_devis: false,
@@ -23,17 +23,17 @@ const devis = {
 beforeEach(() => {
   vi.restoreAllMocks();
   sendMail.mockReset().mockResolvedValue({});
-  process.env.SMTP_USER = 'contact@fictif.com';
-  process.env.ADMIN_EMAIL = 'admin@fictif.com';
-  process.env.BASE_URL = 'https://demo.fictif.com';
+  process.env.SMTP_USER = 'contact@example.com';
+  process.env.ADMIN_EMAIL = 'admin@example.com';
+  process.env.BASE_URL = 'https://demo.example.com';
 });
 
 describe('sendDevisEmails — règle absolue n°4 : toujours 2 emails', () => {
   it('envoie exactement 2 emails : client puis admin', async () => {
     await sendDevisEmails(devis, Buffer.from('%PDF-1.4 fake'));
     expect(sendMail).toHaveBeenCalledTimes(2);
-    expect(sendMail.mock.calls[0][0].to).toBe('marie@cafeducoin.fr');
-    expect(sendMail.mock.calls[1][0].to).toBe('admin@fictif.com');
+    expect(sendMail.mock.calls[0][0].to).toBe('marie@example.com');
+    expect(sendMail.mock.calls[1][0].to).toBe('admin@example.com');
   });
 
   it('joint le PDF aux deux emails, nommé d après le numéro de devis', async () => {
@@ -85,7 +85,7 @@ describe('sendDevisEmails — bascule Brevo REST quand SMTP échoue', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body.htmlContent).not.toContain('cid:monogram-mb');
-    expect(body.htmlContent).toContain('https://demo.fictif.com/images/monogram-email.png');
+    expect(body.htmlContent).toContain('https://demo.example.com/images/monogram-email.png');
     expect(body.attachment[0].name).toBe('Devis-MBE-20260903-00042.pdf');
     expect(body.attachment[0].content).toMatch(/^[A-Za-z0-9+/]+=*$/);
     expect(Buffer.from(body.attachment[0].content, 'base64').toString()).toContain('%PDF-1.4');
@@ -158,7 +158,7 @@ describe('sendPdfFailureAlert', () => {
     await sendPdfFailureAlert(devis);
     expect(sendMail).toHaveBeenCalledTimes(1);
     const mail = sendMail.mock.calls[0][0];
-    expect(mail.to).toBe('admin@fictif.com');
+    expect(mail.to).toBe('admin@example.com');
     expect(mail.subject).toContain('[ALERTE]');
     expect(mail.html).toContain('MBE-20260903-00042');
     expect(mail.attachments).toHaveLength(0);
@@ -215,7 +215,7 @@ describe('sendPdfFailureAlert', () => {
     expect(html).toContain('Marie');
     expect(html).toContain('Dupont');
     expect(html).toContain('Café du Coin');
-    expect(html).toContain('marie@cafeducoin.fr');
+    expect(html).toContain('marie@example.com');
     expect(html).toContain('test-id-1234');
   });
 });

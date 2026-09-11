@@ -62,10 +62,10 @@ Le skill s'arrête là. Il ne merge pas — le merge sur `main` reste une décis
 
   | Repo GitHub | Rôle | Dossier local |
   |---|---|---|
-  | `EdenSahile/maison-buna` | **démo** — infos fictives, bandeau DÉMO (ce dossier) | `.../Documents/Claude/maison-buna-demo/maison-buna-devis-demo` |
-  | `EdenSahile/maison-buna-prod` | **prod** — vraies coordonnées Maison Buna | `.../MaisonBuna/site/maison-buna-devis` |
+  | `EdenSahile/maison-buna-demo` | **démo** — infos fictives, bandeau DÉMO | ce dossier |
+  | `EdenSahile/maison-buna-prod` | **prod** — vraies coordonnées Maison Buna | un autre dossier, jamais celui-ci |
 
-  Vérifier `git remote -v` avant de pousser : `origin` doit pointer vers `maison-buna` (démo), jamais vers `maison-buna-prod`.
+  Vérifier `git remote -v` avant de pousser : `origin` doit pointer vers `maison-buna-demo`, jamais vers `maison-buna-prod`.
 
   Les corrections communes **viennent de prod vers démo** par **cherry-pick manuel** (le remote `prod` peut être ajouté en fetch-only pour ça), jamais par une PR ouverte depuis ce dossier vers le repo prod. Dans l'autre sens, une évolution propre à démo (bandeau DÉMO, données fictives) ne doit jamais être cherry-pickée vers prod.
 

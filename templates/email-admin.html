@@ -189,7 +189,9 @@
       color: #6B5040;
     }
 
-    .recap-value.empty {
+    /* Le span.empty est imbriqué dans .recap-value, il n'en porte pas la
+       classe : .recap-value.empty ne visait donc rien. */
+    .recap-value .empty {
       font-size: 13px;
       color: #C2B5A5;
       font-style: italic;
@@ -285,7 +287,7 @@
 
     <!-- Demo banner -->
     <div style="background-color:#2e2010;color:#D3C2AC;text-align:center;padding:9px 16px;font-size:11px;letter-spacing:0.6px;border-radius:4px 4px 0 0;">
-      Démo — ce devis est fictif et n'a aucune valeur commerciale.
+      Démo : ce devis est fictif et n'a aucune valeur commerciale.
     </div>
 
     <!-- Card -->
