@@ -74,6 +74,7 @@ maison-buna-devis/
 ├── services/
 │   ├── pdfService.js         ← génération PDF Puppeteer, concurrence bornée
 │   ├── limiteConcurrence.js  ← file d'attente à concurrence bornée
+│   ├── arretPropre.js        ← SIGTERM/SIGINT : marque les demandes en cours
 │   └── mailService.js        ← envoi emails Nodemailer
 ├── templates/
 │   ├── devis-template.html   ← template PDF charte Maison Buna
@@ -111,9 +112,38 @@ maison-buna-devis/
 2. **Ne jamais modifier le formulaire React (`client/src/`)** sans raison explicite demandée
 3. **Toujours valider les données côté serveur** (email, société, quantité obligatoires)
 4. **Toujours envoyer 2 emails** à chaque devis : client + admin
-5. **Toujours sauvegarder** dans `data/devis.json` avec timestamp + id unique
+5. **Toujours sauvegarder** dans `data/devis.json` avec timestamp + id unique,
+   et faire évoluer le champ `etat` jusqu'à un état final
 6. **Respecter la charte graphique** dans tous les templates
 7. **Toujours cocher les tâches** dans `CONTEXT.md` au fur et à mesure
+
+---
+
+## États d'une demande
+
+Le PDF et les deux emails partent **après** la réponse au client, dans le même
+processus. Le champ `etat` de `data/devis.json` dit où en est chaque demande,
+sans quoi un redémarrage perdait ce travail sans laisser de trace.
+
+| État | Sens |
+|------|------|
+| `en_cours` | enregistrée, PDF et emails pas encore traités |
+| `envoye` | les deux emails sont partis, avec le PDF |
+| `envoye_sans_pdf` | les deux emails sont partis sans PDF — à relancer à la main |
+| `echec_envoi` | l'envoi a échoué, cause dans `etat_erreur` |
+| `interrompu` | le processus s'est arrêté pendant le traitement — vérifier PDF et emails avant de relancer, le signal a pu tomber juste après l'envoi |
+
+Les états sont définis dans `data/storage.js` (`ETATS`), et `etat_maj` porte
+l'horodatage du dernier changement. Au démarrage, tout ce qui porte encore
+`en_cours` vient forcément de l'exécution précédente et bascule en
+`interrompu` : c'est ce qui rattrape les arrêts sans signal, un dépassement
+mémoire par exemple. Une demande sur mesure ne produit aucun PDF
+et termine donc en `envoye`, pas en `envoye_sans_pdf`. Pour retrouver ce qui demande une action :
+
+```bash
+grep -c '"etat": "envoye_sans_pdf"' data/devis.json
+grep -c '"etat": "interrompu"' data/devis.json
+```
 
 ---
 
