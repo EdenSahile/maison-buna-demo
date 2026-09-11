@@ -304,9 +304,15 @@ n'existe plus. Appelée au démarrage du serveur et une fois par jour ensuite
 par erreur — elle est gardée, pas purgée sur une donnée qu'on ne sait pas
 dater.
 
-**Droits** : accès, rectification, effacement — `contact@fictif.com`, geste
-manuel (chercher par email dans `data/devis.json`, supprimer). Pas d'outil
-dédié, la démo n'a pas le volume qui le justifierait.
+**Droits** : accès, rectification, effacement. `contact@fictif.com` ne va
+nulle part — une vraie demande de suppression y resterait sans réponse. La
+politique de confidentialité donne donc une vraie adresse, différente du
+contact affiché ailleurs sur le site, pour ce seul usage (décision du
+11/09/2026). `scripts/check-coordonnees.js` la connaît explicitement
+(`EMAILS_AUTORISES`, exception à l'adresse près, pas au domaine) : sans ça,
+le scan la flaguerait à chaque exécution. Geste manuel pour traiter une
+demande (chercher par email dans `data/devis.json`, supprimer) — pas
+d'outil dédié, la démo n'a pas le volume qui le justifierait.
 
 **Où c'est expliqué aux visiteurs** : `client/src/pages/PolitiqueConfidentialite.jsx`
 et `client/src/pages/MentionsLegales.jsx`, aux routes `/confidentialite` et

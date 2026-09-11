@@ -274,7 +274,7 @@ export default function DevisForm() {
           </SubmitArea>
         </form>
 
-        <LegalLinks />
+        <LegalLinks omitConfidentialite />
       </FormArea>
     </Shell>
   );

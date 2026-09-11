@@ -63,9 +63,11 @@ export default function PolitiqueConfidentialite() {
       <h2>Vos droits</h2>
       <p>
         Accès, rectification et effacement de vos données : écrivez à{' '}
-        <a href="mailto:contact@fictif.com">contact@fictif.com</a>. Votre
-        demande sera traitée à la main : cette démo n'a pas le volume qui
-        justifierait un outil dédié.
+        <a href="mailto:edensahile12@gmail.com">edensahile12@gmail.com</a>.
+        Une adresse différente du contact affiché ailleurs sur ce site (fictif,
+        propre à la démo) : celle-ci est réelle, tenue par la personne qui
+        gère cette démo, pour ce seul usage. Votre demande sera traitée à la
+        main : ce site n'a pas le volume qui justifierait un outil dédié.
       </p>
     </LegalPageShell>
   )
