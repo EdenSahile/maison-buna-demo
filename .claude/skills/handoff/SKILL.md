@@ -16,8 +16,8 @@ Application Node.js de gestion de devis B2B pour Maison Buna
 
 - Stack : Node.js ESM + Express + Nodemailer + Puppeteer + Handlebars + JSON
 - Point d'entrée : `server.js` (port 3000)
-- Formulaire : `public/index.html` (finalisé — ne pas modifier sans raison)
-- Charte : `#2e2010` · `#4F3422` · `#D3C2AC` · `#AB9679` · `#FAF7F3`
+- Formulaire : app React dans `client/src/` (finalisé — ne pas modifier sans raison)
+- Charte : `client/src/theme.js` fait foi ; le PDF et les emails ont leur propre palette
 - Règles absolues : dans `CLAUDE.md` (toujours lire avant de coder)
 - État courant : dans `CONTEXT.md` (tâches en cours, statut build)
 - SMTP : Brevo (variables dans `.env`, jamais committées)
@@ -84,8 +84,9 @@ SMTP via Brevo (variables dans .env)
 "type": "module" dans package.json — utiliser import/export partout
 
 ### Charte graphique
-#2e2010 · #4F3422 · #D3C2AC · #AB9679 · #FAF7F3
-Ne jamais hardcoder d'autres couleurs.
+Source de vérité : `client/src/theme.js` (14 rôles nommés, contrastes vérifiés).
+Le PDF et les deux emails ont chacun leur palette héritée : ne pas les aligner
+au détour d'une correction, la convergence est une décision à part.
 Polices : Crimson Pro (serif) + Open Sans (sans-serif).
 
 ### Règles absolues

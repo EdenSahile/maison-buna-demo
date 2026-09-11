@@ -22,15 +22,27 @@ Tu ne touches jamais à la logique serveur (routes, services).
 
 ## Charte graphique OBLIGATOIRE
 
-#2e2010  — brun très foncé (header, textes principaux)
-#4F3422  — brun moyen (titres, accents)
-#D3C2AC  — crème (bordures, éléments secondaires)
-#AB9679  — sable (textes secondaires, labels)
-#FAF7F3  — fond crème clair (background)
+Source de vérité : `client/src/theme.js`, seul endroit où les couleurs ont un
+rôle nommé et un contraste vérifié. Pour du texte, préférer `sandText`
+(#705540) à `sand` (#9B8266), décoratif, et `accentText` (#935020) à `accent`
+(#C8753A) sur petit texte.
 
-Polices : Crimson Pro (serif) + Open Sans (sans-serif)
-Charger depuis Google Fonts dans chaque template.
-Ne jamais hardcoder d'autres couleurs.
+```js
+brown: '#4F3422'      dark: '#2C1A0E'       cream: '#E8DDCC'
+creamSoft: '#F5EFE6'  sand: '#9B8266'       sandText: '#705540'
+sandDark: '#6F5A41'   white: '#FAF7F2'      formBg: '#FFFFFF'
+line: '#E5DCCD'       accent: '#C8753A'     accentText: '#935020'
+error: '#B0432E'      ok: '#5C7A4F'
+```
+
+Le PDF et les deux emails ont chacun leur propre palette, héritée : ne pas les
+aligner sur `theme.js` ni l'un sur l'autre au détour d'une correction, la
+convergence est une décision de design à part (voir « Charte graphique » dans
+CLAUDE.MD). Quand on modifie un artefact, la référence est sa palette à lui.
+
+Polices : Crimson Pro (serif) + Open Sans (sans-serif).
+**Aucune police distante dans les emails** : ni `@import`, ni `<link>` — voir
+« Emails » dans CLAUDE.MD. Les piles de repli Georgia et Verdana suffisent.
 
 ## Fichiers à créer
 
@@ -49,7 +61,7 @@ PDF A4 Handlebars avec :
   "Devis N° {{devis_numero}} · {{date_emission}}". Coordonnées toujours
   fictives : dépôt de démonstration public, jamais les vraies coordonnées du
   client.
-- Design élégant, fond #FAF7F3, header #2e2010
+- Design élégant : fond `white` (#FAF7F2), header `dark` (#2C1A0E)
 
 ### templates/email-client.html
 Email Handlebars compatible email (tables, inline CSS) :

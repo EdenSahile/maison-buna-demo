@@ -83,7 +83,8 @@
 - [x] Sélecteur `.recap-value .empty` corrigé : « Non renseigné » est de nouveau italique et gris.
 - [x] Les doublons sont testés avant la longueur : le message nomme la vraie cause.
 - [x] Chemins locaux retirés de la skill `open-pr`, et le nom du dépôt démo corrigé au passage : la table annonçait `maison-buna`, le remote est `maison-buna-demo`.
-- [ ] Avant de corriger les 8 couleurs hors charte du CSS du PDF, auditer les couleurs réellement utilisées dans chaque artefact. Même piège que pour les polices : si la charte couleur documentée est périmée, « corriger » alignerait du code correct sur une référence fictive.
+- [x] Audit des couleurs fait le 11/09/2026, et le piège était réel : `#FAF7F3` n'apparaît nulle part, `#AB9679` une seule fois. `client/src/theme.js` devient la source de vérité — 14 rôles nommés avec contrastes vérifiés. Trois palettes coexistent (app, PDF, emails), documentées comme telles.
+- [ ] Décider si les trois palettes doivent converger. C'est un travail visuel qui change l'apparence des documents envoyés au client, pas un nettoyage : trois bruns foncés quasi identiques coexistent (`#2C1A0E` app et PDF, `#2E2016` emails, `#2E2010` ancienne charte), et les emails ont un jeu entier qui leur est propre.
 
 ### Solution cible — le jour où ce code servira en production réelle
 

@@ -32,15 +32,42 @@ sont envoyés (client + admin) → la demande est sauvegardée.
 
 ## Charte graphique Maison Buna
 
-```
-#2e2010  — brun très foncé (textes principaux, header)
-#4F3422  — brun moyen (titres, accents)
-#D3C2AC  — crème (bordures, éléments secondaires)
-#AB9679  — sable (textes secondaires, labels)
-#FAF7F3  — fond crème clair (background)
+**La source de vérité est `client/src/theme.js`.** C'est le seul endroit du
+projet où les couleurs ont un rôle nommé et un contraste vérifié : `sandText`
+y est annoté « 5.1:1 sur #FAF7F2 », `accentText` « 4.9:1 ». Toute couleur
+ajoutée à l'app React doit y passer.
+
+```js
+brown: '#4F3422'      dark: '#2C1A0E'       cream: '#E8DDCC'
+creamSoft: '#F5EFE6'  sand: '#9B8266'       sandText: '#705540'
+sandDark: '#6F5A41'   white: '#FAF7F2'      formBg: '#FFFFFF'
+line: '#E5DCCD'       accent: '#C8753A'     accentText: '#935020'
+error: '#B0432E'      ok: '#5C7A4F'
 ```
 
-**Règle absolue : ne jamais hardcoder d'autres couleurs.**
+`sand` (#9B8266) est décoratif — bordures, icônes. Pour du texte, utiliser
+`sandText`, et `accentText` plutôt que `accent` sur petit texte : c'est ce qui
+tient les ratios d'accessibilité.
+
+### Trois palettes coexistent, c'est un état de fait à ne pas « corriger »
+
+| Artefact | Couleurs distinctes | Dominantes |
+|---|---|---|
+| `client/src/` | 14, dans `theme.js` | `#4F3422`, `#2C1A0E`, `#9B8266`, `#FAF7F2` |
+| `templates/devis-template.html` | 12 | `#9B8266`, `#E5DCCD`, `#4F3422`, `#2C1A0E` |
+| Les deux emails | 13 et 14 | `#9C7E60`, `#2E2016`, `#DDD5C8`, `#EAE4DB` |
+
+Le PDF est proche de `theme.js`, les emails ont leur propre jeu. Trois bruns
+foncés quasi identiques coexistent : `#2C1A0E` dans le PDF et l'app, `#2E2016`
+dans les emails, `#2E2010` dans l'ancienne charte. C'est de la dérive, pas une
+intention.
+
+Faire converger les trois est un travail visuel à part entière, qui change
+l'apparence des documents envoyés au client : à décider séparément, pas au
+détour d'une correction. **En attendant, ne pas aligner un artefact sur un
+autre au nom de la charte** — la référence à respecter est celle de l'artefact
+qu'on modifie.
+
 Polices : Crimson Pro (serif) + Open Sans (sans-serif).
 
 ---
@@ -239,8 +266,9 @@ Ils ne savent que ce qui est dans leur prompt.
 
 **1. Stack et charte**
 - Stack : Node.js ESM + Express + Nodemailer + Puppeteer + Handlebars
-- Couleurs Maison Buna : #2e2010, #4F3422, #D3C2AC, #AB9679, #FAF7F3
-- Ne jamais hardcoder d'autres couleurs
+- Couleurs : source de vérité `client/src/theme.js` ; le PDF et les emails ont
+  chacun leur palette, ne pas les aligner l'un sur l'autre (voir « Charte
+  graphique »)
 - Ne jamais modifier le formulaire React (client/src/) sans raison explicite
 - Polices : Crimson Pro (serif) + Open Sans (sans-serif)
 
