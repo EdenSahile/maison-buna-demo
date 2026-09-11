@@ -8,6 +8,15 @@ Ce projet a été **conçu et développé dans le cadre d'un besoin client réel
 
 La version de production, avec les informations réelles de l'entreprise, est hébergée dans un dépôt privé séparé.
 
+## Aperçu
+
+<p align="center">
+  <img src=".github/readme/01-formulaire-profil.png" alt="Formulaire de demande de devis, étape Votre entreprise" width="49%">
+  <img src=".github/readme/02-formulaire-commande.png" alt="Formulaire de demande de devis, étape Votre commande" width="49%">
+</p>
+
+Démo en ligne : [maison-buna-demo.onrender.com](https://maison-buna-demo.onrender.com/)
+
 ## Objectif produit
 
 L'objectif est de remplacer un parcours de demande de devis manuel par un parcours digital permettant de :
