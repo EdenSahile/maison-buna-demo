@@ -12,16 +12,31 @@ const DELAI_FORCE_MS = 10000;
 // lance Chromium — arrive en SIGKILL, sans signal à intercepter. Au démarrage
 // suivant, plus rien n'est en cours par définition : ce qui porte encore
 // « en_cours » vient forcément de l'exécution précédente.
+const BILAN_VIDE = { total: 0, avantEnvoi: 0, pendantEnvoi: 0 };
+
+// Détaille le bilan : « pendant l'envoi » veut dire que les emails ont pu
+// partir, et qu'une relance aveugle les enverrait une seconde fois.
+function journaliser(bilan, contexte) {
+  if (!bilan?.total) return;
+
+  const morceaux = [];
+  if (bilan.avantEnvoi > 0) {
+    morceaux.push(`${bilan.avantEnvoi} avant l'envoi (« interrompu » : le client n'a rien reçu)`);
+  }
+  if (bilan.pendantEnvoi > 0) {
+    morceaux.push(`${bilan.pendantEnvoi} pendant l'envoi (« interrompu_pendant_envoi » : vérifier avant de relancer)`);
+  }
+  console.warn(`${bilan.total} demande(s) inachevée(s) ${contexte} — ${morceaux.join(', ')}.`);
+}
+
 export function balayerAuDemarrage(marquerInterrompus) {
   try {
-    const interrompus = marquerInterrompus();
-    if (interrompus > 0) {
-      console.warn(`${interrompus} demande(s) restée(s) en cours après un arrêt précédent, marquée(s) « interrompu » : PDF et emails à vérifier.`);
-    }
-    return interrompus;
+    const bilan = marquerInterrompus();
+    journaliser(bilan, 'après un arrêt précédent');
+    return bilan;
   } catch (err) {
     console.error(`Balayage au démarrage impossible : ${err.message}`);
-    return 0;
+    return BILAN_VIDE;
   }
 }
 
@@ -30,17 +45,12 @@ export function installerArretPropre({ serveur, marquerInterrompus, delaiMs = DE
 
   function marquer() {
     try {
-      const interrompus = marquerInterrompus();
-      if (interrompus > 0) {
-        // Formulation prudente : le signal peut tomber entre l'acceptation
-        // SMTP et l'enregistrement de l'état, auquel cas les emails sont
-        // partis alors que la demande est marquée « interrompu ».
-        console.warn(`${interrompus} demande(s) marquée(s) « interrompu » : traitement non terminé, PDF et emails à vérifier avant de relancer.`);
-      }
-      return interrompus;
+      const bilan = marquerInterrompus();
+      journaliser(bilan, "à l'arrêt");
+      return bilan;
     } catch (err) {
       console.error(`Marquage des demandes en cours impossible : ${err.message}`);
-      return 0;
+      return BILAN_VIDE;
     }
   }
 

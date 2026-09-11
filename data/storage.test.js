@@ -155,13 +155,14 @@ describe('majEtat', () => {
 });
 
 describe('marquerInterrompus', () => {
-  it('ne bascule que ce qui était en cours', () => {
+  it('ne bascule que ce qui était inachevé', () => {
     saveDevis(devis('a'));
     saveDevis({ ...devis('b'), etat: ETATS.ENVOYE });
     saveDevis({ ...devis('c'), etat: ETATS.ENVOYE_SANS_PDF });
     saveDevis(devis('d'));
+    saveDevis({ ...devis('e'), etat: ETATS.ECHEC_ENVOI });
 
-    expect(marquerInterrompus()).toBe(2);
+    expect(marquerInterrompus()).toEqual({ total: 2, avantEnvoi: 2, pendantEnvoi: 0 });
 
     const etats = Object.fromEntries(lire().map((d) => [d.id, d.etat]));
     expect(etats).toEqual({
@@ -169,13 +170,39 @@ describe('marquerInterrompus', () => {
       b: ETATS.ENVOYE,
       c: ETATS.ENVOYE_SANS_PDF,
       d: ETATS.INTERROMPU,
+      e: ETATS.ECHEC_ENVOI,
     });
   });
 
-  it('n écrit rien quand il n y a rien en cours', () => {
+  // Toute la raison d'être d'envoi_en_cours : « interrompu » dit que le client
+  // n'a rien reçu, « interrompu_pendant_envoi » que les emails ont pu partir.
+  // Relancer le second à l'aveugle enverrait deux fois le même devis.
+  it('distingue un arrêt avant l envoi d un arrêt pendant l envoi', () => {
+    saveDevis(devis('avant'));
+    saveDevis({ ...devis('pendant'), etat: ETATS.ENVOI_EN_COURS });
+
+    expect(marquerInterrompus()).toEqual({ total: 2, avantEnvoi: 1, pendantEnvoi: 1 });
+
+    const etats = Object.fromEntries(lire().map((d) => [d.id, d.etat]));
+    expect(etats).toEqual({
+      avant: ETATS.INTERROMPU,
+      pendant: ETATS.INTERROMPU_PENDANT_ENVOI,
+    });
+  });
+
+  it('n écrit rien quand il n y a rien d inachevé', () => {
     saveDevis({ ...devis('a'), etat: ETATS.ENVOYE });
     const avant = readFileSync(filePath, 'utf8');
-    expect(marquerInterrompus()).toBe(0);
+    expect(marquerInterrompus()).toEqual({ total: 0, avantEnvoi: 0, pendantEnvoi: 0 });
     expect(readFileSync(filePath, 'utf8')).toBe(avant);
+  });
+
+  // Un état déjà final ne doit pas être re-basculé par un second balayage.
+  it('est idempotent', () => {
+    saveDevis(devis('a'));
+    saveDevis({ ...devis('b'), etat: ETATS.ENVOI_EN_COURS });
+
+    marquerInterrompus();
+    expect(marquerInterrompus()).toEqual({ total: 0, avantEnvoi: 0, pendantEnvoi: 0 });
   });
 });
