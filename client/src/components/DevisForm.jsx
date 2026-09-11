@@ -103,11 +103,19 @@ const SubmitNote = styled.p`
   }
 `;
 
+// Bloc légal séparé de SubmitArea : la phrase de consentement fait des
+// dizaines de caractères de plus que "Réponse rapide…" au-dessus, et
+// partager sa colonne de 400px lui faisait couper "politique de
+// confidentialité" sur deux lignes, un mot orphelin isolé. Pleine largeur,
+// elle tient sur une ligne à toutes les tailles d'écran usuelles.
+const LegalFooter = styled.div`
+  margin-top: 20px;
+`;
+
 const ConsentNote = styled.p`
   font-family: "Open Sans", system-ui, sans-serif;
   font-size: 12px;
   color: ${theme.sandText};
-  margin-top: 12px;
 
   a {
     color: inherit;
@@ -246,17 +254,11 @@ export default function DevisForm() {
           />
 
           <SubmitArea>
-            <div style={{ maxWidth: 400 }}>
-              <SubmitNote>
-                <strong>Réponse rapide, adaptée à vos besoins</strong>
-                <br />
-                Devis immédiat ou accompagnement personnalisé sous 48 h pour toute demande sur mesure.
-              </SubmitNote>
-              <ConsentNote>
-                En envoyant ce formulaire, vous acceptez notre{" "}
-                <a href="/confidentialite" target="_blank" rel="noreferrer">politique de confidentialité</a>.
-              </ConsentNote>
-            </div>
+            <SubmitNote>
+              <strong>Réponse rapide, adaptée à vos besoins</strong>
+              <br />
+              Devis immédiat ou accompagnement personnalisé sous 48 h pour toute demande sur mesure.
+            </SubmitNote>
             <PrimaryButton type="submit" disabled={loading}>
               <span>{loading ? "Envoi en cours…" : "Demander mon devis"}</span>
               {!loading && (
@@ -274,7 +276,13 @@ export default function DevisForm() {
           </SubmitArea>
         </form>
 
-        <LegalLinks omitConfidentialite />
+        <LegalFooter>
+          <ConsentNote>
+            En envoyant ce formulaire, vous acceptez notre{" "}
+            <a href="/confidentialite" target="_blank" rel="noreferrer">politique de confidentialité</a>.
+          </ConsentNote>
+          <LegalLinks omitConfidentialite marginTop={6} />
+        </LegalFooter>
       </FormArea>
     </Shell>
   );
