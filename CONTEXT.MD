@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 172/172 (2026-09-11) |
+| Tests serveur (`npm run test:server`) | ✅ 177/177 (2026-09-11) |
 
 ---
 
@@ -71,7 +71,7 @@
 ### Priorité 3 — à joindre à la PR de charte ci-dessus
 
 - [ ] `data/storage.js` fait deux cycles lecture/écriture complets par demande, synchrones donc bloquants (~6 ms à 685 ko, linéaire avec la taille), et rien ne plafonne le nombre d'enregistrements. Relevé par l'audit du 10/09/2026.
-- [ ] Un état intermédiaire `envoi_en_cours` lèverait l'ambiguïté d'`interrompu` : aujourd'hui, un signal reçu entre l'acceptation SMTP et l'enregistrement marque « interrompu » une demande dont les emails sont partis.
+- [x] `envoi_en_cours` lève l'ambiguïté : un arrêt avant l'envoi donne `interrompu` (le client n'a rien reçu, c'est certain), un arrêt pendant donne `interrompu_pendant_envoi` (à vérifier avant de relancer). Le bilan de l'arrêt distingue les deux dans son message.
 
 - [x] Plus aucune ressource distante dans les emails : l'`@import` vers Google Fonts est retiré, les piles de repli suffisent. L'intégration en base64 envisagée au départ était impraticable — les blocs du PDF pèsent 1410 Ko pour une limite Gmail de 102 Ko, et les clients de messagerie ignorent `@font-face`. Un test vérifie qu'aucune ressource distante ne réapparaît.
 

@@ -21,8 +21,10 @@ vi.mock('../data/storage.js', () => ({
     EN_COURS: 'en_cours',
     ENVOYE: 'envoye',
     ENVOYE_SANS_PDF: 'envoye_sans_pdf',
+    ENVOI_EN_COURS: 'envoi_en_cours',
     ECHEC_ENVOI: 'echec_envoi',
     INTERROMPU: 'interrompu',
+    INTERROMPU_PENDANT_ENVOI: 'interrompu_pendant_envoi',
   },
 }));
 vi.mock('../services/pdfService.js', () => ({
@@ -495,6 +497,17 @@ describe('POST /api/devis — état de la demande', () => {
 
     majEtat.mockReset();
     erreur.mockRestore();
+  });
+
+  // Sans cet état, un arrêt pendant l'envoi laissait « interrompu », qui dit
+  // que le client n'a rien reçu — alors que les emails ont pu partir.
+  it('passe par « envoi_en_cours » avant d envoyer les emails', async () => {
+    await post(devisB2B);
+    await attendre(() => majEtat.mock.calls.length >= 2);
+
+    const id = idEnregistre();
+    expect(majEtat.mock.calls[0]).toEqual([id, 'envoi_en_cours', {}]);
+    expect(majEtat.mock.calls[1]).toEqual([id, 'envoye', {}]);
   });
 
   it('journalise une demande introuvable au lieu de la laisser périmée', async () => {

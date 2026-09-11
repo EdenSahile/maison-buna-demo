@@ -12,14 +12,28 @@ const filePath = process.env.DEVIS_PATH || join(__dirname, 'devis.json');
 export const ETATS = {
   // Enregistrée, PDF et emails pas encore traités.
   EN_COURS: 'en_cours',
+  // Le PDF est réglé, l'envoi des emails est lancé. Cet état ne dure que le
+  // temps de l'envoi : il sert à savoir, en cas d'arrêt, si les emails ont pu
+  // partir ou non.
+  ENVOI_EN_COURS: 'envoi_en_cours',
   // Les deux emails sont partis, avec le PDF.
   ENVOYE: 'envoye',
   // Les deux emails sont partis, sans PDF : à relancer à la main.
   ENVOYE_SANS_PDF: 'envoye_sans_pdf',
   // L'envoi lui-même a échoué.
   ECHEC_ENVOI: 'echec_envoi',
-  // Le processus s'est arrêté avant la fin du traitement.
+  // Arrêt avant que l'envoi ne commence : le client n'a rien reçu, c'est sûr.
   INTERROMPU: 'interrompu',
+  // Arrêt pendant l'envoi : les emails ont pu partir. À vérifier avant de
+  // relancer, sous peine d'envoyer deux fois.
+  INTERROMPU_PENDANT_ENVOI: 'interrompu_pendant_envoi',
+};
+
+// Ce qu'un arrêt transforme en quoi. Les deux cas se distinguent : avant
+// l'envoi, on sait que le client n'a rien reçu ; pendant, on ne sait pas.
+const APRES_ARRET = {
+  [ETATS.EN_COURS]: ETATS.INTERROMPU,
+  [ETATS.ENVOI_EN_COURS]: ETATS.INTERROMPU_PENDANT_ENVOI,
 };
 
 function mettreDeCote(raison) {
@@ -96,14 +110,20 @@ export function majEtat(id, etat, details = {}) {
 // pouvoir les retrouver.
 export function marquerInterrompus() {
   const data = lire();
-  const enCours = data.filter((d) => d.etat === ETATS.EN_COURS);
-  if (enCours.length === 0) return 0;
+  const inacheves = data.filter((d) => Object.hasOwn(APRES_ARRET, d.etat));
+  if (inacheves.length === 0) return { total: 0, avantEnvoi: 0, pendantEnvoi: 0 };
 
   const maintenant = new Date().toISOString();
-  for (const devis of enCours) {
-    devis.etat = ETATS.INTERROMPU;
+  let avantEnvoi = 0;
+  let pendantEnvoi = 0;
+
+  for (const devis of inacheves) {
+    if (devis.etat === ETATS.ENVOI_EN_COURS) pendantEnvoi++;
+    else avantEnvoi++;
+    devis.etat = APRES_ARRET[devis.etat];
     devis.etat_maj = maintenant;
   }
+
   ecrire(data);
-  return enCours.length;
+  return { total: inacheves.length, avantEnvoi, pendantEnvoi };
 }

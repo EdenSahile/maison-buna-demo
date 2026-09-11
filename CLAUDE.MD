@@ -155,10 +155,12 @@ sans quoi un redémarrage perdait ce travail sans laisser de trace.
 | État | Sens |
 |------|------|
 | `en_cours` | enregistrée, PDF et emails pas encore traités |
+| `envoi_en_cours` | le PDF est réglé, l'envoi des emails est lancé |
 | `envoye` | les deux emails sont partis, avec le PDF |
-| `envoye_sans_pdf` | les deux emails sont partis sans PDF — à relancer à la main |
+| `envoye_sans_pdf` | les deux emails sont partis sans PDF — **à relancer à la main** |
 | `echec_envoi` | l'envoi a échoué, cause dans `etat_erreur` |
-| `interrompu` | le processus s'est arrêté pendant le traitement — vérifier PDF et emails avant de relancer, le signal a pu tomber juste après l'envoi |
+| `interrompu` | arrêt **avant** que l'envoi ne commence : le client n'a rien reçu, c'est certain |
+| `interrompu_pendant_envoi` | arrêt **pendant** l'envoi : les emails ont pu partir — **vérifier avant de relancer**, sous peine d'envoyer deux fois |
 
 Les états sont définis dans `data/storage.js` (`ETATS`), et `etat_maj` porte
 l'horodatage du dernier changement. Au démarrage, tout ce qui porte encore
@@ -168,9 +170,14 @@ mémoire par exemple. Une demande sur mesure ne produit aucun PDF
 et termine donc en `envoye`, pas en `envoye_sans_pdf`. Pour retrouver ce qui demande une action :
 
 ```bash
-grep -c '"etat": "envoye_sans_pdf"' data/devis.json
-grep -c '"etat": "interrompu"' data/devis.json
+grep -c '"etat": "envoye_sans_pdf"' data/devis.json          # relancer
+grep -c '"etat": "interrompu"' data/devis.json               # relancer
+grep -c '"etat": "interrompu_pendant_envoi"' data/devis.json # vérifier d'abord
 ```
+
+`interrompu` et `interrompu_pendant_envoi` ne se traitent pas pareil : le
+premier se relance sans risque, le second peut avoir déjà envoyé ses deux
+emails.
 
 ---
 
