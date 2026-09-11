@@ -319,6 +319,10 @@ router.post('/devis', async (req, res) => {
           }
         }
       }
+      // Marqué avant l'envoi : si le processus s'arrête pendant, l'état dit
+      // que les emails ont pu partir, au lieu de laisser croire le contraire.
+      noterEtat(devis.id, ETATS.ENVOI_EN_COURS);
+
       try {
         await sendDevisEmails(devis, pdfBuffer);
         noterEtat(devis.id, pdfEchoue ? ETATS.ENVOYE_SANS_PDF : ETATS.ENVOYE);
