@@ -147,6 +147,29 @@ grep -c '"etat": "interrompu"' data/devis.json
 
 ---
 
+## Emails — aucune ressource distante
+
+Les deux templates d'email ne chargent **aucune police ni feuille de style
+distante**, et les images passent par `cid:`, en pièces jointes en ligne.
+
+C'est délibéré. Un `@import` vers Google Fonts transmet, à chaque ouverture,
+l'adresse IP du destinataire, son User-Agent et l'horodatage, sans son
+consentement — le tribunal régional de Munich I a jugé ce point contraire au
+RGPD le 20/01/2022 (3 O 17493/20).
+
+Intégrer les polices en base64, comme le fait `templates/devis-template.html`,
+n'est pas une option ici : ses dix `@font-face` pèsent 1410 Ko, quand Gmail
+coupe tout message au-delà de 102 Ko. Et les clients de messagerie ignorent
+très largement `@font-face`, Gmail en tête — la police n'aurait donc même pas
+été appliquée.
+
+Les piles de repli font le travail : Georgia pour le serif, Verdana pour le
+sans-serif, présentes partout. Le PDF joint, lui, porte la charte complète.
+`services/mailService.test.js` vérifie qu'aucune ressource distante ne
+réapparaît.
+
+---
+
 ## Variables d'environnement
 
 ```

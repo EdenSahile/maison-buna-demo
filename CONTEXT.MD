@@ -13,7 +13,7 @@
 | Emails local (`npm run mail:test`) | ⬜ à vérifier |
 | App React (`npm run dev:client`) | ✅ build Vite OK (2026-09-09) |
 | Tests client (`npm test`) | ✅ 18/18 (2026-09-09) |
-| Tests serveur (`npm run test:server`) | ✅ 170/170 (2026-09-11) |
+| Tests serveur (`npm run test:server`) | ✅ 172/172 (2026-09-11) |
 
 ---
 
@@ -73,7 +73,7 @@
 - [ ] `data/storage.js` fait deux cycles lecture/écriture complets par demande, synchrones donc bloquants (~6 ms à 685 ko, linéaire avec la taille), et rien ne plafonne le nombre d'enregistrements. Relevé par l'audit du 10/09/2026.
 - [ ] Un état intermédiaire `envoi_en_cours` lèverait l'ambiguïté d'`interrompu` : aujourd'hui, un signal reçu entre l'acceptation SMTP et l'enregistrement marque « interrompu » une demande dont les emails sont partis.
 
-- [ ] Les deux emails chargent leurs polices depuis `fonts.googleapis.com` par `@import` : à l'ouverture, l'adresse IP du destinataire, son User-Agent et l'horodatage partent chez Google, sans son consentement. Dette antérieure à la PR #23, qui ne fait qu'en changer les noms de familles. Le tribunal régional de Munich I a jugé ce point contraire au RGPD le 20/01/2022 (3 O 17493/20). Correction : intégrer les polices en base64 dans les templates d'email, comme le fait déjà `templates/devis-template.html`.
+- [x] Plus aucune ressource distante dans les emails : l'`@import` vers Google Fonts est retiré, les piles de repli suffisent. L'intégration en base64 envisagée au départ était impraticable — les blocs du PDF pèsent 1410 Ko pour une limite Gmail de 102 Ko, et les clients de messagerie ignorent `@font-face`. Un test vérifie qu'aucune ressource distante ne réapparaît.
 
 - [x] Tous les domaines d'exemple passent à `example.com`, seul domaine réservé par la RFC 2606 parmi ceux employés : `.env.example`, les fixtures de test et les scripts PDF.
 
