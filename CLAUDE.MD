@@ -244,14 +244,43 @@ Ils ne savent que ce qui est dans leur prompt.
 Les hooks PostToolUse ne se déclenchent PAS dans les sous-agents.
 Ne pas compter sur eux pour la validation — l'inclure dans le prompt.
 
+## Audits locaux — ne pas en lancer par défaut
+
+Un audit local coûte 80 000 à 120 000 tokens. Les trois passes de revue de la
+PR #25 en ont consommé près de 300 000 à elles seules, et les PR de
+documentation #18 et #24 n'en ont eu aucun sans que ça pose problème.
+
+**La règle : aucun agent d'audit — Code Reviewer, Sécurité — sans demande
+explicite de l'utilisateur.** Elle ne vise que ces deux-là : l'UX Designer et
+le Développeur construisent la feature, ils ne sont pas concernés.
+
+À la place, deux contrôles qui ne coûtent presque rien :
+
+1. **Vérification par mutation, à faire soi-même sur chaque correctif.**
+   Désactiver la ligne corrigée, relancer les tests, vérifier qu'un test
+   tombe, restaurer. C'est ce qui a réellement attrapé les défauts de cette
+   session, pas le nombre de passes : un test qui passe avec et sans la
+   correction ne teste rien.
+2. **La review de CI**, qui tourne déjà sur chaque pull request. C'est elle
+   qui a repéré la phrase devenue fausse dans l'alerte admin.
+
+Quand un audit semble justifié — persistance des données, secrets,
+workflow de CI —, le **proposer** en disant pourquoi, et attendre la réponse.
+Ne jamais le lancer de sa propre initiative.
+
+---
+
 ## Pipeline multi-agents — ordre obligatoire
 
-Quand on construit une feature, toujours respecter cet ordre :
+Les étapes 1 et 2 restent le flux normal de construction d'une feature. Les
+étapes 3 et 4 sont des audits : elles ne s'exécutent **que si l'utilisateur
+les demande**, conformément à la section précédente. Quand elles s'exécutent,
+c'est dans cet ordre.
 
 1. UX Designer    -> crée les templates (reports/local/dev-report.md : "UX Designer — DONE")
 2. Développeur    -> construit le serveur et ses tests (reports/local/dev-report.md : "Développeur — DONE")
-3. Code Reviewer  -> audite la qualité (reports/local/review-report.md : "APPROUVÉ")
-4. Sécurité       -> audite les vulnérabilités (reports/local/security-report.md : "SÛR")
+3. Code Reviewer  -> audite la qualité, **sur demande** (reports/local/review-report.md : "APPROUVÉ")
+4. Sécurité       -> audite les vulnérabilités, **sur demande** (reports/local/security-report.md : "SÛR")
 
 En cas d'échec :
 - Reviewer BLOQUANT -> retour Développeur avec reports/local/review-report.md
