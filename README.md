@@ -208,7 +208,7 @@ Cette solution permet de limiter les temps de réveil de l'environnement de dém
 Ces règles sont documentées dans `CLAUDE.MD` et appliquées aussi bien en développement qu'en review automatique :
 
 1. Ne jamais committer `.env`, seulement `.env.example`.
-2. Ne jamais modifier `public/index.html` sans raison explicite.
+2. Ne jamais modifier le formulaire React (`client/src/`) sans raison explicite.
 3. Toujours valider les données côté serveur (email, identité, café et quantité obligatoires).
 4. Toujours envoyer les deux emails à chaque devis (voir l'exception ci-dessus en cas d'échec définitif du PDF).
 5. Toujours sauvegarder la demande avec un horodatage et un identifiant unique.

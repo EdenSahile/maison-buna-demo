@@ -19,7 +19,7 @@ const devisTest = {
   societe: 'Particulier',
   prenom: 'Marie',
   nom: 'Dupont',
-  email: 'marie.dupont@gmail.com',
+  email: 'marie.dupont@example.com',
   telephone: '06 12 34 56 78',
   collaborateurs: '',
   secteur: '',
