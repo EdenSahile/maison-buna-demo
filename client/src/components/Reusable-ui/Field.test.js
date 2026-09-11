@@ -9,11 +9,16 @@ import { dirname, resolve } from 'path';
 // PDF/emails. Corrigées en dérivant de theme.error (teinte à 10 % d'opacité)
 // et en réutilisant theme.sandText. Ce test empêche qu'une couleur en dur y
 // revienne sans qu'on le remarque.
+//
+// Les styled-components ont été déplacés dans Field.styles.js le 11/09/2026
+// (3 erreurs ESLint react-refresh/only-export-components : un fichier de
+// composant ne peut pas exporter aussi des constantes). Le test vise
+// désormais ce fichier, où les couleurs vivent réellement.
 
 const ici = dirname(fileURLToPath(import.meta.url));
-const source = readFileSync(resolve(ici, './Field.jsx'), 'utf8');
+const source = readFileSync(resolve(ici, './Field.styles.js'), 'utf8');
 
-describe('Field.jsx — couleurs', () => {
+describe('Field.styles.js — couleurs', () => {
   it('n\'emploie aucune couleur en dur, seulement des tokens de theme.js', () => {
     // #4chiffres (ex: 1A d'opacité) fait partie d'une dérivation ${theme.x}1A,
     // pas d'une couleur en dur : seuls les codes à 6 ou 8 chiffres comptent.
