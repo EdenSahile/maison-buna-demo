@@ -132,6 +132,33 @@ describe('sendDevisEmails — annonce de la pièce jointe', () => {
   });
 });
 
+describe('Emails — aucune ressource distante chargée à l ouverture', () => {
+  // Un @import vers fonts.googleapis.com transmettait à Google l'adresse IP du
+  // destinataire, son User-Agent et l'horodatage, sans son consentement. Les
+  // images passent par cid: (pièces jointes en ligne), pas par une URL.
+  it('ne charge ni police ni feuille de style distante', async () => {
+    await sendDevisEmails(devis, Buffer.from('%PDF-1.4 fake'));
+
+    for (const { html } of sendMail.mock.calls.map((c) => c[0])) {
+      expect(html).not.toContain('@import');
+      expect(html).not.toContain('fonts.googleapis.com');
+      expect(html).not.toContain('fonts.gstatic.com');
+      expect(html).not.toMatch(/<link[^>]+stylesheet/i);
+    }
+  });
+
+  it('garde des piles de repli utilisables sans police distante', async () => {
+    await sendDevisEmails(devis, null);
+
+    for (const { html } of sendMail.mock.calls.map((c) => c[0])) {
+      // Chaque déclaration nomme une police présente sur tous les systèmes.
+      for (const declaration of html.match(/font-family:[^;]+/g) ?? []) {
+        expect(declaration).toMatch(/Georgia|Verdana|serif|sans-serif/);
+      }
+    }
+  });
+});
+
 describe('sendViaBrevoREST — message d erreur borné', () => {
   // Brevo renvoie en écho la charge utile envoyée : nom, email et HTML du
   // client. Ce message finit dans etat_erreur, en base.
