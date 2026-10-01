@@ -5,7 +5,7 @@ import LegalPageShell from './LegalPageShell'
 // nouvelles données inventées ici. Voir CLAUDE.md, « Conformité RGPD ».
 export default function MentionsLegales() {
   return (
-    <LegalPageShell title="Mentions légales" misAJour="11 septembre 2026">
+    <LegalPageShell title="Mentions légales" misAJour="1 octobre 2026">
       <p>
         Ce site est une <strong>démonstration publique</strong> : les
         coordonnées ci-dessous sont fictives, comme les devis générés par le
@@ -34,6 +34,14 @@ export default function MentionsLegales() {
         Les textes, images et éléments graphiques de ce site sont la
         propriété de Maison Buna ou de ses partenaires, sauf mention
         contraire. Toute reproduction sans autorisation est interdite.
+      </p>
+
+      <h2>Responsabilité</h2>
+      <p>
+        Ce site est une démonstration technique. Les devis générés sont
+        fictifs et ne constituent pas une offre commerciale. L'éditeur ne
+        saurait être tenu responsable de l'usage qui serait fait des
+        documents produits par le formulaire.
       </p>
 
       <h2>Données personnelles</h2>
